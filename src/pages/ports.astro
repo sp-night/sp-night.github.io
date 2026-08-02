@@ -1,0 +1,87 @@
+---
+import Base from '../layouts/Base.astro';
+import { ports, portsByGroup } from '../data/ports';
+
+const description = `SP Night for kitty, Alacritty, Ghostty, Neovim, tmux, fish, Starship, bat, eza, Waybar, Hyprland, GTK, KDE Plasma and more — ${ports.length} targets generated from a single source.`;
+---
+
+<Base title="Ports" description={description}>
+  <p class="eyebrow">ports</p>
+  <h1>One palette, {ports.length} targets</h1>
+  <p class="lede">
+    Every port is generated from the same source, so no target ever drifts from the spec. None are
+    published yet: each will get its own page here — install instructions, a screenshot of the real
+    app — as it ships.
+  </p>
+
+  {
+    portsByGroup.map(({ label, items }) => (
+      <section>
+        <h2 class="mono">{label}</h2>
+        <ul role="list" class="ports">
+          {items.map((p) => (
+            <li>
+              <span class="ports__head">
+                <a href={p.homepage}>{p.name}</a>
+                <span class="pill">planned</span>
+              </span>
+              <p>{p.blurb}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+
+  <section>
+    <h2>Want one of these sooner?</h2>
+    <p>
+      Or something that is not on the list — VS Code, Zed, Emacs, Obsidian? A port is one template
+      file, and the colour decisions are already made.
+    </p>
+    <a class="btn" href="/contribute">How to contribute a port</a>
+  </section>
+</Base>
+
+<style>
+  section {
+    margin-block: 3.25rem;
+    max-width: var(--measure);
+  }
+
+  section h2 {
+    font-size: var(--step-1);
+  }
+
+  section h2.mono {
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sp-fg-muted);
+  }
+
+  .ports {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0;
+    display: grid;
+    gap: 1.1rem;
+  }
+
+  .ports__head {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .ports__head a {
+    font-weight: 600;
+  }
+
+  .ports li p {
+    margin: 0.25rem 0 0;
+    font-size: var(--step--1);
+    color: var(--sp-fg-dim);
+    max-width: var(--measure);
+  }
+</style>
