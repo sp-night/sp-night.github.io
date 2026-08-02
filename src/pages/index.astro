@@ -253,7 +253,8 @@ const facts = [
   .facts {
     display: grid;
     gap: 1rem;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+    /* 9.5rem lets a 390px phone fit two columns; wide screens still get four. */
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr));
     list-style: none;
     padding: 0;
     margin: 0;
