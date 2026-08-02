@@ -20,6 +20,8 @@ export interface Port {
   activate?: string;
   note?: string;
   homepage: string;
+  /** The published port repository, once it ships. Absent = still planned. */
+  repo?: string;
 }
 
 export const GROUP_LABELS: Record<PortGroup, string> = {
@@ -60,6 +62,7 @@ export const ports: Port[] = [
     install: '~/.config/ghostty/themes/sp_night_{flavor}',
     activate: 'theme = sp_night_{flavor}',
     homepage: 'https://ghostty.org/',
+    repo: 'https://github.com/sp-night/ghostty',
   },
   {
     slug: 'herdr',
