@@ -1,0 +1,130 @@
+{
+  "$schema": "./schema.json",
+  "name": "sp_night",
+  "label": "SP Night",
+  "description": "Paleta com São Paulo como referência: poste de sódio, concreto exposto, o vão do MASP, a garoa antes da chuva, a mata do Jaraguá. Três flavors escuros, três jeitos de olhar a mesma cidade.",
+  "author": "Rogerio Junior",
+  "url": "https://github.com/rogeradas/sp_night",
+  "meaning": {
+    "vao": "o recuo mais fundo — vão livre do MASP, poço de sombra",
+    "laje": "a superfície padrão — laje de concreto, o plano de fundo de tudo",
+    "concreto": "painéis, cartões, barras — concreto aparente",
+    "vidro": "seleção e elevação — vidro refletindo a rua",
+    "fiacao": "bordas e divisórias — fiação aérea cortando o céu",
+    "fg": "texto principal",
+    "fg_dim": "texto secundário e comentários",
+    "fg_muted": "texto desativado, ornamentos",
+    "brasa": "vermelho — o MASP, luz de freio na Paulista",
+    "sodio": "laranja — o poste de sódio que deixa a cidade inteira dessa cor",
+    "taxi": "amarelo — sinaleira, táxi, faixa de pedestre gasta",
+    "ibira": "verde — Ibirapuera, semáforo aberto",
+    "estaiada": "turquesa — a Ponte Estaiada acesa sobre o Pinheiros",
+    "sereno": "ciano — o sereno da madrugada, letreiro frio",
+    "marginal": "azul — a Marginal, o metrô, a placa de via expressa",
+    "temporal": "roxo — o céu logo antes da chuva desabar",
+    "brasa_vivo": "brasa acesa — bright red do terminal, texto bold",
+    "taxi_vivo": "táxi aceso — bright yellow do terminal",
+    "ibira_vivo": "semáforo aceso — bright green do terminal",
+    "sereno_vivo": "letreiro aceso — bright cyan do terminal",
+    "marginal_vivo": "placa acesa — bright blue do terminal",
+    "temporal_vivo": "relâmpago — bright magenta do terminal"
+  },
+  "flavors": {
+    "noite": {
+      "label": "Noite Paulista",
+      "appearance": "dark",
+      "description": "A cidade às 3h. O escuro azul-violeta do tokyodark, e o poste de sódio queimando quente por cima.",
+      "colors": {
+        "vao": "#0f101a",
+        "laje": "#151723",
+        "concreto": "#1d1f2d",
+        "vidro": "#272937",
+        "fiacao": "#373943",
+
+        "fg": "#d3d7eb",
+        "fg_dim": "#868999",
+        "fg_muted": "#707380",
+
+        "brasa": "#ea5d5d",
+        "sodio": "#f2984a",
+        "taxi": "#f5c66b",
+        "ibira": "#89d093",
+        "estaiada": "#38b59e",
+        "sereno": "#5dbec4",
+        "marginal": "#6e92de",
+        "temporal": "#b094e2",
+
+        "brasa_vivo": "#ff716f",
+        "taxi_vivo": "#ffdc9c",
+        "ibira_vivo": "#9ce4a6",
+        "sereno_vivo": "#71d1d7",
+        "marginal_vivo": "#80a5f2",
+        "temporal_vivo": "#c3a7f6"
+      }
+    },
+    "garoa": {
+      "label": "Garoa",
+      "appearance": "dark",
+      "description": "A mesma janela, vista através do chuvisco. Cinza chapado — a garoa não esfria a cidade, ela desbota.",
+      "colors": {
+        "vao": "#151719",
+        "laje": "#1c1e20",
+        "concreto": "#26282a",
+        "vidro": "#313436",
+        "fiacao": "#414346",
+
+        "fg": "#c7cdd6",
+        "fg_dim": "#8d949f",
+        "fg_muted": "#767d88",
+
+        "brasa": "#d87676",
+        "sodio": "#e3a068",
+        "taxi": "#e7cb8a",
+        "ibira": "#9acaa2",
+        "estaiada": "#56b19f",
+        "sereno": "#77babf",
+        "marginal": "#7993cb",
+        "temporal": "#af97d3",
+
+        "brasa_vivo": "#ed8988",
+        "taxi_vivo": "#fbdf9d",
+        "ibira_vivo": "#addeb5",
+        "sereno_vivo": "#8acdd2",
+        "marginal_vivo": "#8ba6df",
+        "temporal_vivo": "#c2aae7"
+      }
+    },
+    "jaragua": {
+      "label": "Pico do Jaraguá",
+      "appearance": "dark",
+      "description": "A mesma noite, vista do ponto mais alto da cidade. O escuro do noite girado para o verde da mata fechada — e a torre vermelha e branca acesa no topo.",
+      "colors": {
+        "vao": "#050806",
+        "laje": "#0c100d",
+        "concreto": "#151a17",
+        "vidro": "#202622",
+        "fiacao": "#323733",
+
+        "fg": "#d3dad5",
+        "fg_dim": "#868b87",
+        "fg_muted": "#707471",
+
+        "brasa": "#ea5d5d",
+        "sodio": "#f2984a",
+        "taxi": "#f5c66b",
+        "ibira": "#79d488",
+        "estaiada": "#05b89e",
+        "sereno": "#60bfb8",
+        "marginal": "#6e92de",
+        "temporal": "#b094e2",
+
+        "brasa_vivo": "#ff716f",
+        "taxi_vivo": "#ffdc9c",
+        "ibira_vivo": "#8ce99b",
+        "sereno_vivo": "#73d2cb",
+        "marginal_vivo": "#80a5f2",
+        "temporal_vivo": "#c3a7f6"
+      }
+    }
+  }
+}

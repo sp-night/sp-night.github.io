@@ -1,0 +1,91 @@
+{
+  "$comment": "Camada semântica. Templates NUNCA referenciam cores da paleta direto — sempre um papel. Trocar 'syntax.keyword' aqui repinta todos os alvos de uma vez.",
+
+  "ui": {
+    "bg": "laje",
+    "bg_deep": "vao",
+    "panel": "concreto",
+    "float": "vao",
+    "line": "concreto",
+    "selection": "vidro",
+    "border": "fiacao",
+    "border_active": "sodio",
+    "fg": "fg",
+    "fg_dim": "fg_dim",
+    "fg_muted": "fg_muted",
+    "cursor": "sodio",
+    "accent": "sodio",
+    "accent_alt": "marginal",
+    "$_": "accent é identidade (terminal, barras, cursor); accent_alt é o acento de SISTEMA — seleção e foco em apps GTK/Qt/KDE. Widget de app nunca usa o sodio.",
+    "link": "marginal",
+    "match": "taxi",
+    "on_accent": "vao"
+  },
+
+  "syntax": {
+    "keyword": "marginal",
+    "conditional": "marginal",
+    "repeat": "marginal",
+    "operator": "sereno",
+    "function": "sereno",
+    "method": "sereno",
+    "constructor": "sereno",
+    "type": "temporal",
+    "namespace": "temporal",
+    "macro": "estaiada",
+    "parameter": "estaiada",
+    "constant": "sodio",
+    "number": "sodio",
+    "boolean": "sodio",
+    "builtin": "taxi",
+    "attribute": "taxi",
+    "string": "ibira",
+    "character": "ibira",
+    "escape": "estaiada",
+    "variable": "fg",
+    "property": "fg",
+    "field": "fg",
+    "punctuation": "fg_dim",
+    "comment": "fg_dim",
+    "tag": "brasa",
+    "deprecated": "fg_muted"
+  },
+
+  "diagnostic": {
+    "error": "brasa",
+    "warn": "taxi",
+    "info": "marginal",
+    "hint": "sereno",
+    "ok": "ibira"
+  },
+
+  "git": {
+    "$_": "diff tem UM padrão: adicionado=verde, modificado=amarelo, removido=vermelho. Estrutura (hunk, cabeçalho, rename, untracked) é neutra — nunca roxo, azul ou laranja num diff.",
+    "added": "ibira",
+    "modified": "taxi",
+    "removed": "brasa",
+    "renamed": "taxi",
+    "staged": "ibira",
+    "untracked": "fg_muted",
+    "conflict": "brasa"
+  },
+
+  "ansi": {
+    "black": "vao",
+    "red": "brasa",
+    "green": "ibira",
+    "yellow": "taxi",
+    "blue": "marginal",
+    "magenta": "temporal",
+    "cyan": "sereno",
+    "white": "fg_dim",
+    "bright_black": "fg_muted",
+    "bright_red": "brasa_vivo",
+    "bright_green": "ibira_vivo",
+    "bright_yellow": "taxi_vivo",
+    "bright_blue": "marginal_vivo",
+    "bright_magenta": "temporal_vivo",
+    "bright_cyan": "sereno_vivo",
+    "bright_white": "fg"
+  }
+}
