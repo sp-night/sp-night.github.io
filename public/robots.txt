@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sp-night.github.io/sitemap-index.xml
