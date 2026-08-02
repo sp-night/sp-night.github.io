@@ -108,34 +108,23 @@ Full detail — glosses, OKLCH, WCAG ratios, the ANSI map — lives at
 
 ## Ports
 
-One template per app, filled once per flavour by the generator — so no target ever
-drifts from the spec. Seventeen targets generate today in the lab and are being
-prepared for publication; each will be linked from
-[sp-night.github.io/ports](https://sp-night.github.io/ports) as it ships.
+One repository per themed app, each holding finished theme files — plain text, no
+build step to use them. A port is listed only once it is published, so everything
+below can be installed today. The registry is
+[`resources/ports.yml`](resources/ports.yml) and the table is generated from it by
+`npm run assets`.
 
-| Target | Group | Status |
+<!-- ports-table:start -->
+| Port | Group | Installs to |
 | --- | --- | --- |
-| [kitty](https://sw.kovidgoyal.net/kitty/) | Terminals | planned |
-| [Alacritty](https://alacritty.org/) | Terminals | planned |
-| [Ghostty](https://ghostty.org/) | Terminals | planned |
-| [herdr](https://github.com/rogeradas/herdr) | Terminals | planned |
-| [Neovim](https://neovim.io/) | Editors | planned |
-| [tmux](https://github.com/tmux/tmux) | Shell & CLI | planned |
-| [fish](https://fishshell.com/) | Shell & CLI | planned |
-| [Starship](https://starship.rs/) | Shell & CLI | planned |
-| [bat](https://github.com/sharkdp/bat) | Shell & CLI | planned |
-| [eza](https://eza.rocks/) | Shell & CLI | planned |
-| [Waybar](https://github.com/Alexays/Waybar) | Desktop | planned |
-| [Hyprland](https://hyprland.org/) | Desktop | planned |
-| [GTK](https://www.gtk.org/) | Desktop | planned |
-| [KDE / Qt](https://kde.org/plasma-desktop/) | Desktop | planned |
-| [Noctalia Shell](https://github.com/noctalia-dev/noctalia-shell) | Desktop | planned |
-| [CSS](https://developer.mozilla.org/docs/Web/CSS/Using_CSS_custom_properties) | Web | planned |
-| [JSON](https://www.json.org/) | Web | planned |
+| [Ghostty](https://github.com/sp-night/ghostty) | Terminals | `~/.config/ghostty/themes/sp_night_{flavor}` |
+| [eza](https://github.com/sp-night/eza) | Shell & CLI | `~/.config/eza/theme.yml` |
+<!-- ports-table:end -->
 
-Want one sooner, or something not on the list? See
-[CONTRIBUTING.md](CONTRIBUTING.md) — a port is one template file, and the colour
-decisions are already made.
+Theming another app? See [CONTRIBUTING.md](CONTRIBUTING.md). The palette and the
+role layer are published as data — [`/palette.json`](https://sp-night.github.io/palette.json)
+and [`/roles.json`](https://sp-night.github.io/roles.json) — so the colour decisions
+are already made and nothing needs to be copied by hand.
 
 ## This repository
 
@@ -153,7 +142,7 @@ npm run dev        # dev server
 npm run check      # astro type-check
 npm test           # vitest: colour maths, data shape, contrast policy, no-raw-hex rule
 npm run build      # static build into dist/
-npm run assets     # regenerate favicons, logos, OG cards and palette strips
+npm run assets     # regenerate favicons, logos, OG cards, palette strips and the README tables
 ```
 
 Every image in this README is generated from the palette by `npm run assets` —
@@ -168,9 +157,11 @@ GitHub Pages. Other branches and PRs run the same checks via `ci.yml` without de
 
 - Palette or roles change → replace `src/data/palette.json` / `src/data/roles.json`,
   run `npm test` (the contrast tests are the gate) and `npm run assets`.
-- Per-app themes (ports) will be linked from the site as they are published —
-  metadata for the 17 targets lives in `src/data/ports.ts` and is listed at
-  [sp-night.github.io/ports](https://sp-night.github.io/ports).
+- New port, or a port ships as its own repo → edit
+  [`resources/ports.yml`](resources/ports.yml) (add the entry, or its `repo:` line)
+  and run `npm run assets` to refresh the table above. The site and
+  [sp-night.github.io/ports](https://sp-night.github.io/ports) read the same file
+  at build time.
 
 Contributions are welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md) for how to
 propose a port or report a colour problem, and [`SITE.md`](SITE.md) for the full

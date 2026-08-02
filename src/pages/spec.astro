@@ -5,7 +5,7 @@ import { flavors, GROUPS, keyVar, type ColorKey } from '../data/palette';
 const base = flavors[0]!;
 const roles = base.roles;
 
-/** Contrast policy from the generator (tools/gen/contrast.go). */
+/** The contrast floors every flavour has to clear, enforced in tests/palette.test.ts. */
 const policy = [
   { surface: 'vao', min: '4.5:1', kind: 'gate', why: 'the deepest background — floats, popups, the terminal' },
   { surface: 'laje', min: '4.5:1', kind: 'gate', why: 'the default surface; everything readable sits here' },
@@ -44,7 +44,7 @@ const glossary = [
   },
   {
     term: 'target',
-    def: 'An app the theme is generated for — kitty, Neovim, tmux. Each target is one template.',
+    def: 'An app the theme is written for — Ghostty, eza. Each target is one port repository.',
   },
   {
     term: 'contrast ratio',
@@ -72,9 +72,9 @@ const glossary = [
   <p class="eyebrow">specification</p>
   <h1>What each colour is for</h1>
   <p class="lede">
-    SP Night is one file of colours, a layer of names on top of it, and a generator that writes the
-    theme for every app. This page is the reference for what those colours mean and which rules a
-    port has to hold. If you want to build one, start at
+    SP Night is one file of colours and a layer of names on top of it. A theme file for any app is
+    that second layer, written out in the app's own format. This page is the reference for what the
+    colours mean and which rules a port has to hold. If you want to build one, start at
     <a href="/contribute">contribute</a> instead — this page is the lookup table it points back to.
   </p>
 
@@ -112,21 +112,21 @@ const glossary = [
         </span>
       </li>
       <li>
-        <strong class="mono">3 · templates</strong>
+        <strong class="mono">3 · ports</strong>
         <span>
-          One file per app, with holes in it. The generator fills the holes with roles and writes a
-          finished config for every flavour.
+          One repository per app, holding a finished theme file for every flavour. A port decides
+          which role each of its config keys gets; it never decides a colour.
         </span>
       </li>
     </ol>
 
     <h3>A worked example</h3>
     <p>
-      Say you want kitty's ANSI blue. The template for kitty has this line — the double braces are a
-      hole the generator fills:
+      Say you want Ghostty's ANSI blue. The port does not choose a blue — it says that this config
+      key is the ANSI blue:
     </p>
-    <pre class="mono example"><code>color4  {'{{ .R.ansi.blue }}'}</code></pre>
-    <p>The generator resolves it in two hops:</p>
+    <pre class="mono example"><code>palette = 4  →  ansi.blue</code></pre>
+    <p>and that resolves in two hops:</p>
     <p class="chain mono">
       <span>ansi.blue</span>
       <span aria-hidden="true">→</span>
@@ -140,10 +140,12 @@ const glossary = [
         ))
       }
     </p>
-    <p>and writes, into the build of <code>kitty.conf</code> for the flavour you have selected:</p>
+    <p>
+      and lands in the shipped theme file, for the flavour you have selected, as:
+    </p>
     {
       flavors.map((f) => (
-        <pre class="mono example" data-f={f.id}><code>color4  {f.colors.marginal!.hex}</code></pre>
+        <pre class="mono example" data-f={f.id}><code>palette = 4={f.colors.marginal!.hex}</code></pre>
       ))
     }
     <p>
@@ -153,12 +155,12 @@ const glossary = [
 
     <div class="rule rule--bad">
       <span class="mono" aria-hidden="true">✗</span>
-      <code>color4 {'{{ .C.marginal }}'}</code>
+      <code>palette = 4 → marginal</code>
       <span class="muted">reaching past the roles, straight into the palette</span>
     </div>
     <div class="rule rule--good">
       <span class="mono" aria-hidden="true">✓</span>
-      <code>color4 {'{{ .R.ansi.blue }}'}</code>
+      <code>palette = 4 → ansi.blue</code>
       <span class="muted">asking for the role, letting it resolve</span>
     </div>
   </section>
@@ -166,8 +168,8 @@ const glossary = [
   <section aria-labelledby="colors">
     <h2 id="colors">The colours</h2>
     <p>
-      Every flavour has the same 22 keys. Only the values change, so a template written once works
-      for all of them.
+      Every flavour has the same 22 keys. Only the values change, so a port mapped once works for
+      all of them.
     </p>
 
     {

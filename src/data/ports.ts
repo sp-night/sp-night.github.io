@@ -1,30 +1,32 @@
 /**
  * Loader for the port registry. The data itself lives in resources/ports.yml —
- * the single source of truth, in the spirit of catppuccin's ports.yml — and
- * this module parses it at build time and refuses to build on a bad entry.
- * Pages import from here; none of them know the registry is YAML.
+ * the single source of truth — and this module parses it at build time and
+ * refuses to build on a bad entry. Pages import from here; none of them know
+ * the registry is YAML.
+ *
+ * Every port in the registry is published: `repo` is required, so the site has
+ * no concept of a planned port and cannot render a card for something that does
+ * not exist yet.
  */
 import { readFileSync } from 'node:fs';
 import { parse } from 'yaml';
 
-export type PortGroup = 'terminal' | 'editor' | 'shell' | 'desktop' | 'web';
+export type PortGroup = 'terminal' | 'shell';
 
 export interface Port {
   slug: string;
   name: string;
   group: PortGroup;
-  /** One-line description of what the target is. */
+  /** One-line description of what the port covers. */
   blurb: string;
-  /** Path inside dist/, with {flavor} / {label} placeholders. */
-  dist: string;
   /** Where the file goes on the user's machine. */
   install: string;
   /** Extra line the user must add, if the app needs one. */
   activate?: string;
   note?: string;
   homepage: string;
-  /** The published port repository, once it ships. Absent = still planned. */
-  repo?: string;
+  /** The published sp-night/<slug> repository. */
+  repo: string;
 }
 
 interface Registry {
@@ -38,7 +40,7 @@ const registry = parse(
 
 export const GROUP_LABELS = registry.groups;
 
-const REQUIRED = ['slug', 'name', 'group', 'blurb', 'dist', 'install', 'homepage'] as const;
+const REQUIRED = ['slug', 'name', 'group', 'blurb', 'install', 'homepage', 'repo'] as const;
 
 for (const p of registry.ports) {
   for (const field of REQUIRED) {
@@ -53,10 +55,12 @@ for (const p of registry.ports) {
 
 export const ports: Port[] = registry.ports;
 
-export const portsByGroup = (Object.keys(GROUP_LABELS) as PortGroup[]).map((group) => ({
-  group,
-  label: GROUP_LABELS[group],
-  items: ports.filter((p) => p.group === group),
-}));
+export const portsByGroup = (Object.keys(GROUP_LABELS) as PortGroup[])
+  .map((group) => ({
+    group,
+    label: GROUP_LABELS[group],
+    items: ports.filter((p) => p.group === group),
+  }))
+  .filter((g) => g.items.length > 0);
 
 export const port = (slug: string): Port | undefined => ports.find((p) => p.slug === slug);

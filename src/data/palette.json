@@ -1,10 +1,9 @@
 {
-  "$schema": "./schema.json",
   "name": "sp_night",
   "label": "SP Night",
   "description": "Paleta com São Paulo como referência: poste de sódio, concreto exposto, o vão do MASP, a garoa antes da chuva, a mata do Jaraguá. Três flavors escuros, três jeitos de olhar a mesma cidade.",
   "author": "Rogerio Junior",
-  "url": "https://github.com/rogeradas/sp_night",
+  "url": "https://sp-night.github.io",
   "meaning": {
     "vao": "o recuo mais fundo — vão livre do MASP, poço de sombra",
     "laje": "a superfície padrão — laje de concreto, o plano de fundo de tudo",

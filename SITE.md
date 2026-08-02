@@ -1,5 +1,11 @@
 # SP Night — Plano do site
 
+> **Leia primeiro:** as seções 1–9 são o plano original e o registro de como ele foi
+> executado — várias delas foram superadas depois (não existem páginas `/ports/[slug]`,
+> nem arquivos MDX, nem 17 alvos). O estado atual do projeto está nas **rodadas**, no
+> fim do arquivo; a Rodada 5 é a mais recente. Este documento é histórico por design:
+> as decisões são registradas, não reescritas.
+
 > Escopo desta fase: **montar o site localmente neste repo**, como teste.
 > Sem deploy, sem renomear repo, sem `/lab` interativo.
 > Conteúdo em **inglês**; nomes de cores e flavors permanecem em português (identidade).
@@ -11,9 +17,9 @@
 
 | # | Decisão | Nota |
 |---|---|---|
-| S1 | **Astro + MDX**, estático | content collections resolvem as 17 páginas de port |
+| S1 | **Astro**, estático | sem páginas por port: o registro em `resources/ports.yml` alimenta uma página só |
 | S2 | Sem config de deploy | `astro.config.mjs` mínimo; `site`/`base` entram quando houver URL definida |
-| S3 | Paleta **vendorizada** em `src/data/` | o pacote `@sp-night/palette` ainda não existe; um único ponto de troca no futuro |
+| S3 | Paleta **é** `src/data/` | fonte da verdade do projeto, publicada como dado em `/palette.json` e `/roles.json` |
 | S4 | **Zero hex** no código do site | tudo deriva do JSON → CSS custom properties |
 | S5 | **Sem `/lab`** | cores definitivas; contraste é calculado em *build time*, não no navegador |
 | S6 | Idioma: inglês | glosas das cores exibidas em EN, com o original PT como legenda |
@@ -264,12 +270,42 @@ Firefox com `animation-delay: -25s`, que força a animação a 90° no carregame
 o navegador executa `transform-box: view-box` + contra-rotação corretamente.
 
 **Pendências conhecidas:**
-- **Textos dos flavors — aguardando o autor.** `content.ts` está com `todo: true` nos três flavors;
-  `tagline` e `whenToUse` são placeholders. A `story` do jaragua em PT ainda descreve as superfícies
-  verdes que não existem mais.
 - Decidir se os verdes do jaragua devem se afastar mais dos do noite (hoje 5 dos 8 acentos são idênticos)
 - Revisão visual/responsiva em navegador
-- Trocar `src/data/*.json` pelo pacote `@sp-night/palette` quando existir
+
+**Rodada 5 — só o que existe, e nada acoplado ao motor** (2026-08-02)
+
+Duas decisões que mudam a estrutura do projeto:
+
+**1. O site lista só o que está publicado.** O registro caiu de 17 alvos para os 2 que têm repo
+(`ghostty`, `eza`). Não existe mais o conceito de port "planned": `repo` virou campo obrigatório em
+`ports.ts` e um teste rejeita entrada sem ele — nada aparece na página antes de poder ser instalado.
+Saíram junto o placar shipped/planned, o "o resto vem depois", o aviso de que o gerador "está sendo
+empacotado", os `todo: true` de `content.ts` e o bloco `pages` (que era código morto).
+
+**2. A paleta virou o contrato público; o motor virou detalhe substituível.** `/palette.json` e
+`/roles.json` passam a ser servidos como dado (endpoints em `src/pages/`, lendo os mesmos arquivos
+que as páginas renderizam — não podem divergir). Nenhuma página, README ou repo de port cita mais
+"o gerador": o site descreve o *contrato* (paleta → papéis → arquivo do app), não a ferramenta que
+o escreve. Um motor novo, em qualquer linguagem, só precisa ler esses dois JSON.
+
+Consequências:
+
+| mudança | motivo |
+|---|---|
+| `dist:` removido de `ports.yml` | apontava para a árvore de saída do gerador; o registro agora só descreve o que o usuário faz |
+| `notify-site.yml` removido dos dois repos de port; `repository_dispatch` removido do `deploy.yml` | o build do site não lê nada dos repos de port, então o dispatch só gastava um token de org e podia falhar sem motivo |
+| `$schema: ./schema.json` removido e `url` → `https://sp-night.github.io` em `palette.json` | ambos apontavam para o repo pessoal do gerador, que não é público |
+| `/spec` e `/contribute` reescritas sem sintaxe de template | o exemplo trabalhado agora é `palette = 4 → ansi.blue` (Ghostty), não `{{ .R.ansi.blue }}` |
+| fatos da home derivados dos dados | "70 pares de contraste" era número herdado do gerador; agora sai de `palette.ts` (22 cores × 3 superfícies) e o número de ports sai do registro |
+| tabela de ports do README: coluna "Status" → "Installs to" | com `repo` obrigatório, "shipped" em toda linha é ruído |
+| `TerminalMock` renomeado de `kitty` para `ghostty` | o mock citava um app que não é port |
+
+O que **não** mudou de propósito: cada repo de port guarda seu template (`eza.yml.tmpl`,
+`ghostty.tmpl`), como o catppuccin guarda o `.tera`. Ele não é necessário para usar o tema — os
+arquivos em `themes/` são finais e em texto puro — mas é o único registro completo do mapeamento
+chave→papel (no eza são ~80 chaves). Perder isso custaria muito mais do que reescrever um template
+se o motor mudar de sintaxe.
 
 **Verificação final:** `npm run build` sem erros/avisos, todas as rotas geradas, zero hex fora de `src/data/`
 (`grep -rE "#[0-9a-fA-F]{6}" src --exclude-dir=data` deve vir vazio).

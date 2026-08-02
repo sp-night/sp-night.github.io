@@ -6,14 +6,16 @@
  *
  * Outputs into public/: og-<flavor>.png (1200x630), favicon-<flavor>.svg,
  * logo-<flavor>.svg, palette-<flavor>.svg, the touch/PWA icons with
- * site.webmanifest, and the hex table kept between markers in README.md.
- * Re-run whenever the palette changes. Every colour below is read from
- * src/data/palette.json — no hex is written by hand.
+ * site.webmanifest, and the hex + ports tables kept between markers in
+ * README.md. Re-run whenever the palette or resources/ports.yml changes.
+ * Every colour below is read from src/data/palette.json — no hex is written
+ * by hand.
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import sharp from 'sharp';
+import { parse as parseYaml } from 'yaml';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const palette = JSON.parse(readFileSync(join(root, 'src/data/palette.json'), 'utf8'));
@@ -232,8 +234,24 @@ writeFileSync(
 );
 console.log('site.webmanifest');
 
-/* The README hex table lives between markers and is rewritten here, so the
-   published values can never drift from the palette. */
+/* The README tables live between markers and are rewritten here, so the
+   published values can never drift from the palette or the port registry. */
+const readmePath = join(root, 'README.md');
+
+function replaceReadmeBlock(marker, body) {
+  const readme = readFileSync(readmePath, 'utf8');
+  const START = `<!-- ${marker}:start -->`;
+  const END = `<!-- ${marker}:end -->`;
+  if (!readme.includes(START) || !readme.includes(END)) return;
+  const start = readme.indexOf(START);
+  const end = readme.indexOf(END) + END.length;
+  writeFileSync(
+    readmePath,
+    readme.slice(0, start) + [START, body, END].join('\n') + readme.slice(end),
+  );
+  console.log(`README.md ${marker}`);
+}
+
 const FLAVOR_IDS = Object.keys(palette.flavors);
 const KEYS = [...SURFACES, ...TEXT, ...ACCENTS, ...VIVO];
 
@@ -247,25 +265,29 @@ function hexTable() {
   return [header, rule, ...rows].join('\n');
 }
 
-const readmePath = join(root, 'README.md');
-const readme = readFileSync(readmePath, 'utf8');
-const START = '<!-- palette-table:start -->';
-const END = '<!-- palette-table:end -->';
-if (readme.includes(START) && readme.includes(END)) {
-  const block = [
-    START,
+replaceReadmeBlock(
+  'palette-table',
+  [
     '<details>',
     `<summary>The ${KEYS.length} hex values, all three flavours</summary>`,
     '',
     hexTable(),
     '',
     '</details>',
-    END,
-  ].join('\n');
-  const start = readme.indexOf(START);
-  const end = readme.indexOf(END) + END.length;
-  writeFileSync(readmePath, readme.slice(0, start) + block + readme.slice(end));
-  console.log('README.md palette table');
+  ].join('\n'),
+);
+
+const registry = parseYaml(readFileSync(join(root, 'resources/ports.yml'), 'utf8'));
+
+/* Every port in the registry is published, so there is no status to report —
+   the useful columns are where to get it and where the file goes. */
+function portsTable() {
+  const rows = registry.ports.map(
+    (p) => `| [${p.name}](${p.repo}) | ${registry.groups[p.group]} | \`${p.install}\` |`,
+  );
+  return ['| Port | Group | Installs to |', '| --- | --- | --- |', ...rows].join('\n');
 }
+
+replaceReadmeBlock('ports-table', portsTable());
 
 console.log(`\n${SURFACES.length} surfaces · ${ACCENTS.length} accents · ${Object.keys(palette.flavors).length} flavours`);

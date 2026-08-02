@@ -1,12 +1,14 @@
 /**
- * Single source of truth for colour data on this site.
+ * Single source of truth for colour data on this site — and, through
+ * /palette.json and /roles.json, for the project as a whole.
  *
- * Reads the vendored palette + roles JSON (copied from the sp_night generator
- * repo) and derives every representation the pages need — RGB, HSL, OKLCH and
- * WCAG contrast ratios — at build time. No component reads the JSON directly
- * and no component ever writes a hex literal.
+ * Reads palette.json + roles.json and derives every representation the pages
+ * need — RGB, HSL, OKLCH and WCAG contrast ratios — at build time. No component
+ * reads the JSON directly and no component ever writes a hex literal.
  *
- * The colour maths here is a port of tools/gen/color.go from the theme repo.
+ * The two JSON files are the contract; everything here is derivation on top of
+ * them, so nothing downstream has to agree with this module to agree with the
+ * palette.
  */
 import paletteJson from './palette.json';
 import rolesJson from './roles.json';
