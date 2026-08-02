@@ -1,68 +1,69 @@
 ---
 import Base from '../layouts/Base.astro';
-import { ports, GROUP_LABELS, type PortGroup } from '../data/ports';
+import { ports } from '../data/ports';
 import { flavors, keyVar } from '../data/palette';
-
-const groups = Object.keys(GROUP_LABELS) as PortGroup[];
 
 const steps = [
   {
     n: '1',
-    title: 'Know what a port is',
-    body: `A port is one template file. Not a copy of the colours — a template with holes in it, which the generator fills once per flavour. Writing a port means describing the shape of your app's config, not picking colours: those decisions are already made in the spec.`,
+    title: 'Start from the spec, not from a colour picker',
+    body: `The colour decisions are already made. Open the spec and find what your app is asking for: a terminal wants the sixteen ansi roles, an editor wants the syntax group, a status bar mostly wants ui. Building a port is deciding which of your app's keys means which role — nothing more.`,
   },
   {
     n: '2',
-    title: 'Find the roles you need',
-    body: `Open the spec and look for what your app is asking for. A terminal wants the sixteen ansi roles. An editor wants the syntax group. A status bar mostly wants ui. If your app needs something the role layer does not have yet, that is a conversation worth having — a missing role is a real finding.`,
+    title: 'Map keys to roles, never to colours',
+    body: `This is the one rule that matters. Your app's "cursor colour" is ui.cursor, not sodio. A mapping that names a palette colour directly breaks the moment a flavour is added or a colour is retuned, and it silently disagrees with every other port.`,
   },
   {
     n: '3',
-    title: 'Write the template',
-    body: `Take your own config file, replace each colour with the role that means it, and save it as a template. The generator writes one finished file per flavour from that single source.`,
+    title: 'Write out one file per flavour',
+    body: `Resolve each role against each flavour and write the app's config in its own format. Three flavours means three finished files. How you produce them is your business — by hand, by script, by whatever you like reading six months from now.`,
   },
   {
     n: '4',
-    title: 'Never reach into the palette',
-    body: `This is the one rule that matters. Ask for a role, not a colour. A template that hardcodes sodio breaks the moment a flavour is added or a colour is retuned — and the whole point of this project is that nothing drifts.`,
+    title: 'Check anything the app composes itself',
+    body: `The palette's own pairings are already measured. What is not measured is a combination your app invents — text placed on an accent, a badge, a tooltip over glass. If your port creates a pair like that, check it holds 4.5:1 before shipping it.`,
   },
   {
     n: '5',
-    title: 'Run the checks',
-    body: `The generator audits contrast for every pair, checks that no two accents have collapsed into each other, and reruns the whole build to confirm no file is stale. If your port emits colour pairs of its own, they get audited too.`,
-  },
-  {
-    n: '6',
-    title: 'Submit it',
-    body: `A port lands with a README, a screenshot of the real app, install instructions and a code sample worth looking at. That is the bar — a screenshot is what convinces someone to install a theme.`,
+    title: 'Ship it as a repository',
+    body: `A port is its own repo under the org: the finished theme files, a README with real install instructions, and a preview of the actual app. The bar is that someone can install it in one command without reading anything else — a screenshot is what convinces them to try.`,
   },
 ];
+
+const example = [
+  { key: 'background', role: 'ui.bg', palette: 'laje' },
+  { key: 'foreground', role: 'ui.fg', palette: 'fg' },
+  { key: 'cursor-color', role: 'ui.cursor', palette: 'sodio' },
+  { key: 'palette = 4', role: 'ansi.blue', palette: 'marginal' },
+] as const;
 ---
 
 <Base
   title="Contribute"
-  description="How SP Night is built and how to add a port: what a template is, which rules it has to follow, and what a submission needs."
+  description="How SP Night is built and how to add a port: the palette as public data, the rules a port has to follow, and what a submission needs."
 >
   <p class="eyebrow">contribute</p>
   <h1>How to help build this</h1>
   <p class="lede">
-    SP Night is moving out of a personal lab and into a real organisation. Some of what follows
-    already works locally; some of it is being packaged right now. This page is honest about which
-    is which.
+    SP Night is a palette, a layer of names on top of it, and one repository per themed app. There
+    are {ports.length} of those today. Everything you need to build the next one is on this page or
+    the <a href="/spec">spec</a>.
   </p>
 
   <aside class="status">
-    <strong class="mono">where things stand</strong>
+    <strong class="mono">the palette, as data</strong>
     <p>
-      The palette and the generator exist and work — three flavours, {ports.length} targets, a
-      contrast audit that fails the build. What does not exist yet is the public repository: the
-      palette is being extracted into its own package and the generator into an installable CLI.
-      Until those are published, there is no <code>git clone</code> to give you that would actually
-      run.
+      The colours and the role layer are published as plain JSON, versioned with this site. They are
+      the contract: anything that reads them produces a theme that agrees with every other port.
+    </p>
+    <p class="mono links">
+      <a href="/palette.json">/palette.json</a>
+      <a href="/roles.json">/roles.json</a>
     </p>
     <p class="muted">
-      If you want to be the first port author, the useful thing to do today is tell me which app you
-      want and what its config looks like.
+      No tool is required to use them, and none is blessed. A port is judged by the files it ships,
+      not by how they were written.
     </p>
   </aside>
 
@@ -84,67 +85,37 @@ const steps = [
   </section>
 
   <section aria-labelledby="example">
-    <h2 id="example">What a template looks like</h2>
+    <h2 id="example">What a mapping looks like</h2>
     <p>
-      Here is the whole idea in four lines. On the left, what you write once. On the right, what the
-      generator produces for each of the three flavours.
+      Here is the whole idea in four lines, taken from the Ghostty port. On the left, the decision
+      you make once: which role each config key means. On the right, what that resolves to for the
+      flavour selected in the header.
     </p>
 
     <div class="side-by-side">
       <div>
-        <span class="side__label mono muted">template · written once</span>
-        <pre class="mono block"><code>background  {'{{ .R.ui.bg }}'}
-foreground  {'{{ .R.ui.fg }}'}
-cursor      {'{{ .R.ui.cursor }}'}
-color4      {'{{ .R.ansi.blue }}'}</code></pre>
+        <span class="side__label mono muted">the mapping · decided once</span>
+        <pre class="mono block"><code>{example.map((e) => `${e.key.padEnd(14)}${e.role}`).join('\n')}</code></pre>
       </div>
       <div>
-        <span class="side__label mono muted">generated · one per flavour</span>
+        <span class="side__label mono muted">resolved · one file per flavour</span>
         {
           flavors.map((f) => (
-            <pre class="mono block" data-f={f.id}><code>background  <span class="chip" style={`background: ${keyVar('laje')}; color: ${keyVar('fg')}`}>{f.colors.laje!.hex}</span>
-foreground  <span style={`color: ${keyVar('fg')}`}>{f.colors.fg!.hex}</span>
-cursor      <span style={`color: ${keyVar('sodio')}`}>{f.colors.sodio!.hex}</span>
-color4      <span style={`color: ${keyVar('marginal')}`}>{f.colors.marginal!.hex}</span></code></pre>
+            <pre class="mono block" data-f={f.id}><code>{example.map((e, i) => (
+              <>
+                {i > 0 && '\n'}
+                {e.key.padEnd(14)}
+                <span style={`color: ${keyVar(e.palette)}`}>{f.colors[e.palette]!.hex}</span>
+              </>
+            ))}</code></pre>
           ))
         }
       </div>
     </div>
 
     <p class="muted">
-      Those are the real values for the flavour selected in the header — switch it and the generated
-      side changes while the template does not. That is the whole point.
-    </p>
-  </section>
-
-  <section aria-labelledby="targets">
-    <h2 id="targets">Targets that already generate</h2>
-    <p>
-      These exist in the lab and are being prepared for publication. They are listed so you can see
-      what is covered — and, more usefully, what is not. Each is described on the
-      <a href="/ports">ports page</a>.
-    </p>
-
-    <div class="targets">
-      {
-        groups.map((g) => (
-          <div class="targets__group">
-            <h3 class="mono">{GROUP_LABELS[g]}</h3>
-            <ul role="list">
-              {ports
-                .filter((p) => p.group === g)
-                .map((p) => (
-                  <li>{p.name}</li>
-                ))}
-            </ul>
-          </div>
-        ))
-      }
-    </div>
-
-    <p class="muted">
-      Nothing for VS Code, Zed, Emacs, Firefox, Discord, Obsidian, GitHub or a dozen other obvious
-      places. That is where a new port would matter most.
+      Those are the real values for the flavour selected in the header — switch it and the resolved
+      side changes while the mapping does not. That is the whole point.
     </p>
   </section>
 
@@ -153,8 +124,8 @@ color4      <span style={`color: ${keyVar('marginal')}`}>{f.colors.marginal!.hex
     <p>
       A contrast bug is the most valuable issue you can file, and the easiest to act on. Include the
       two colours, where they meet, and the ratio if you measured it — for example: “<code
-        class="mono">fg_muted</code> on <code class="mono">vidro</code> in the Waybar tooltip, 3.02:1,
-      unreadable on my monitor.”
+        class="mono">fg_muted</code> on <code class="mono">vidro</code> in the eza header row,
+      3.02:1, unreadable on my monitor.”
     </p>
     <p>
       Judgement calls are welcome too. The jaragua flavour was rebuilt because its surfaces read as
@@ -177,7 +148,7 @@ color4      <span style={`color: ${keyVar('marginal')}`}>{f.colors.marginal!.hex
     padding: 1.1rem 1.25rem;
     background: var(--sp-laje);
     border: var(--border);
-    border-left: 3px solid var(--sp-taxi);
+    border-left: 3px solid var(--sp-sodio);
     border-radius: var(--radius);
     margin-block: 2rem;
     max-width: var(--measure);
@@ -185,7 +156,7 @@ color4      <span style={`color: ${keyVar('marginal')}`}>{f.colors.marginal!.hex
 
   .status strong {
     display: block;
-    color: var(--sp-taxi);
+    color: var(--sp-sodio);
     font-size: 0.72rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -199,6 +170,12 @@ color4      <span style={`color: ${keyVar('marginal')}`}>{f.colors.marginal!.hex
 
   .status p:last-child {
     margin-bottom: 0;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.1rem;
   }
 
   .steps {
@@ -253,11 +230,6 @@ color4      <span style={`color: ${keyVar('marginal')}`}>{f.colors.marginal!.hex
     margin-bottom: 0.4rem;
   }
 
-  .chip {
-    padding: 0 0.25em;
-    border-radius: 3px;
-  }
-
   .block {
     margin: 0;
     padding: 0.85rem 1rem;
@@ -267,30 +239,6 @@ color4      <span style={`color: ${keyVar('marginal')}`}>{f.colors.marginal!.hex
     font-size: var(--step--1);
     line-height: 1.7;
     overflow-x: auto;
-  }
-
-  .targets {
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
-    margin-block: 1.25rem;
-  }
-
-  .targets__group h3 {
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--sp-fg-muted);
-    margin-bottom: 0.4rem;
-  }
-
-  .targets__group ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    gap: 0.2rem;
-    font-size: var(--step--1);
-    color: var(--sp-fg-dim);
+    white-space: pre;
   }
 </style>

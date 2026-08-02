@@ -4,10 +4,6 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-  # Port repos (sp-night/<port>) send this event from their notify-site
-  # workflow, so a shipped port landing on main rebuilds the site.
-  repository_dispatch:
-    types: [port-updated]
 
 permissions:
   contents: read

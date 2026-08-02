@@ -5,12 +5,21 @@ import HeroClock from '../components/HeroClock.astro';
 import TerminalMock from '../components/TerminalMock.astro';
 import FlavorSwitcher from '../components/FlavorSwitcher.astro';
 import { flavors, GROUPS } from '../data/palette';
+import { ports } from '../data/ports';
+
+/**
+ * Derived, never asserted: the counts below come from the data this page
+ * renders, so a fact cannot outlive the thing it describes.
+ */
+const base = flavors[0]!;
+const surfaces = Object.keys(base.list[0]!.contrast).length;
+const pairs = base.list.length * surfaces;
 
 const facts = [
-  { n: '3', label: 'flavours', sub: 'all dark, by decision' },
-  { n: '22', label: 'colours each', sub: 'named after the city' },
-  { n: '70', label: 'contrast pairs', sub: 'audited per flavour' },
-  { n: '0', label: 'hand-written hex', sub: 'the palette is the only source' },
+  { n: String(flavors.length), label: 'flavours', sub: 'all dark, by decision' },
+  { n: String(base.list.length), label: 'colours each', sub: 'named after the city' },
+  { n: String(pairs), label: 'contrast pairs', sub: 'measured at build time' },
+  { n: String(ports.length), label: ports.length === 1 ? 'port' : 'ports', sub: 'published, installable today' },
 ];
 ---
 
@@ -109,16 +118,21 @@ const facts = [
   </section>
 
   <section class="wrap section reveal">
-    <p class="eyebrow">status</p>
-    <h2>The palette is settled. The first port is out.</h2>
+    <p class="eyebrow">ports</p>
+    <h2>Themes you can install today</h2>
     <p class="lede">
-      SP Night started as a personal lab and is being rebuilt as a proper theme organisation. The
-      colours on this site are final, and the ports are shipping one at a time, each one with real
-      install instructions rather than a promise —
-      <a href="https://github.com/sp-night/ghostty">Ghostty</a> is the first.
+      Each port is a repository of its own, holding finished theme files — plain text, no build
+      step. {
+        ports.map((p, i) => (
+          <>
+            {i > 0 && (i === ports.length - 1 ? ' and ' : ', ')}
+            <a href={p.repo}>{p.name}</a>
+          </>
+        ))
+      } {ports.length === 1 ? 'is' : 'are'} out.
     </p>
     <p>
-      <a href="/contribute">How this gets built, and how to help →</a>
+      <a href="/ports">Where each file goes →</a>
     </p>
   </section>
 </Base>
