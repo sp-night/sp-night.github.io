@@ -1,0 +1,44 @@
+name: Port proposal
+description: Propose a new target — an app you want SP Night in.
+title: "[port] "
+labels: ["port"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A port is one template file: your app's config with each colour replaced by the
+        role that means it. How it works, step by step:
+        [sp-night.github.io/contribute](https://sp-night.github.io/contribute).
+  - type: input
+    id: app
+    attributes:
+      label: App
+      placeholder: VS Code, Zed, Emacs, Obsidian…
+    validations:
+      required: true
+  - type: input
+    id: homepage
+    attributes:
+      label: Homepage
+      placeholder: https://…
+  - type: textarea
+    id: config
+    attributes:
+      label: What its colour config looks like
+      description: Paste a snippet of the app's theme/colour configuration format.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: roles
+    attributes:
+      label: Roles it needs
+      description: >
+        ansi? syntax? ui? Anything the role layer may not have yet — a missing role is a
+        real finding.
+  - type: checkboxes
+    id: author
+    attributes:
+      label: Authorship
+      options:
+        - label: I want to write the template myself

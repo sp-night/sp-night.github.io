@@ -26,6 +26,8 @@
   &nbsp;·&nbsp;
   <a href="https://sp-night.github.io/spec">spec</a>
   &nbsp;·&nbsp;
+  <a href="https://sp-night.github.io/ports">ports</a>
+  &nbsp;·&nbsp;
   <a href="https://sp-night.github.io/contribute">contribute</a>
 </p>
 
@@ -72,6 +74,69 @@ it ships, never eyeballed.
 Full detail — glosses, OKLCH, WCAG ratios, the ANSI map — lives at
 [sp-night.github.io/palette](https://sp-night.github.io/palette).
 
+<!-- palette-table:start -->
+<details>
+<summary>The 22 hex values, all three flavours</summary>
+
+| colour | `noite` | `garoa` | `jaragua` |
+| --- | --- | --- | --- |
+| `vao` | `#0f101a` | `#151719` | `#050806` |
+| `laje` | `#151723` | `#1c1e20` | `#0c100d` |
+| `concreto` | `#1d1f2d` | `#26282a` | `#151a17` |
+| `vidro` | `#272937` | `#313436` | `#202622` |
+| `fiacao` | `#373943` | `#414346` | `#323733` |
+| `fg` | `#d3d7eb` | `#c7cdd6` | `#d3dad5` |
+| `fg_dim` | `#868999` | `#8d949f` | `#868b87` |
+| `fg_muted` | `#707380` | `#767d88` | `#707471` |
+| `brasa` | `#ea5d5d` | `#d87676` | `#ea5d5d` |
+| `sodio` | `#f2984a` | `#e3a068` | `#f2984a` |
+| `taxi` | `#f5c66b` | `#e7cb8a` | `#f5c66b` |
+| `ibira` | `#89d093` | `#9acaa2` | `#79d488` |
+| `estaiada` | `#38b59e` | `#56b19f` | `#05b89e` |
+| `sereno` | `#5dbec4` | `#77babf` | `#60bfb8` |
+| `marginal` | `#6e92de` | `#7993cb` | `#6e92de` |
+| `temporal` | `#b094e2` | `#af97d3` | `#b094e2` |
+| `brasa_vivo` | `#ff716f` | `#ed8988` | `#ff716f` |
+| `taxi_vivo` | `#ffdc9c` | `#fbdf9d` | `#ffdc9c` |
+| `ibira_vivo` | `#9ce4a6` | `#addeb5` | `#8ce99b` |
+| `sereno_vivo` | `#71d1d7` | `#8acdd2` | `#73d2cb` |
+| `marginal_vivo` | `#80a5f2` | `#8ba6df` | `#80a5f2` |
+| `temporal_vivo` | `#c3a7f6` | `#c2aae7` | `#c3a7f6` |
+
+</details>
+<!-- palette-table:end -->
+
+## Ports
+
+One template per app, filled once per flavour by the generator — so no target ever
+drifts from the spec. Seventeen targets generate today in the lab and are being
+prepared for publication; each will be linked from
+[sp-night.github.io/ports](https://sp-night.github.io/ports) as it ships.
+
+| Target | Group | Status |
+| --- | --- | --- |
+| [kitty](https://sw.kovidgoyal.net/kitty/) | Terminals | planned |
+| [Alacritty](https://alacritty.org/) | Terminals | planned |
+| [Ghostty](https://ghostty.org/) | Terminals | planned |
+| [herdr](https://github.com/rogeradas/herdr) | Terminals | planned |
+| [Neovim](https://neovim.io/) | Editors | planned |
+| [tmux](https://github.com/tmux/tmux) | Shell & CLI | planned |
+| [fish](https://fishshell.com/) | Shell & CLI | planned |
+| [Starship](https://starship.rs/) | Shell & CLI | planned |
+| [bat](https://github.com/sharkdp/bat) | Shell & CLI | planned |
+| [eza](https://eza.rocks/) | Shell & CLI | planned |
+| [Waybar](https://github.com/Alexays/Waybar) | Desktop | planned |
+| [Hyprland](https://hyprland.org/) | Desktop | planned |
+| [GTK](https://www.gtk.org/) | Desktop | planned |
+| [KDE / Qt](https://kde.org/plasma-desktop/) | Desktop | planned |
+| [Noctalia Shell](https://github.com/noctalia-dev/noctalia-shell) | Desktop | planned |
+| [CSS](https://developer.mozilla.org/docs/Web/CSS/Using_CSS_custom_properties) | Web | planned |
+| [JSON](https://www.json.org/) | Web | planned |
+
+Want one sooner, or something not on the list? See
+[CONTRIBUTING.md](CONTRIBUTING.md) — a port is one template file, and the colour
+decisions are already made.
+
 ## This repository
 
 The website. A static [Astro](https://astro.build) site, no UI framework. Colour data
@@ -104,9 +169,12 @@ GitHub Pages. Other branches and PRs run the same checks via `ci.yml` without de
 - Palette or roles change → replace `src/data/palette.json` / `src/data/roles.json`,
   run `npm test` (the contrast tests are the gate) and `npm run assets`.
 - Per-app themes (ports) will be linked from the site as they are published —
-  metadata for the 17 targets lives in `src/data/ports.ts`.
+  metadata for the 17 targets lives in `src/data/ports.ts` and is listed at
+  [sp-night.github.io/ports](https://sp-night.github.io/ports).
 
-See [`SITE.md`](SITE.md) for the full design plan and decision log.
+Contributions are welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md) for how to
+propose a port or report a colour problem, and [`SITE.md`](SITE.md) for the full
+design plan and decision log.
 
 <p align="center">
   <sub>SP Night — built by Rogerio Junior · MIT</sub>
