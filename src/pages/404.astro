@@ -1,0 +1,29 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="404" description="This page does not exist." noindex>
+  <p class="eyebrow">404</p>
+  <h1>Nothing under this lamp post</h1>
+  <p class="lede">
+    The page you were looking for does not exist — or not yet. The palette, the spec and the list
+    of planned ports are all one block away.
+  </p>
+  <p class="links mono">
+    <a href="/">home</a>
+    <a href="/palette">palette</a>
+    <a href="/spec">spec</a>
+    <a href="/ports">ports</a>
+    <a href="/contribute">contribute</a>
+  </p>
+</Base>
+
+<style>
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-top: 2rem;
+    font-size: var(--step--1);
+  }
+</style>

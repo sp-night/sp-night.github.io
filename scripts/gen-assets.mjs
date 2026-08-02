@@ -4,7 +4,9 @@
  *
  *   node scripts/gen-assets.mjs
  *
- * Outputs into public/: og-<flavor>.png (1200x630) and favicon-<flavor>.svg.
+ * Outputs into public/: og-<flavor>.png (1200x630), favicon-<flavor>.svg,
+ * logo-<flavor>.svg, palette-<flavor>.svg, the touch/PWA icons with
+ * site.webmanifest, and the hex table kept between markers in README.md.
  * Re-run whenever the palette changes. Every colour below is read from
  * src/data/palette.json — no hex is written by hand.
  */
@@ -189,4 +191,81 @@ for (const [id, flavor] of Object.entries(palette.flavors)) {
 // The default favicon mirrors the default flavour.
 writeFileSync(join(root, 'public/favicon.svg'), markSvg(palette.flavors.noite));
 console.log('favicon.svg (noite)');
+
+/* Touch and PWA icons mirror the default flavour, flattened onto vao — the
+   platforms mask their own corners, so no transparency survives anyway. */
+function flatIconSvg(flavor, size) {
+  return markSvg(flavor, size).replace(
+    '<rect width="64" height="64" rx="13"',
+    `<rect width="64" height="64" fill="${flavor.colors.vao}"/><rect width="64" height="64" rx="13"`,
+  );
+}
+
+const noite = palette.flavors.noite;
+for (const [file, size] of [
+  ['apple-touch-icon.png', 180],
+  ['icon-192.png', 192],
+  ['icon-512.png', 512],
+]) {
+  await sharp(Buffer.from(flatIconSvg(noite, size))).png().toFile(join(root, `public/${file}`));
+  console.log(file);
+}
+
+writeFileSync(
+  join(root, 'public/site.webmanifest'),
+  JSON.stringify(
+    {
+      name: palette.label,
+      short_name: palette.label,
+      start_url: '/',
+      display: 'browser',
+      background_color: noite.colors.vao,
+      theme_color: noite.colors.vao,
+      icons: [
+        { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+      ],
+    },
+    null,
+    2,
+  ) + '\n',
+);
+console.log('site.webmanifest');
+
+/* The README hex table lives between markers and is rewritten here, so the
+   published values can never drift from the palette. */
+const FLAVOR_IDS = Object.keys(palette.flavors);
+const KEYS = [...SURFACES, ...TEXT, ...ACCENTS, ...VIVO];
+
+function hexTable() {
+  const header = `| colour | ${FLAVOR_IDS.map((id) => `\`${id}\``).join(' | ')} |`;
+  const rule = `| --- | ${FLAVOR_IDS.map(() => '---').join(' | ')} |`;
+  const rows = KEYS.map(
+    (key) =>
+      `| \`${key}\` | ${FLAVOR_IDS.map((id) => `\`${palette.flavors[id].colors[key]}\``).join(' | ')} |`,
+  );
+  return [header, rule, ...rows].join('\n');
+}
+
+const readmePath = join(root, 'README.md');
+const readme = readFileSync(readmePath, 'utf8');
+const START = '<!-- palette-table:start -->';
+const END = '<!-- palette-table:end -->';
+if (readme.includes(START) && readme.includes(END)) {
+  const block = [
+    START,
+    '<details>',
+    `<summary>The ${KEYS.length} hex values, all three flavours</summary>`,
+    '',
+    hexTable(),
+    '',
+    '</details>',
+    END,
+  ].join('\n');
+  const start = readme.indexOf(START);
+  const end = readme.indexOf(END) + END.length;
+  writeFileSync(readmePath, readme.slice(0, start) + block + readme.slice(end));
+  console.log('README.md palette table');
+}
+
 console.log(`\n${SURFACES.length} surfaces · ${ACCENTS.length} accents · ${Object.keys(palette.flavors).length} flavours`);

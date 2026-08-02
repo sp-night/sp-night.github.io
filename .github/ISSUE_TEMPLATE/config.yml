@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: The palette, in full detail
+    url: https://sp-night.github.io/palette
+    about: Glosses, OKLCH, WCAG ratios and the ANSI map for all three flavours.
+  - name: How to contribute a port
+    url: https://sp-night.github.io/contribute
+    about: What a template is, the rules it follows, and what a submission needs.

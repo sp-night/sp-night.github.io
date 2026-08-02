@@ -9,12 +9,15 @@ interface Props {
   description?: string;
   /** Full-bleed pages (the home hero) opt out of the default container. */
   bare?: boolean;
+  /** Pages that must not be indexed (the 404). */
+  noindex?: boolean;
 }
 
 const {
   title,
   description = theme.description,
   bare = false,
+  noindex = false,
 } = Astro.props;
 
 const pageTitle = title ? `${title} · ${theme.label}` : `${theme.label} — a São Paulo dark theme`;
@@ -22,6 +25,7 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 const nav = [
   { href: '/palette', label: 'palette' },
   { href: '/spec', label: 'spec' },
+  { href: '/ports', label: 'ports' },
   { href: '/contribute', label: 'contribute' },
 ];
 const current = (href: string) => (path === href || path.startsWith(href + '/') ? 'page' : undefined);
@@ -29,7 +33,37 @@ const seed = flavor(defaultFlavor);
 
 // Social cards need an absolute URL; `site` is set in astro.config.mjs, with a
 // dev-origin fallback for local servers where it may be absent.
-const ogImage = new URL(`/og-${defaultFlavor}.png`, Astro.site ?? 'http://localhost:4321').href;
+const origin = Astro.site ?? 'http://localhost:4321';
+const ogImage = new URL(`/og-${defaultFlavor}.png`, origin).href;
+const ogImageAlt = `${theme.label} — the São Paulo skyline at night under the sodium lamp, with the eight accent colours as swatches`;
+
+// Canonical carries the trailing slash, matching the URLs the sitemap emits.
+const canonical = new URL(path === '/' ? '/' : `${path}/`, origin).href;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${origin}#website`,
+      name: theme.label,
+      url: `${origin}`,
+      description: theme.description,
+    },
+    {
+      '@type': 'SoftwareApplication',
+      '@id': `${origin}#theme`,
+      name: theme.label,
+      applicationCategory: 'DeveloperApplication',
+      operatingSystem: 'Any',
+      url: `${origin}`,
+      description: theme.description,
+      license: 'https://opensource.org/license/MIT',
+      author: { '@type': 'Person', name: theme.author },
+      sameAs: [theme.repoUrl, `${theme.repoUrl}/sp-night.github.io`],
+    },
+  ],
+};
 ---
 
 <!doctype html>
@@ -41,14 +75,27 @@ const ogImage = new URL(`/og-${defaultFlavor}.png`, Astro.site ?? 'http://localh
     <meta name="description" content={description} />
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content={seed.colors.vao?.hex} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <link rel="canonical" href={canonical} />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={theme.label} />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImage} />
+    <meta property="og:image:alt" content={ogImageAlt} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
     {/* Swapped client-side so the tab icon matches the flavour on screen. */}
     <link id="favicon" rel="icon" href={`/favicon-${defaultFlavor}.svg`} type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
     <style set:html={`  ${flavorStylesheet()}`}></style>
 

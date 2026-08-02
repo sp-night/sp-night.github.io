@@ -1,0 +1,48 @@
+name: Colour problem
+description: A contrast bug or a pairing that reads wrong — the most valuable issue you can file.
+title: "[colour] "
+labels: ["colour"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A contrast bug is the easiest issue to act on. The full palette — keys, roles,
+        measured WCAG ratios — is at [sp-night.github.io/palette](https://sp-night.github.io/palette).
+        Judgement calls are welcome too: "this reads wrong" is a real finding.
+  - type: dropdown
+    id: flavour
+    attributes:
+      label: Flavour
+      options:
+        - noite
+        - garoa
+        - jaragua
+        - all three
+    validations:
+      required: true
+  - type: input
+    id: pair
+    attributes:
+      label: The two colours
+      description: Palette keys or roles, foreground on background.
+      placeholder: "`fg_muted` on `vidro`"
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Where they meet
+      description: The app and the surface where the pairing shows up.
+      placeholder: the Waybar tooltip
+    validations:
+      required: true
+  - type: input
+    id: ratio
+    attributes:
+      label: Measured ratio (if you have it)
+      placeholder: "3.02:1"
+  - type: textarea
+    id: details
+    attributes:
+      label: What it looks like
+      description: Anything else — a screenshot is worth a lot here.
