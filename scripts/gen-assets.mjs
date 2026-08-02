@@ -17,7 +17,9 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const palette = JSON.parse(readFileSync(join(root, 'src/data/palette.json'), 'utf8'));
 
 const SURFACES = ['vao', 'laje', 'concreto', 'vidro', 'fiacao'];
+const TEXT = ['fg', 'fg_dim', 'fg_muted'];
 const ACCENTS = ['brasa', 'sodio', 'taxi', 'ibira', 'estaiada', 'sereno', 'marginal', 'temporal'];
+const VIVO = ['brasa_vivo', 'taxi_vivo', 'ibira_vivo', 'sereno_vivo', 'marginal_vivo', 'temporal_vivo'];
 
 /** Fixed-seed PRNG — the OG skyline must be identical on every run. */
 function mulberry32(seed) {
@@ -149,12 +151,39 @@ function markSvg(flavor, size = 64) {
 </svg>`;
 }
 
+/** All 22 colours in palette order as one group-spaced strip — the README's
+    palette preview. Swatches sit on the flavour's own background. */
+function stripSvg(flavor) {
+  const c = flavor.colors;
+  const SW = 30;
+  const GAP = 4;
+  const GROUP_GAP = 16;
+  const PAD = 10;
+  let x = PAD;
+  let cells = '';
+  for (const group of [SURFACES, TEXT, ACCENTS, VIVO]) {
+    for (const key of group) {
+      cells += `<rect x="${x}" y="${PAD}" width="${SW}" height="${SW}" rx="7" fill="${c[key]}"/>`;
+      x += SW + GAP;
+    }
+    x += GROUP_GAP - GAP;
+  }
+  const w = x - GROUP_GAP + PAD;
+  const h = SW + PAD * 2;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+  <rect width="${w}" height="${h}" rx="12" fill="${c.vao}"/>
+  <rect width="${w}" height="${h}" rx="12" fill="none" stroke="${c.fiacao}"/>
+  ${cells}
+</svg>`;
+}
+
 for (const [id, flavor] of Object.entries(palette.flavors)) {
   const svg = ogSvg(flavor);
   await sharp(Buffer.from(svg)).png().toFile(join(root, `public/og-${id}.png`));
   writeFileSync(join(root, `public/favicon-${id}.svg`), markSvg(flavor));
   writeFileSync(join(root, `public/logo-${id}.svg`), markSvg(flavor, 256));
-  console.log(`og-${id}.png + favicon-${id}.svg + logo-${id}.svg`);
+  writeFileSync(join(root, `public/palette-${id}.svg`), stripSvg(flavor));
+  console.log(`og-${id}.png + favicon-${id}.svg + logo-${id}.svg + palette-${id}.svg`);
 }
 
 // The default favicon mirrors the default flavour.
