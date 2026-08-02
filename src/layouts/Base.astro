@@ -1,0 +1,113 @@
+---
+import '../styles/global.css';
+import FlavorSwitcher from '../components/FlavorSwitcher.astro';
+import Logo from '../components/Logo.astro';
+import { flavorStylesheet, defaultFlavor, theme, flavor } from '../data/palette';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Full-bleed pages (the home hero) opt out of the default container. */
+  bare?: boolean;
+}
+
+const {
+  title,
+  description = theme.description,
+  bare = false,
+} = Astro.props;
+
+const pageTitle = title ? `${title} · ${theme.label}` : `${theme.label} — a São Paulo dark theme`;
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const nav = [
+  { href: '/palette', label: 'palette' },
+  { href: '/spec', label: 'spec' },
+  { href: '/contribute', label: 'contribute' },
+];
+const current = (href: string) => (path === href || path.startsWith(href + '/') ? 'page' : undefined);
+const seed = flavor(defaultFlavor);
+
+// Social cards need an absolute URL. `site` is unset while this is a local
+// build, so fall back to the dev origin; setting `site` later makes it real.
+const ogImage = new URL(`/og-${defaultFlavor}.png`, Astro.site ?? 'http://localhost:4321').href;
+---
+
+<!doctype html>
+<html lang="en" data-flavor={defaultFlavor}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content={seed.colors.vao?.hex} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImage} />
+    {/* Swapped client-side so the tab icon matches the flavour on screen. */}
+    <link id="favicon" rel="icon" href={`/favicon-${defaultFlavor}.svg`} type="image/svg+xml" />
+
+    <style set:html={`  ${flavorStylesheet()}`}></style>
+
+    {/* Set the stored flavour before first paint, so there is no flash. */}
+    <script is:inline data-default={defaultFlavor}>
+      (function () {
+        var el = document.currentScript;
+        var fallback = (el && el.dataset.default) || 'noite';
+        var stored = null;
+        try {
+          stored = localStorage.getItem('sp-night-flavor');
+        } catch (e) {}
+        var flavor = q0() || stored || fallback;
+        function q0() {
+          return new URLSearchParams(location.search).get('flavor');
+        }
+        document.documentElement.dataset.flavor = flavor;
+        var icon = document.getElementById('favicon');
+        if (icon) icon.href = '/favicon-' + flavor + '.svg';
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="visually-hidden" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="wrap site-header__inner">
+        <a class="brand" href="/">
+          <Logo size={26} id="brand" />
+          {theme.label}
+        </a>
+        <nav class="nav" aria-label="Main">
+          {nav.map((i) => <a href={i.href} aria-current={current(i.href)}>{i.label}</a>)}
+          <FlavorSwitcher />
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      {bare ? <slot /> : <div class="wrap section"><slot /></div>}
+    </main>
+
+    <p id="copy-status" class="visually-hidden" role="status" aria-live="polite"></p>
+
+    <footer class="site-footer">
+      <div class="wrap site-footer__inner">
+        <span>
+          {theme.label} — a dark theme with São Paulo as its reference. Built by {theme.author}.
+        </span>
+        <span class="mono">
+          <a href={theme.repoUrl}>github.com/sp-night</a> · MIT
+        </span>
+      </div>
+    </footer>
+
+    <script>
+      import '../scripts/copy';
+      import '../scripts/motion';
+    </script>
+  </body>
+</html>

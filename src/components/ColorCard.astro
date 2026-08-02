@@ -1,0 +1,165 @@
+---
+import { flavors, type ColorKey } from '../data/palette';
+
+interface Props {
+  colorKey: ColorKey;
+}
+const { colorKey } = Astro.props;
+
+const perFlavor = flavors.map((f) => ({ flavor: f.id, color: f.colors[colorKey]! }));
+const sample = perFlavor[0]!.color;
+const cssVar = `--sp-${colorKey.replace(/_/g, '-')}`;
+---
+
+<button class="color" type="button" data-copy-var={cssVar} aria-label={`Copy ${colorKey} hex value`}>
+  <span class="color__swatch" style={`background: var(${cssVar})`} aria-hidden="true"></span>
+
+  <span class="color__body">
+    <span class="color__head">
+      <span class="color__name mono">{colorKey}</span>
+      {
+        perFlavor.map(({ flavor, color }) => (
+          <span class="color__hex mono" data-f={flavor}>
+            {color.hex}
+          </span>
+        ))
+      }
+    </span>
+
+    <span class="color__meaning">{sample.meaning.en}</span>
+
+    <span class="color__meta mono">
+      {
+        perFlavor.map(({ flavor, color }) => (
+          <span data-f={flavor}>
+            <span title="OKLCH lightness / chroma">
+              L {color.oklch.l.toFixed(2)} · C {color.oklch.c.toFixed(3)}
+            </span>
+            <span class="color__ratio" title="WCAG contrast ratio against laje (the default surface)">
+              {color.contrast.laje.toFixed(2)}:1 on laje
+            </span>
+          </span>
+        ))
+      }
+    </span>
+  </span>
+
+  <span class="color__copied" aria-hidden="true">copied</span>
+</button>
+
+<style>
+  .color {
+    display: flex;
+    gap: 0.9rem;
+    align-items: flex-start;
+    width: 100%;
+    text-align: left;
+    position: relative;
+    padding: 0.85rem 0.95rem;
+    background: var(--sp-laje);
+    border: var(--border);
+    border-radius: var(--radius);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    transition: border-color 0.18s ease, transform 0.18s ease;
+  }
+
+  .color:hover {
+    border-color: var(--sp-fg-muted);
+    transform: translateY(-2px);
+  }
+
+  .color:active {
+    transform: translateY(0);
+  }
+
+  .color__swatch {
+    flex: 0 0 auto;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 8px;
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--sp-vao) 45%, transparent);
+    transition: background-color 0.45s ease, transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1),
+      box-shadow 0.25s ease;
+  }
+
+  .color:hover .color__swatch {
+    transform: scale(1.06);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in oklab, var(--sp-vao) 45%, transparent),
+      0 10px 26px -10px currentColor;
+  }
+
+  /* the copied flag pops rather than fades in */
+  .color.is-copied .color__swatch {
+    animation: swatch-pop 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  @keyframes swatch-pop {
+    40% {
+      transform: scale(0.92);
+    }
+    100% {
+      transform: scale(1.06);
+    }
+  }
+
+  .color__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  .color__head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .color__name {
+    font-weight: 650;
+    color: var(--sp-fg);
+  }
+
+  .color__hex {
+    font-size: var(--step--1);
+    color: var(--sp-fg-dim);
+  }
+
+  .color__meaning {
+    font-size: var(--step--1);
+    color: var(--sp-fg-dim);
+    line-height: 1.45;
+  }
+
+  .color__meta {
+    font-size: 0.72rem;
+    color: var(--sp-fg-muted);
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .color__meta > span {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .color__copied {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.7rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--sp-ibira);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .color.is-copied .color__copied {
+    opacity: 1;
+  }
+</style>

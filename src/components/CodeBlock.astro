@@ -1,0 +1,80 @@
+---
+interface Props {
+  code: string;
+  label?: string;
+  /** Renders only for this flavour when set (see the [data-f] visibility rule). */
+  flavor?: string;
+}
+const { code, label, flavor } = Astro.props;
+---
+
+<div class="snippet" data-f={flavor}>
+  {label && <span class="snippet__label mono muted">{label}</span>}
+  <pre class="snippet__pre mono"><code>{code}</code></pre>
+  <button class="snippet__copy mono" type="button" data-copy-text={code}>
+    <span class="snippet__copy-idle">copy</span>
+    <span class="snippet__copy-done">copied</span>
+  </button>
+</div>
+
+<style>
+  .snippet {
+    position: relative;
+    margin-block: 1rem;
+  }
+
+  .snippet__label {
+    display: block;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  .snippet__pre {
+    margin: 0;
+    padding: 0.9rem 5rem 0.9rem 1rem;
+    background: var(--sp-vao);
+    border: var(--border);
+    border-radius: var(--radius);
+    overflow-x: auto;
+    font-size: var(--step--1);
+    line-height: 1.6;
+    color: var(--sp-fg);
+  }
+
+  .snippet__copy {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.55rem;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.72rem;
+    color: var(--sp-fg-muted);
+    background: var(--sp-concreto);
+    border: var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .snippet__copy:hover {
+    color: var(--sp-fg);
+    border-color: var(--sp-fg-muted);
+  }
+
+  .snippet__label + .snippet__pre + .snippet__copy {
+    top: 2rem;
+  }
+
+  .snippet__copy-done {
+    display: none;
+    color: var(--sp-ibira);
+  }
+
+  .snippet__copy.is-copied .snippet__copy-idle {
+    display: none;
+  }
+
+  .snippet__copy.is-copied .snippet__copy-done {
+    display: inline;
+  }
+</style>

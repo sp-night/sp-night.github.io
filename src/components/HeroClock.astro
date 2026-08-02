@@ -1,0 +1,46 @@
+---
+/** The São Paulo wall clock from the lab demo. Ticks every 15 s. */
+---
+
+<span class="clock mono" aria-label="Current time in São Paulo">
+  SP · <time id="sp-clock" datetime="">--:--</time>
+</span>
+
+<style>
+  .clock {
+    display: inline-flex;
+    gap: 0.35rem;
+    align-items: baseline;
+    font-size: var(--step--1);
+    letter-spacing: 0.08em;
+    color: var(--sp-fg-muted);
+    border: var(--border);
+    border-radius: 999px;
+    padding: 0.25rem 0.8rem;
+    background: color-mix(in oklab, var(--sp-laje) 70%, transparent);
+  }
+
+  .clock time {
+    color: var(--sp-sodio);
+  }
+</style>
+
+<script>
+  const el = document.getElementById('sp-clock');
+
+  function tick() {
+    if (!el) return;
+    const now = new Date();
+    const time = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'America/Sao_Paulo',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).format(now);
+    el.textContent = time;
+    el.setAttribute('datetime', time);
+  }
+
+  tick();
+  setInterval(tick, 15_000);
+</script>

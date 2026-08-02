@@ -1,0 +1,971 @@
+---
+/**
+ * The São Paulo skyline, migrated from the lab demo (demo/index.html).
+ *
+ * Everything procedural — buildings, lit windows, stars, drizzle — is generated
+ * here at build time with a fixed-seed PRNG, so the page ships static SVG and
+ * every visitor sees the same city. Only colour changes between flavours, never
+ * geometry.
+ *
+ * Motion is deliberately small and slow: beacons blink, a few windows flicker
+ * as people move around inside, headlights run the Marginal, the drizzle falls
+ * in `garoa` and the stars breathe in `noite`. All of it collapses under
+ * prefers-reduced-motion.
+ */
+
+const FLOOR = 250;
+const ACCENTS = ['--sp-sodio', '--sp-sodio', '--sp-taxi', '--sp-sereno', '--sp-fg-muted'];
+
+const BUILDINGS = [
+  { x: 0, w: 44, h: 92 },
+  { x: 50, w: 38, h: 124 },
+  { x: 94, w: 54, h: 72 },
+  { x: 154, w: 40, h: 142 },
+  { x: 200, w: 62, h: 60 },
+  { x: 268, w: 36, h: 106 },
+  { x: 310, w: 52, h: 152 },
+  { x: 368, w: 44, h: 78 },
+  { x: 418, w: 44, h: 98 },
+  { x: 622, w: 36, h: 130 },
+  { x: 664, w: 70, h: 64 },
+  { x: 740, w: 46, h: 114 },
+  { x: 792, w: 40, h: 86 },
+  { x: 838, w: 46, h: 66 },
+  { x: 1074, w: 46, h: 138 },
+  { x: 1126, w: 66, h: 72 },
+];
+
+/** Fixed-seed PRNG so the skyline is identical on every build. */
+function mulberry32(seed: number) {
+  return function () {
+    seed |= 0;
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+type Shape =
+  | {
+      kind: 'rect';
+      x: number;
+      y: number;
+      w: number;
+      h: number;
+      fill: string;
+      opacity?: number;
+      /** Lit window that occasionally changes state. */
+      flicker?: string;
+    }
+  | { kind: 'line'; x1: number; y1: number; x2: number; y2: number }
+  | { kind: 'dot'; cx: number; cy: number; fill: string; beacon: boolean; delay?: string };
+
+function buildSkyline(): Shape[] {
+  const rand = mulberry32(1958);
+  const out: Shape[] = [];
+
+  for (const b of BUILDINGS) {
+    const glass = rand() < 0.18; // the occasional mirrored tower
+    const top = FLOOR - b.h;
+
+    out.push({
+      kind: 'rect',
+      x: b.x,
+      y: top,
+      w: b.w,
+      h: b.h,
+      fill: glass ? '--sp-vidro' : '--sp-concreto',
+    });
+    // parapet: a shadow line along the top
+    out.push({ kind: 'rect', x: b.x, y: top, w: b.w, h: 2, fill: '--sp-vao', opacity: 0.4 });
+
+    // roof: an antenna or a water tank
+    const roll = rand();
+    if (roll < 0.34) {
+      const ax = b.x + 6 + Math.floor(rand() * (b.w - 12));
+      const ah = 8 + Math.floor(rand() * 10);
+      out.push({ kind: 'line', x1: ax, y1: top, x2: ax, y2: top - ah });
+      const lit = rand() < 0.22;
+      const delay = (rand() * 2.2).toFixed(1);
+      out.push({
+        kind: 'dot',
+        cx: ax,
+        cy: top - ah,
+        fill: lit ? '--sp-brasa' : '--sp-fg-muted',
+        beacon: lit,
+        delay: lit ? `-${delay}s` : undefined,
+      });
+    } else if (roll < 0.55 && b.w >= 40) {
+      const tx = b.x + 5 + Math.floor(rand() * (b.w - 18));
+      out.push({ kind: 'rect', x: tx, y: top - 7, w: 10, h: 7, fill: '--sp-concreto' });
+    }
+
+    // windows: each column gets its own "how many people are awake"
+    const cols = Math.max(1, Math.floor((b.w - 6) / 12));
+    const rows = Math.max(1, Math.floor((b.h - 10) / 16));
+    for (let c = 0; c < cols; c++) {
+      const bias = 0.22 + rand() * (glass ? 0.55 : 0.4);
+      for (let r = 0; r < rows; r++) {
+        if (rand() > bias) continue;
+        const v = glass && rand() < 0.5 ? '--sp-sereno' : ACCENTS[Math.floor(rand() * ACCENTS.length)]!;
+        // roughly one window in nine has someone still moving about
+        const flickers = rand() < 0.11;
+        out.push({
+          kind: 'rect',
+          x: b.x + 4 + c * 12,
+          y: top + 7 + r * 16,
+          w: 5,
+          h: 7,
+          fill: v,
+          opacity: Number((0.35 + rand() * 0.5).toFixed(2)),
+          flicker: flickers
+            ? `animation-delay: -${(rand() * 14).toFixed(1)}s; animation-duration: ${(7 + rand() * 9).toFixed(1)}s`
+            : undefined,
+        });
+      }
+    }
+  }
+  return out;
+}
+
+/** Stars for the clear night, each breathing on its own clock. */
+function buildStars() {
+  const rand = mulberry32(4407);
+  return Array.from({ length: 26 }, () => ({
+    cx: Number((rand() * 1200).toFixed(0)),
+    cy: Number((6 + rand() * 96).toFixed(0)),
+    r: Number((0.7 + rand() * 0.7).toFixed(1)),
+    o: Number((0.18 + rand() * 0.3).toFixed(2)),
+    style: `animation-delay: -${(rand() * 6).toFixed(1)}s; animation-duration: ${(3.5 + rand() * 4).toFixed(1)}s`,
+  }));
+}
+
+/**
+ * Drizzle. Two stacked copies of the same scatter, one a full viewBox above the
+ * other, so translating the pair down by 250 loops seamlessly.
+ */
+function buildDrizzle() {
+  const rand = mulberry32(1932);
+  return Array.from({ length: 60 }, () => ({
+    x: Number((rand() * 1220 - 10).toFixed(0)),
+    y: Number((rand() * 250).toFixed(0)),
+    len: Number((14 + rand() * 12).toFixed(0)),
+  }));
+}
+
+/**
+ * Roda Rico, at Parque Cândido Portinari next to Villa-Lobos, on the Marginal
+ * Pinheiros — the garoa scene.
+ *
+ * 91 m tall with 42 cabins, drawn by the same office behind the London Eye,
+ * which is why it is a bicycle wheel of cables rather than a heavy lattice.
+ * It never stops: 3–5 km/h, one full turn in about 25 minutes. The animation
+ * keeps that spirit — slow enough that you only notice it moved if you look
+ * away and back.
+ */
+const RODA = { cx: 800, cy: 98, r: 88 };
+const CABIN_COUNT = 42;
+
+const wheelPoint = (i: number, radius: number) => {
+  const a = (i / CABIN_COUNT) * Math.PI * 2 - Math.PI / 2;
+  return {
+    x: Number((RODA.cx + Math.cos(a) * radius).toFixed(1)),
+    y: Number((RODA.cy + Math.sin(a) * radius).toFixed(1)),
+  };
+};
+
+const CABINS = Array.from({ length: CABIN_COUNT }, (_, i) => ({
+  ...wheelPoint(i, RODA.r + 5),
+  // the cabin lights are not all the same colour up close
+  lamp: ['--sp-temporal', '--sp-sereno', '--sp-temporal', '--sp-marginal'][i % 4]!,
+}));
+
+/**
+ * At night the spokes are the show: LED bars running the cables, which read as
+ * a starburst rather than as a wheel of thin wires. They stop short of the hub
+ * and of the rim, exactly as in the photographs.
+ */
+const SPOKES = Array.from({ length: CABIN_COUNT }, (_, i) => {
+  const inner = wheelPoint(i, RODA.r * 0.16);
+  const outer = wheelPoint(i, RODA.r * (i % 2 ? 0.82 : 0.93));
+  return {
+    x1: inner.x,
+    y1: inner.y,
+    x2: outer.x,
+    y2: outer.y,
+    // a slow chase runs around the wheel
+    delay: `-${((i / CABIN_COUNT) * 9).toFixed(1)}s`,
+  };
+});
+
+/** The park's canopy, and the low skyline of Alto de Pinheiros behind it. */
+function buildParque() {
+  const rand = mulberry32(2022);
+  const trees = [];
+  for (let x = -10; x < 1210; x += 14 + rand() * 16) {
+    if (x > 720 && x < 890) continue; // the clearing the wheel stands in
+    trees.push({
+      x: Number(x.toFixed(0)),
+      y: Number((214 + rand() * 8).toFixed(0)),
+      r: Number((9 + rand() * 9).toFixed(1)),
+    });
+  }
+  // Alto de Pinheiros across the river: towers flattened into a grey band by
+  // the drizzle, with the odd taller block breaking the line.
+  const blocks = [];
+  for (let x = -10; x < 1210; x += 18 + rand() * 26) {
+    const tall = rand() < 0.22;
+    blocks.push({
+      x: Number(x.toFixed(0)),
+      w: Number((16 + rand() * 26).toFixed(0)),
+      h: Number(((tall ? 54 : 22) + rand() * 34).toFixed(0)),
+      lit: rand() < 0.5,
+    });
+  }
+  return { trees, blocks };
+}
+
+const shapes = buildSkyline();
+const parque = buildParque();
+const stars = buildStars();
+const drizzle = buildDrizzle();
+---
+
+<div class="skyline-wrap">
+  <svg
+    id="skyline"
+    viewBox="0 0 1200 250"
+    preserveAspectRatio="none"
+    xmlns="http://www.w3.org/2000/svg"
+    role="img"
+    aria-label="An illustration of the São Paulo skyline at night, drawn in the colours of the selected flavour"
+  >
+    <defs>
+      <linearGradient id="g-ceu" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" style="stop-color:var(--sp-vao)"></stop>
+        <stop offset="0.74" style="stop-color:var(--sp-vao)"></stop>
+        <stop offset="1" style="stop-color:var(--sp-laje)"></stop>
+      </linearGradient>
+      <linearGradient id="g-brilho" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" style="stop-color:var(--sp-sodio);stop-opacity:0"></stop>
+        <stop offset="1" style="stop-color:var(--sp-sodio);stop-opacity:0.20"></stop>
+      </linearGradient>
+      <linearGradient id="g-neblina" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" style="stop-color:var(--sp-fg-muted);stop-opacity:0.16"></stop>
+        <stop offset="1" style="stop-color:var(--sp-fg-muted);stop-opacity:0"></stop>
+      </linearGradient>
+      <radialGradient id="g-roda">
+        <stop offset="0" style="stop-color:var(--sp-temporal);stop-opacity:0.20"></stop>
+        <stop offset="0.55" style="stop-color:var(--sp-temporal);stop-opacity:0.07"></stop>
+        <stop offset="1" style="stop-color:var(--sp-temporal);stop-opacity:0"></stop>
+      </radialGradient>
+      <clipPath id="copan-clip">
+        <path d="M468,250 L468,102 C468,92 477,88 486,93 C499,101 511,101 524,93 C537,85 549,85 562,93 C575,101 587,101 600,93 C608,88 612,92 612,100 L612,250 Z"></path>
+      </clipPath>
+    </defs>
+
+    <rect x="0" y="0" width="1200" height="250" fill="url(#g-ceu)"></rect>
+    <rect x="0" y="140" width="1200" height="110" fill="url(#g-brilho)" class="glow"></rect>
+
+    <!-- clear night sky -->
+    <g id="estrelas">
+      {
+        stars.map((s) => (
+          <circle cx={s.cx} cy={s.cy} r={s.r} fill="var(--sp-fg)" opacity={s.o} class="star" style={s.style} />
+        ))
+      }
+    </g>
+
+    <!-- the drizzle, falling -->
+    <g id="garoa-chuva" stroke="var(--sp-fg-dim)" stroke-width="1.1" opacity="0.1" stroke-linecap="round">
+      <g class="rainfall">
+        {
+          [0, -250].map((offset) => (
+            <g transform={`translate(0 ${offset})`}>
+              {drizzle.map((d) => (
+                <line x1={d.x} y1={d.y} x2={d.x + 3} y2={d.y + d.len} />
+              ))}
+            </g>
+          ))
+        }
+      </g>
+    </g>
+
+    <!-- ============ THE CITY (noite / garoa) ============ -->
+    <g id="cena-cidade">
+      <!-- Pico do Jaraguá on the horizon: from anywhere in the city, it is there -->
+      <g id="pico-distante" class="layer-far">
+        <path d="M14,250 C70,224 112,176 158,134 C188,107 212,94 232,92 C254,94 284,114 322,146 C368,186 416,222 456,250 Z" fill="var(--sp-laje)" opacity="0.5"></path>
+        <g stroke="var(--sp-fg-muted)" stroke-width="1.5" opacity="0.75" stroke-linecap="round">
+          <line x1="232" y1="92" x2="232" y2="48"></line>
+          <line x1="228" y1="70" x2="236" y2="70"></line>
+          <line x1="229" y1="58" x2="235" y2="58"></line>
+        </g>
+        <circle cx="232" cy="48" r="2" fill="var(--sp-brasa)" class="beacon" style="animation-delay: -1.1s"></circle>
+      </g>
+
+      <!-- Serra da Cantareira closing the right edge -->
+      <path class="layer-far" d="M760,250 C820,236 880,222 950,214 C1030,205 1110,212 1200,222 L1200,250 Z" fill="var(--sp-laje)" opacity="0.4"></path>
+
+      <!-- middle band: the endless smear of buildings -->
+      <path class="layer-mid" d="M0,250 L0,184 L32,184 L32,188 L68,188 L68,165 L120,165 L120,189 L176,189 L176,181 L209,181 L209,189 L263,189 L263,168 L318,168 L318,178 L368,178 L368,166 L394,166 L394,167 L442,167 L442,167 L497,167 L497,179 L522,179 L522,186 L571,186 L571,165 L613,165 L613,183 L650,183 L650,155 L675,155 L675,168 L715,168 L715,161 L741,161 L741,171 L770,171 L770,189 L812,189 L812,163 L866,163 L866,165 L908,165 L908,148 L952,148 L952,181 L993,181 L993,183 L1040,183 L1040,172 L1073,172 L1073,191 L1102,191 L1102,150 L1147,150 L1147,188 L1200,188 L1200,155 L1200,250 Z" fill="var(--sp-laje)" opacity="0.55"></path>
+
+      <g id="buildings">
+        {
+          shapes.map((s) =>
+            s.kind === 'rect' ? (
+              <rect
+                x={s.x}
+                y={s.y}
+                width={s.w}
+                height={s.h}
+                fill={`var(${s.fill})`}
+                opacity={s.opacity}
+                class={s.flicker ? 'win win--flicker' : 'win'}
+                style={s.flicker}
+              />
+            ) : s.kind === 'line' ? (
+              <line x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} stroke="var(--sp-fg-muted)" stroke-width="1.2" />
+            ) : (
+              <circle
+                cx={s.cx}
+                cy={s.cy}
+                r="1.4"
+                fill={`var(${s.fill})`}
+                class={s.beacon ? 'beacon' : undefined}
+                style={s.delay ? `animation-delay: ${s.delay}` : undefined}
+              />
+            ),
+          )
+        }
+      </g>
+
+      <!-- Copan: the wavy slab and its brise-soleil -->
+      <g id="copan">
+        <path d="M468,250 L468,102 C468,92 477,88 486,93 C499,101 511,101 524,93 C537,85 549,85 562,93 C575,101 587,101 600,93 C608,88 612,92 612,100 L612,250 Z" fill="var(--sp-concreto)"></path>
+        <g clip-path="url(#copan-clip)" stroke="var(--sp-vao)" stroke-width="1.6" opacity="0.5">
+          {Array.from({ length: 24 }, (_, i) => <line x1="464" y1={104 + i * 6} x2="616" y2={104 + i * 6} />)}
+        </g>
+        <g clip-path="url(#copan-clip)">
+          <rect x="486" y="118" width="12" height="3.4" fill="var(--sp-sodio)" opacity="0.75" class="win win--flicker" style="animation-delay: -3s; animation-duration: 11s"></rect>
+          <rect x="548" y="142" width="14" height="3.4" fill="var(--sp-taxi)" opacity="0.6"></rect>
+          <rect x="516" y="172" width="11" height="3.4" fill="var(--sp-sodio)" opacity="0.7"></rect>
+          <rect x="578" y="160" width="12" height="3.4" fill="var(--sp-fg-muted)" opacity="0.55" class="win win--flicker" style="animation-delay: -8s; animation-duration: 9s"></rect>
+          <rect x="496" y="208" width="13" height="3.4" fill="var(--sp-sodio)" opacity="0.65"></rect>
+          <rect x="562" y="222" width="11" height="3.4" fill="var(--sp-sereno)" opacity="0.5"></rect>
+        </g>
+        <circle cx="540" cy="84" r="2.6" fill="var(--sp-brasa)" class="beacon"></circle>
+      </g>
+
+      <!-- MASP: the red beams and the body suspended over the free span -->
+      <g id="masp">
+        <rect x="899" y="176" width="9" height="74" fill="var(--sp-brasa)" opacity="0.85"></rect>
+        <rect x="1050" y="176" width="9" height="74" fill="var(--sp-brasa)" opacity="0.85"></rect>
+        <rect x="892" y="170" width="174" height="10" fill="var(--sp-brasa)"></rect>
+        <rect x="892" y="215" width="174" height="8" fill="var(--sp-brasa)" opacity="0.95"></rect>
+        <rect x="908" y="180" width="142" height="35" fill="var(--sp-vidro)"></rect>
+        <g stroke="var(--sp-vao)" stroke-width="1.2" opacity="0.55">
+          {Array.from({ length: 11 }, (_, i) => <line x1={919 + i * 13} y1="184" x2={919 + i * 13} y2="215" />)}
+        </g>
+        <rect x="924" y="190" width="9" height="14" fill="var(--sp-sodio)" opacity="0.6" class="win win--flicker" style="animation-delay: -5s; animation-duration: 12s"></rect>
+        <rect x="972" y="190" width="9" height="14" fill="var(--sp-taxi)" opacity="0.45"></rect>
+        <rect x="1018" y="190" width="9" height="14" fill="var(--sp-sereno)" opacity="0.4"></rect>
+      </g>
+
+      <!-- the road, grounding the headlight trails -->
+      <rect x="0" y="244" width="1200" height="6" fill="var(--sp-vao)" opacity="0.85"></rect>
+    </g>
+
+    <!-- ============ PARQUE VILLA-LOBOS / RODA RICO (garoa) ============ -->
+    <g id="parque-villalobos">
+      <!-- Alto de Pinheiros behind, flattened by the drizzle -->
+      <g>
+        {
+          parque.blocks.map((b) => (
+            <>
+              <rect x={b.x} y={212 - b.h} width={b.w} height={b.h} fill="var(--sp-fiacao)" opacity="0.42" />
+              {b.lit && (
+                <rect x={b.x + b.w / 2 - 1} y={216 - b.h} width="2" height="2" fill="var(--sp-sodio)" opacity="0.4" />
+              )}
+            </>
+          ))
+        }
+      </g>
+      <rect x="0" y="150" width="1200" height="70" fill="url(#g-neblina)" opacity="0.8"></rect>
+
+      <!-- the Marginal Pinheiros, running along the park -->
+      <rect x="0" y="222" width="1200" height="14" fill="var(--sp-concreto)"></rect>
+      <rect x="0" y="222" width="1200" height="1.5" fill="var(--sp-fiacao)" opacity="0.7"></rect>
+      <rect x="0" y="236" width="1200" height="14" fill="var(--sp-laje)"></rect>
+
+      <!-- the river bank and the park's canopy -->
+      <rect x="0" y="208" width="1200" height="16" fill="var(--sp-laje)" opacity="0.9"></rect>
+      <g>
+        {
+          parque.trees.map((t, i) => (
+            <ellipse
+              cx={t.x}
+              cy={t.y}
+              rx={t.r}
+              ry={t.r * 0.72}
+              fill={i % 4 === 0 ? 'var(--sp-ibira)' : 'var(--sp-vao)'}
+              opacity={i % 4 === 0 ? 0.14 : 0.7}
+            />
+          ))
+        }
+      </g>
+
+      <!-- ---- Roda Rico ---- -->
+      <g id="roda-rico">
+        <!-- lit, in the mist: the drizzle scatters the wheel into a halo -->
+        <circle cx={RODA.cx} cy={RODA.cy} r={RODA.r * 1.5} fill="url(#g-roda)" class="roda-halo"></circle>
+        <!-- the legs: a splayed frame carrying the hub -->
+        <path d="M792,100 L752,214 L762,214 L798,102 Z" fill="var(--sp-fiacao)"></path>
+        <path d="M808,100 L848,214 L838,214 L802,102 Z" fill="var(--sp-fiacao)"></path>
+        <rect x="797" y="100" width="6" height="114" fill="var(--sp-fiacao)"></rect>
+        <rect x="799" y="100" width="2" height="114" fill="var(--sp-temporal)" opacity="0.35"></rect>
+
+        <g class="roda-gira">
+          <!-- the lit spokes: a soft bloom under a bright core -->
+          <g stroke="var(--sp-temporal)" stroke-linecap="round" fill="none">
+            {
+              SPOKES.map((sp) => (
+                <line x1={sp.x1} y1={sp.y1} x2={sp.x2} y2={sp.y2} stroke-width="3.4" opacity="0.14" />
+              ))
+            }
+            {
+              SPOKES.map((sp) => (
+                <line
+                  x1={sp.x1}
+                  y1={sp.y1}
+                  x2={sp.x2}
+                  y2={sp.y2}
+                  stroke-width="1"
+                  opacity="0.75"
+                  class="raio"
+                  style={`animation-delay: ${sp.delay}`}
+                />
+              ))
+            }
+          </g>
+
+          <!-- the rim: a braced double ring, its outer edge lit -->
+          <circle cx={RODA.cx} cy={RODA.cy} r={RODA.r} fill="none" stroke="var(--sp-temporal)" stroke-width="3.4" opacity="0.16"></circle>
+          <circle cx={RODA.cx} cy={RODA.cy} r={RODA.r} fill="none" stroke="var(--sp-temporal)" stroke-width="1.3" opacity="0.7"></circle>
+          <circle cx={RODA.cx} cy={RODA.cy} r={RODA.r - 4} fill="none" stroke="var(--sp-fg-dim)" stroke-width="1" opacity="0.45"></circle>
+
+          <!-- 42 cabins, each staying level as the wheel turns -->
+          {
+            CABINS.map((c, i) => (
+              <g transform={`translate(${c.x} ${c.y})`}>
+                <g class="cabine">
+                  <rect x="-3" y="-2.6" width="6" height="5.2" rx="2.2" fill="var(--sp-concreto)" stroke="var(--sp-fg-muted)" stroke-width="0.5"></rect>
+                  <rect x="-2.2" y="-1.7" width="4.4" height="2.3" rx="1.1" fill={`var(${c.lamp})`} opacity="0.75"></rect>
+                  {i % 7 === 0 && <circle cx="0" cy="-3.4" r="0.8" fill="var(--sp-brasa)" opacity="0.9" />}
+                </g>
+              </g>
+            ))
+          }
+        </g>
+
+        <!-- the hub -->
+        <circle cx={RODA.cx} cy={RODA.cy} r="5" fill="var(--sp-concreto)" stroke="var(--sp-fg-dim)" stroke-width="1"></circle>
+        <circle cx={RODA.cx} cy={RODA.cy} r="1.6" fill="var(--sp-fg-dim)"></circle>
+
+        <!-- the lit pavilion at the base -->
+        <rect x="758" y="200" width="86" height="14" fill="var(--sp-concreto)"></rect>
+        <rect x="758" y="200" width="86" height="1.5" fill="var(--sp-fiacao)"></rect>
+        <g fill="var(--sp-taxi)" opacity="0.75">
+          <rect x="764" y="205" width="5" height="4"></rect>
+          <rect x="774" y="205" width="5" height="4"></rect>
+          <rect x="822" y="205" width="5" height="4"></rect>
+          <rect x="832" y="205" width="5" height="4"></rect>
+        </g>
+        <rect x="788" y="204" width="26" height="4" rx="1" fill="var(--sp-brasa)" opacity="0.8"></rect>
+      </g>
+    </g>
+
+    <!-- ============ THE PEAK (jaragua) ============ -->
+    <g id="pico-jaragua">
+      <g fill="var(--sp-fg)" opacity="0.06" class="clouds">
+        <ellipse cx="200" cy="56" rx="76" ry="11"></ellipse>
+        <ellipse cx="252" cy="48" rx="44" ry="8"></ellipse>
+        <ellipse cx="520" cy="38" rx="64" ry="9"></ellipse>
+        <ellipse cx="566" cy="46" rx="38" ry="7"></ellipse>
+        <ellipse cx="806" cy="30" rx="52" ry="8"></ellipse>
+      </g>
+      <g stroke="var(--sp-fg-dim)" stroke-width="1.2" fill="none" opacity="0.5" stroke-linecap="round" class="birds">
+        <path d="M508,112 q6,-6 12,0 q6,-6 12,0"></path>
+        <path d="M562,130 q5,-5 10,0"></path>
+      </g>
+
+      <!-- the city down there, behind the haze -->
+      <path d="M0,250 L0,187 L29,187 L29,204 L58,204 L58,202 L83,202 L83,197 L105,197 L105,197 L137,197 L137,187 L169,187 L169,198 L192,198 L192,182 L208,182 L208,193 L242,193 L242,195 L260,195 L260,186 L300,186 L300,189 L323,189 L323,204 L340,204 L340,195 L379,195 L379,206 L408,206 L408,201 L438,201 L438,183 L464,183 L464,199 L495,199 L495,204 L514,204 L514,202 L541,202 L541,182 L561,182 L561,205 L579,205 L579,185 L595,185 L595,196 L616,196 L616,199 L640,199 L640,192 L640,250 Z" fill="var(--sp-fiacao)" opacity="0.5"></path>
+      <g>
+        <rect x="285" y="199" width="2.5" height="2.5" fill="var(--sp-fg-muted)" opacity="0.41"></rect><rect x="500" y="195" width="2.5" height="2.5" fill="var(--sp-sodio)" opacity="0.76" class="win win--flicker" style="animation-delay:-2s;animation-duration:10s"></rect><rect x="139" y="199" width="2.5" height="2.5" fill="var(--sp-sodio)" opacity="0.75"></rect><rect x="413" y="205" width="2.5" height="2.5" fill="var(--sp-sodio)" opacity="0.63"></rect><rect x="37" y="194" width="2.5" height="2.5" fill="var(--sp-sodio)" opacity="0.51"></rect><rect x="422" y="193" width="2.5" height="2.5" fill="var(--sp-sodio)" opacity="0.46" class="win win--flicker" style="animation-delay:-6s;animation-duration:13s"></rect><rect x="479" y="192" width="2.5" height="2.5" fill="var(--sp-taxi)" opacity="0.4"></rect><rect x="29" y="194" width="2.5" height="2.5" fill="var(--sp-taxi)" opacity="0.78"></rect><rect x="193" y="193" width="2.5" height="2.5" fill="var(--sp-sereno)" opacity="0.53"></rect><rect x="227" y="205" width="2.5" height="2.5" fill="var(--sp-taxi)" opacity="0.47"></rect><rect x="225" y="200" width="2.5" height="2.5" fill="var(--sp-sereno)" opacity="0.41"></rect><rect x="448" y="193" width="2.5" height="2.5" fill="var(--sp-taxi)" opacity="0.51"></rect>
+      </g>
+      <rect x="0" y="172" width="700" height="46" fill="url(#g-neblina)"></rect>
+
+      <path d="M0,250 L0,214 C100,204 200,212 320,204 C440,196 540,204 660,198 C780,192 880,200 980,206 C1060,211 1140,216 1200,218 L1200,250 Z" fill="var(--sp-laje)" opacity="0.45"></path>
+      <path d="M0,250 L0,230 C140,222 260,228 400,222 C520,217 620,224 720,228 L720,250 Z" fill="var(--sp-laje)" opacity="0.75"></path>
+
+      <!-- The massif: Jaraguá (1,135 m) on the left, Pico do Papagaio (1,127 m) on
+           the right, split by the saddle that cuts the hill in two. Almost the same
+           height, so they read as twins; rounded because this is eroded Atlantic
+           forest, not alpine rock. -->
+      <path d="M420,250 C560,238 660,212 758,164 C812,134 886,92 948,86 C984,92 1008,120 1030,132 C1052,118 1070,100 1094,100 C1128,108 1168,168 1200,206 L1200,250 Z" fill="var(--sp-concreto)"></path>
+      <path d="M758,164 C812,134 886,92 948,86 C984,92 1008,120 1030,132 C1052,118 1070,100 1094,100 C1128,108 1168,168 1200,206" stroke="var(--sp-ibira)" stroke-opacity="0.22" stroke-width="2.5" fill="none"></path>
+      <path d="M420,250 C560,244 660,226 758,182 C812,152 886,110 948,104 C984,110 1008,138 1030,150 C1052,136 1070,120 1094,120 C1128,128 1168,180 1200,214 L1200,250 Z" fill="var(--sp-vao)" opacity="0.22"></path>
+
+      <g fill="var(--sp-ibira)">
+        <path d="M772,170 Q781,159 790,164 Q799,153 808,158 Q817,147 826,152 Q835,141 844,146 Q853,135 862,140 Q871,129 880,134 Q889,123 898,128 L898,143 L772,185 Z" opacity="0.13"></path>
+        <path d="M1096,104 Q1105,102 1113,116 Q1122,114 1130,130 Q1139,128 1147,144 Q1156,142 1164,158 Q1173,156 1181,172 L1181,188 L1096,120 Z" opacity="0.10"></path>
+        <path d="M480,244 Q489,235 498,241 Q506,232 515,238 Q524,229 532,236 Q541,226 550,233 Q559,224 568,230 Q576,221 585,228 Q594,218 602,225 Q611,215 620,222 L620,237 L480,259 Z" opacity="0.08"></path>
+      </g>
+      <g fill="var(--sp-vao)">
+        <path d="M600,238 Q609,227 618,233 Q628,222 637,228 Q646,217 656,222 Q665,212 674,217 Q683,206 692,212 Q702,201 711,206 Q720,196 730,201 Q739,191 748,196 L748,214 L600,256 Z" opacity="0.28"></path>
+        <path d="M1108,128 Q1118,126 1127,140 Q1136,138 1146,153 Q1155,151 1164,166 Q1173,164 1183,179 L1183,196 L1108,146 Z" opacity="0.24"></path>
+      </g>
+
+      <path d="M978,96 C996,110 1012,124 1028,136" stroke="var(--sp-fg-muted)" stroke-width="2" stroke-dasharray="3 3" opacity="0.55" fill="none"></path>
+      <rect x="958" y="82" width="14" height="10" fill="var(--sp-fg)" opacity="0.85"></rect>
+      <rect x="974" y="90" width="9" height="8" fill="var(--sp-fg)" opacity="0.7"></rect>
+
+      <g stroke="var(--sp-fg-dim)" stroke-width="1.4" opacity="0.8" stroke-linecap="round">
+        <line x1="874" y1="106" x2="874" y2="68"></line>
+        <line x1="870" y1="88" x2="878" y2="88"></line>
+        <line x1="871" y1="78" x2="877" y2="78"></line>
+      </g>
+      <circle cx="874" cy="68" r="1.6" fill="var(--sp-brasa)" class="beacon" style="animation-delay: -0.8s"></circle>
+      <line x1="1150" y1="150" x2="1150" y2="128" stroke="var(--sp-fg-dim)" stroke-width="1.2" opacity="0.7"></line>
+
+      <!--
+        The tower. From the photos this is the landmark: a very tall, slender
+        lattice mast banded red and white, taller than the visible hill, guyed,
+        with dishes down its length and the aviation beacon on top.
+      -->
+      <g id="pj-torre">
+        <!--
+          No guy wires: the real tower is self-supporting — a tapered lattice
+          that carries itself, which is why it widens towards the base.
+        -->
+
+        <!-- the lattice body, tapering from the base to the mast -->
+        <path d="M938,90 L945,20 L951,20 L958,90 Z" fill="none" stroke="var(--sp-fg-dim)" stroke-width="1.2"></path>
+        <g stroke="var(--sp-fg-dim)" stroke-width="0.7" opacity="0.75">
+          <line x1="939.4" y1="76" x2="956.6" y2="76"></line>
+          <line x1="940.8" y1="62" x2="955.2" y2="62"></line>
+          <line x1="942.2" y1="48" x2="953.8" y2="48"></line>
+          <line x1="943.6" y1="34" x2="952.4" y2="34"></line>
+          <line x1="938" y1="90" x2="956.6" y2="76"></line>
+          <line x1="958" y1="90" x2="939.4" y2="76"></line>
+          <line x1="939.4" y1="76" x2="955.2" y2="62"></line>
+          <line x1="956.6" y1="76" x2="940.8" y2="62"></line>
+          <line x1="940.8" y1="62" x2="953.8" y2="48"></line>
+          <line x1="955.2" y1="62" x2="942.2" y2="48"></line>
+          <line x1="942.2" y1="48" x2="952.4" y2="34"></line>
+          <line x1="953.8" y1="48" x2="943.6" y2="34"></line>
+        </g>
+
+        <!-- microwave dishes and drums -->
+        <circle cx="941" cy="58" r="2.4" fill="var(--sp-fg-muted)"></circle>
+        <circle cx="955" cy="70" r="2.4" fill="var(--sp-fg-muted)"></circle>
+        <circle cx="944" cy="40" r="1.8" fill="var(--sp-fg-muted)"></circle>
+        <rect x="936" y="84" width="24" height="5" fill="var(--sp-fg)" opacity="0.75"></rect>
+
+        <!-- the red-and-white banded mast above the lattice -->
+        <rect x="945" y="16" width="6" height="5" fill="var(--sp-brasa)"></rect>
+        <rect x="945" y="11" width="6" height="5" fill="var(--sp-fg)"></rect>
+        <rect x="945" y="6" width="6" height="5" fill="var(--sp-brasa)"></rect>
+        <rect x="946.4" y="1" width="3.2" height="5" fill="var(--sp-fg)"></rect>
+        <circle cx="948" cy="1" r="2.4" fill="var(--sp-brasa)" class="beacon"></circle>
+      </g>
+    </g>
+  </svg>
+
+  <div class="haze-overlay" aria-hidden="true"></div>
+
+  <!-- the Marginal: headlight trails, the one thing on the page that really moves -->
+  <div class="marginal" aria-hidden="true">
+    <div class="lane lane-red">
+      <span class="trail" style="animation-duration: 4.4s"></span>
+      <span class="trail" style="animation-duration: 6.1s; animation-delay: -2.2s"></span>
+      <span class="trail trail--short" style="animation-duration: 3.6s; animation-delay: -3.1s"></span>
+    </div>
+    <div class="lane lane-white">
+      <span class="trail" style="animation-duration: 5.1s"></span>
+      <span class="trail trail--short" style="animation-duration: 3.9s; animation-delay: -1.4s"></span>
+      <span class="trail" style="animation-duration: 7.2s; animation-delay: -4.6s"></span>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  .skyline-wrap {
+    position: relative;
+    line-height: 0;
+    --sp-haze: 0.18;
+  }
+
+  svg#skyline {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* The viewBox is 1200x250, so on a phone the skyline collapses to ~80px and
+     loses all its shape. It stretches instead — a taller city, not a thinner one. */
+  @media (max-width: 40rem) {
+    svg#skyline {
+      min-height: 160px;
+    }
+  }
+
+  /* Retint smoothly on flavour change — but not the hundreds of tiny windows,
+     which would turn one attribute change into a very expensive frame. */
+  #skyline path,
+  #skyline ellipse,
+  #skyline circle,
+  #skyline > rect {
+    transition: fill 0.45s ease;
+  }
+
+  /* Garoa is flat grey by definition — the sodium wash is pulled right back so
+     the drizzle reads as haze rather than as a warm glow. */
+  html[data-flavor='garoa'] .skyline-wrap {
+    --sp-haze: 0.06;
+  }
+
+  .haze-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(to top, var(--sp-sodio), transparent 55%);
+    opacity: var(--sp-haze);
+    mix-blend-mode: soft-light;
+    animation: haze-breathe 14s ease-in-out infinite;
+  }
+
+  @keyframes haze-breathe {
+    0%,
+    100% {
+      opacity: var(--sp-haze);
+    }
+    50% {
+      opacity: calc(var(--sp-haze) * 1.45);
+    }
+  }
+
+  /* the sodium wash over the rooftops, pulsing very slowly */
+  .glow {
+    animation: glow-pulse 11s ease-in-out infinite;
+    transform-origin: bottom;
+  }
+
+  @keyframes glow-pulse {
+    0%,
+    100% {
+      opacity: 0.85;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  .beacon {
+    animation: beacon 2.2s ease-in-out infinite;
+  }
+
+  @keyframes beacon {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.15;
+    }
+  }
+
+  /* someone is still up, and moves across the room */
+  .win--flicker {
+    animation-name: win-flicker;
+    animation-timing-function: steps(1, end);
+    animation-iteration-count: infinite;
+  }
+
+  /* fill-opacity multiplies the element's own opacity, so each window keeps the
+     brightness it was generated with and only dips relative to it. */
+  @keyframes win-flicker {
+    0%,
+    46% {
+      fill-opacity: 1;
+    }
+    47%,
+    53% {
+      fill-opacity: 0.08;
+    }
+    54%,
+    88% {
+      fill-opacity: 1;
+    }
+    89%,
+    94% {
+      fill-opacity: 0.08;
+    }
+    95%,
+    100% {
+      fill-opacity: 1;
+    }
+  }
+
+  .star {
+    animation-name: twinkle;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+
+  @keyframes twinkle {
+    0%,
+    100% {
+      fill-opacity: 0.45;
+    }
+    50% {
+      fill-opacity: 1;
+    }
+  }
+
+  .rainfall {
+    animation: rainfall 2.1s linear infinite;
+  }
+
+  @keyframes rainfall {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(250px);
+    }
+  }
+
+  .clouds {
+    animation: drift 44s ease-in-out infinite alternate;
+  }
+
+  @keyframes drift {
+    from {
+      transform: translateX(-18px);
+    }
+    to {
+      transform: translateX(22px);
+    }
+  }
+
+  .birds {
+    animation: birds 26s linear infinite;
+  }
+
+  @keyframes birds {
+    from {
+      transform: translate(-60px, 6px);
+      opacity: 0;
+    }
+    12% {
+      opacity: 0.5;
+    }
+    88% {
+      opacity: 0.5;
+    }
+    to {
+      transform: translate(340px, -22px);
+      opacity: 0;
+    }
+  }
+
+  /* The peak is always on the city's horizon (#pico-distante). In the jaragua
+     flavour the camera climbs the range: the peak becomes the foreground and
+     the city becomes the lights far below. The weather is flavour-bound too —
+     stars on the clear night, drizzle in the garoa. */
+  #pico-jaragua,
+  #parque-villalobos,
+  #garoa-chuva,
+  #estrelas {
+    display: none;
+  }
+
+  html[data-flavor='noite'] #estrelas {
+    display: block;
+  }
+
+  /* Garoa moves west to Parque Villa-Lobos: the Roda Rico turning in the
+     drizzle, with the Marginal Pinheiros running past its feet. */
+  html[data-flavor='garoa'] #garoa-chuva,
+  html[data-flavor='garoa'] #parque-villalobos {
+    display: block;
+  }
+
+  html[data-flavor='garoa'] #cena-cidade {
+    display: none;
+  }
+
+  html[data-flavor='jaragua'] #pico-jaragua {
+    display: block;
+  }
+
+  html[data-flavor='jaragua'] #cena-cidade,
+  html[data-flavor='jaragua'] .marginal {
+    display: none;
+  }
+
+  /*
+    The wheel turns continuously — it never stops boarding. The real thing
+    takes about 25 minutes for a full revolution; 100s here is the same idea
+    at a speed you can perceive without it becoming a distraction.
+  */
+  .roda-gira {
+    transform-box: view-box;
+    transform-origin: 800px 98px;
+    animation: roda 100s linear infinite;
+  }
+
+  @keyframes roda {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* A slow chase runs the spokes, the way the real light show breathes. */
+  .raio {
+    animation: raio 9s ease-in-out infinite;
+  }
+
+  @keyframes raio {
+    0%,
+    100% {
+      opacity: 0.75;
+    }
+    50% {
+      opacity: 0.3;
+    }
+  }
+
+  .roda-halo {
+    animation: roda-halo 9s ease-in-out infinite;
+    transform-box: view-box;
+    transform-origin: 800px 98px;
+  }
+
+  @keyframes roda-halo {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.72;
+    }
+  }
+
+  /* Each cabin hangs level, so it counter-turns at exactly the wheel's rate. */
+  .cabine {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: cabine 100s linear infinite;
+  }
+
+  @keyframes cabine {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(-360deg);
+    }
+  }
+
+  .marginal {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 14px;
+    height: 14px;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .lane {
+    position: relative;
+    height: 4px;
+    margin-bottom: 3px;
+  }
+
+  .trail {
+    position: absolute;
+    top: 0;
+    height: 3px;
+    width: 64px;
+    border-radius: 2px;
+    filter: blur(1.5px);
+    opacity: 0.75;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+
+  .trail--short {
+    width: 34px;
+    opacity: 0.5;
+  }
+
+  .lane-red .trail {
+    background: linear-gradient(to right, transparent, var(--sp-brasa));
+    animation-name: driveL;
+  }
+
+  .lane-white .trail {
+    background: linear-gradient(to left, transparent, var(--sp-sodio));
+    animation-name: driveR;
+  }
+
+  @keyframes driveL {
+    from {
+      left: 100%;
+    }
+    to {
+      left: -70px;
+    }
+  }
+
+  @keyframes driveR {
+    from {
+      left: -70px;
+    }
+    to {
+      left: 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .beacon,
+    .win--flicker,
+    .star,
+    .rainfall,
+    .clouds,
+    .birds,
+    .glow,
+    .haze-overlay,
+    .roda-gira,
+    .cabine,
+    .raio,
+    .roda-halo {
+      animation: none;
+    }
+    .beacon {
+      opacity: 0.7;
+    }
+    .trail {
+      animation: none !important;
+      opacity: 0.3;
+    }
+  }
+</style>

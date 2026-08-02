@@ -1,0 +1,105 @@
+---
+/**
+ * A synthetic terminal, coloured entirely through the semantic role layer.
+ * Stands in for a real screenshot: it is always in sync with the palette and
+ * retints with the flavour switcher.
+ */
+import { roleVar } from '../data/palette';
+
+interface Props {
+  /** Label shown in the title bar. */
+  title?: string;
+  compact?: boolean;
+}
+const { title = 'kitty — sp_night', compact = false } = Astro.props;
+
+const s = (group: string, role: string) => `color: ${roleVar(group, role)}`;
+---
+
+<div class={`term${compact ? ' term--compact' : ''}`} role="img" aria-label={`A terminal window themed with SP Night, titled ${title}`}>
+  <div class="term__bar">
+    <span class="term__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="term__title mono">{title}</span>
+  </div>
+
+  <pre class="term__body mono"><span style={s('ui', 'accent')}>~/sp-night</span> <span style={s('git', 'modified')}>(main)</span> <span style={s('ui', 'accent_alt')}>❯</span> cat theme.lua
+<span style={s('syntax', 'comment')}>-- the sodium lamp that turns the whole city this colour</span>
+<span style={s('syntax', 'keyword')}>local</span> <span style={s('syntax', 'variable')}>palette</span> <span style={s('syntax', 'operator')}>=</span> <span style={s('syntax', 'keyword')}>require</span>(<span style={s('syntax', 'string')}>"sp_night.palette"</span>)
+
+<span style={s('syntax', 'keyword')}>function</span> <span style={s('syntax', 'function')}>M</span>.<span style={s('syntax', 'method')}>setup</span>(<span style={s('syntax', 'parameter')}>opts</span>)
+  <span style={s('syntax', 'variable')}>opts</span>.<span style={s('syntax', 'property')}>flavor</span> <span style={s('syntax', 'operator')}>=</span> <span style={s('syntax', 'variable')}>opts</span>.<span style={s('syntax', 'property')}>flavor</span> <span style={s('syntax', 'keyword')}>or</span> <span style={s('syntax', 'string')}>"noite"</span>
+  <span style={s('syntax', 'keyword')}>if</span> <span style={s('syntax', 'builtin')}>vim</span>.<span style={s('syntax', 'property')}>o</span>.<span style={s('syntax', 'property')}>background</span> <span style={s('syntax', 'operator')}>~=</span> <span style={s('syntax', 'string')}>"dark"</span> <span style={s('syntax', 'keyword')}>then</span>
+    <span style={s('syntax', 'keyword')}>return</span> <span style={s('syntax', 'constant')}>nil</span>, <span style={s('syntax', 'string')}>"dark only, by decision"</span>
+  <span style={s('syntax', 'keyword')}>end</span>
+  <span style={s('syntax', 'keyword')}>return</span> <span style={s('syntax', 'type')}>Theme</span>:<span style={s('syntax', 'constructor')}>new</span>(<span style={s('syntax', 'variable')}>palette</span>[<span style={s('syntax', 'variable')}>opts</span>.<span style={s('syntax', 'property')}>flavor</span>], <span style={s('syntax', 'number')}>22</span>)
+<span style={s('syntax', 'keyword')}>end</span>
+
+<span style={s('ui', 'accent')}>~/sp-night</span> <span style={s('ui', 'accent_alt')}>❯</span> gen check
+<span style={s('diagnostic', 'ok')}>✓</span> 3 flavors · 22 colours · 5 role groups
+<span style={s('diagnostic', 'ok')}>✓</span> contrast   <span style={s('ui', 'fg_dim')}>70 pairs per flavor, AA on every surface</span>
+<span style={s('diagnostic', 'warn')}>!</span> fg_muted   <span style={s('ui', 'fg_dim')}>3.02:1 on vidro (warn-only by policy)</span>
+<span style={s('diagnostic', 'ok')}>✓</span> accents    <span style={s('ui', 'fg_dim')}>separation ΔE ≥ 0.10 or ΔL ≥ 0.04</span></pre>
+</div>
+
+<style>
+  .term {
+    background: var(--sp-vao);
+    border: var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 22px 60px -28px color-mix(in oklab, var(--sp-vao) 90%, transparent);
+  }
+
+  .term__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.5rem 0.8rem;
+    background: var(--sp-concreto);
+    border-bottom: var(--border);
+  }
+
+  .term__dots {
+    display: inline-flex;
+    gap: 5px;
+  }
+
+  .term__dots i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--sp-fiacao);
+  }
+
+  .term__dots i:first-child {
+    background: var(--sp-brasa);
+  }
+
+  .term__dots i:nth-child(2) {
+    background: var(--sp-taxi);
+  }
+
+  .term__dots i:last-child {
+    background: var(--sp-ibira);
+  }
+
+  .term__title {
+    font-size: var(--step--1);
+    color: var(--sp-fg-muted);
+  }
+
+  .term__body {
+    margin: 0;
+    padding: 1rem 1.1rem 1.2rem;
+    font-size: clamp(0.7rem, 0.62rem + 0.32vw, 0.85rem);
+    line-height: 1.7;
+    color: var(--sp-fg);
+    overflow-x: auto;
+    tab-size: 2;
+  }
+
+  .term--compact .term__body {
+    font-size: 0.72rem;
+    line-height: 1.6;
+  }
+</style>

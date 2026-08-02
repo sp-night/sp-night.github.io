@@ -1,0 +1,62 @@
+---
+import { flavors, defaultFlavor } from '../data/palette';
+---
+
+<div class="flavors" role="radiogroup" aria-label="Colour flavour">
+  {
+    flavors.map((f) => (
+      <button
+        type="button"
+        role="radio"
+        data-flavor-btn={f.id}
+        aria-checked={f.id === defaultFlavor}
+        aria-label={f.label}
+        title={f.description}
+      >
+        <span class="swatch" style={`background: ${f.colors.sodio?.hex}`} aria-hidden="true" />
+        <span class="flavor-name">{f.label}</span>
+        {/* Narrow screens swap the full name for the short id — three identical
+            orange dots would be indistinguishable, since sodio is shared. */}
+        <span class="flavor-id">{f.id}</span>
+      </button>
+    ))
+  }
+</div>
+
+<script>
+  const KEY = 'sp-night-flavor';
+  const buttons = Array.from(
+    document.querySelectorAll<HTMLButtonElement>('[data-flavor-btn]'),
+  );
+  const ids = buttons.map((b) => b.dataset.flavorBtn!);
+
+  const favicon = document.getElementById('favicon') as HTMLLinkElement | null;
+
+  function apply(id: string, persist = true) {
+    if (!ids.includes(id)) return;
+    document.documentElement.dataset.flavor = id;
+    if (favicon) favicon.href = `/favicon-${id}.svg`;
+    if (persist) localStorage.setItem(KEY, id);
+    for (const b of buttons) {
+      const on = b.dataset.flavorBtn === id;
+      b.setAttribute('aria-checked', String(on));
+      b.tabIndex = on ? 0 : -1;
+    }
+    document.dispatchEvent(new CustomEvent('sp:flavor', { detail: id }));
+  }
+
+  // Sync the buttons with whatever the head script already set on <html>.
+  apply(document.documentElement.dataset.flavor || ids[0]!, false);
+
+  buttons.forEach((btn, i) => {
+    btn.addEventListener('click', () => apply(btn.dataset.flavorBtn!));
+    btn.addEventListener('keydown', (e) => {
+      const delta = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (!delta) return;
+      e.preventDefault();
+      const next = buttons[(i + delta + buttons.length) % buttons.length]!;
+      apply(next.dataset.flavorBtn!);
+      next.focus();
+    });
+  });
+</script>
