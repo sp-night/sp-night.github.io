@@ -27,8 +27,8 @@ const nav = [
 const current = (href: string) => (path === href || path.startsWith(href + '/') ? 'page' : undefined);
 const seed = flavor(defaultFlavor);
 
-// Social cards need an absolute URL. `site` is unset while this is a local
-// build, so fall back to the dev origin; setting `site` later makes it real.
+// Social cards need an absolute URL; `site` is set in astro.config.mjs, with a
+// dev-origin fallback for local servers where it may be absent.
 const ogImage = new URL(`/og-${defaultFlavor}.png`, Astro.site ?? 'http://localhost:4321').href;
 ---
 
@@ -83,8 +83,8 @@ const ogImage = new URL(`/og-${defaultFlavor}.png`, Astro.site ?? 'http://localh
         </a>
         <nav class="nav" aria-label="Main">
           {nav.map((i) => <a href={i.href} aria-current={current(i.href)}>{i.label}</a>)}
-          <FlavorSwitcher />
         </nav>
+        <FlavorSwitcher />
       </div>
     </header>
 

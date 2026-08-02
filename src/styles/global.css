@@ -123,6 +123,17 @@ hr {
   padding-block: clamp(3rem, 2rem + 5vw, 6rem);
 }
 
+/* Anchor targets stop below the sticky header instead of under it. */
+[id] {
+  scroll-margin-top: 5rem;
+}
+
+@media (max-width: 34rem) {
+  [id] {
+    scroll-margin-top: 7rem;
+  }
+}
+
 .eyebrow {
   font-family: var(--font-mono);
   font-size: var(--step--1);
@@ -258,19 +269,42 @@ hr {
   transition: box-shadow 0.25s ease, background-color 0.45s ease;
 }
 
-@media (max-width: 34rem) {
+/* Below ~44rem one header row cannot hold brand + nav + switcher, so the
+   switcher moves to a second row: two rows of chrome instead of three. The
+   pill is capped so it reads as a control, not a banner. */
+@media (max-width: 44rem) {
   .site-header__inner {
-    gap: 0.75rem;
+    gap: 1rem;
+    row-gap: 0.4rem;
     flex-wrap: wrap;
+    padding-block: 0.7rem;
   }
 
   .nav {
-    gap: 0.9rem;
-    width: 100%;
-    margin-left: 0;
-    justify-content: space-between;
+    gap: 1rem;
   }
 
+  /* Comfortable touch targets: the padding, not the type, grows. */
+  .nav a {
+    padding-block: 0.5rem;
+  }
+
+  .site-header .flavors {
+    display: flex;
+    flex-basis: 100%;
+    max-width: 26rem;
+  }
+
+  .site-header .flavors button {
+    flex: 1;
+    justify-content: center;
+    padding-block: 0.5rem;
+  }
+}
+
+/* Narrow phones: the full names no longer fit three abreast — swap each for
+   its short id. (Three identical dots would not do: sodio is shared.) */
+@media (max-width: 34rem) {
   .flavors button .flavor-name {
     display: none;
   }
@@ -280,7 +314,7 @@ hr {
   }
 
   .flavors button {
-    padding: 0.35rem 0.6rem;
+    padding: 0.5rem 0.6rem;
   }
 
   .flavors .swatch {
