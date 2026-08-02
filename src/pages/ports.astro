@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import { ports, portsByGroup } from '../data/ports';
 
+const shipped = ports.filter((p) => p.repo).length;
 const description = `SP Night for kitty, Alacritty, Ghostty, Neovim, tmux, fish, Starship, bat, eza, Waybar, Hyprland, GTK, KDE Plasma and more — ${ports.length} targets generated from a single source.`;
 ---
 
@@ -14,26 +15,44 @@ const description = `SP Night for kitty, Alacritty, Ghostty, Neovim, tmux, fish,
     and the rest will follow the same way, each with real install instructions as it lands.
   </p>
 
+  <p class="tally mono" role="presentation">
+    <span class="tally__item"><span class="tally__dot tally__dot--live" aria-hidden="true"></span>{shipped} shipped</span>
+    <span class="tally__item"><span class="tally__dot" aria-hidden="true"></span>{ports.length - shipped} planned</span>
+  </p>
+
   {
     portsByGroup.map(({ label, items }) => (
-      <section>
-        <h2 class="mono">{label}</h2>
+      <section class="group">
+        <h2 class="group__label mono">
+          {label}
+          <span class="group__count">{items.length}</span>
+        </h2>
         <ul role="list" class="ports">
-          {items.map((p) => (
-            <li>
-              <span class="ports__head">
-                <a href={p.homepage}>{p.name}</a>
-                {
-                  p.repo ? (
-                    <a class="pill pill--live" href={p.repo}>
-                      get the port ↗
-                    </a>
-                  ) : (
-                    <span class="pill">planned</span>
-                  )
-                }
-              </span>
-              <p>{p.blurb}</p>
+          {items.map((p, i) => (
+            <li class:list={['port', 'reveal', { 'port--live': p.repo }]} style={`--d: ${i * 60}ms`}>
+              <div class="port__head">
+                <a class="port__name" href={p.homepage}>{p.name}</a>
+                {p.repo ? (
+                  <a class="port__status port__status--live" href={p.repo}>
+                    <span class="port__lamp" aria-hidden="true" /> shipped ↗
+                  </a>
+                ) : (
+                  <span class="port__status">planned</span>
+                )}
+              </div>
+              <p class="port__blurb">{p.blurb}</p>
+              <dl class="port__meta mono">
+                <div>
+                  <dt>file</dt>
+                  <dd>{p.install}</dd>
+                </div>
+                {p.activate && (
+                  <div>
+                    <dt>use</dt>
+                    <dd>{p.activate}</dd>
+                  </div>
+                )}
+              </dl>
             </li>
           ))}
         </ul>
@@ -41,7 +60,7 @@ const description = `SP Night for kitty, Alacritty, Ghostty, Neovim, tmux, fish,
     ))
   }
 
-  <section>
+  <section class="cta">
     <h2>Want one of these sooner?</h2>
     <p>
       Or something that is not on the list — VS Code, Zed, Emacs, Obsidian? A port is one template
@@ -52,55 +71,193 @@ const description = `SP Night for kitty, Alacritty, Ghostty, Neovim, tmux, fish,
 </Base>
 
 <style>
-  section {
-    margin-block: 3.25rem;
-    max-width: var(--measure);
+  /* ------------------------------------------------------------ shipped tally */
+
+  .tally {
+    display: flex;
+    gap: 1.4rem;
+    margin: 1.5rem 0 0;
+    font-size: var(--step--1);
+    color: var(--sp-fg-dim);
   }
 
-  section h2 {
-    font-size: var(--step-1);
+  .tally__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
   }
 
-  section h2.mono {
+  .tally__dot {
+    width: 0.5em;
+    height: 0.5em;
+    border-radius: 50%;
+    background: var(--sp-fiacao);
+  }
+
+  .tally__dot--live {
+    background: var(--sp-sodio);
+    box-shadow: 0 0 8px color-mix(in oklab, var(--sp-sodio) 60%, transparent);
+  }
+
+  /* ------------------------------------------------------------------ groups */
+
+  .group {
+    margin-block: 3rem;
+  }
+
+  .group__label {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
     font-size: 0.78rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--sp-fg-muted);
+    border-bottom: var(--border);
+    padding-bottom: 0.55rem;
   }
+
+  .group__count {
+    color: var(--sp-sodio);
+    font-weight: 400;
+  }
+
+  /* ------------------------------------------------------------------- cards */
 
   .ports {
     list-style: none;
     padding: 0;
-    margin: 1rem 0 0;
+    margin: 1.1rem 0 0;
     display: grid;
-    gap: 1.1rem;
+    gap: 0.9rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
   }
 
-  .ports__head {
-    display: inline-flex;
+  .port {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    padding: 1.05rem 1.15rem;
+    background: var(--sp-laje);
+    border: var(--border);
+    border-radius: var(--radius);
+    transition: border-color 0.25s ease, transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1),
+      box-shadow 0.25s ease, background-color 0.45s ease;
+  }
+
+  .port:hover {
+    border-color: color-mix(in oklab, var(--sp-sodio) 45%, var(--sp-fiacao));
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px -18px color-mix(in oklab, var(--sp-sodio) 55%, transparent);
+  }
+
+  /* the shipped port carries the lamp: warm border even at rest */
+  .port--live {
+    border-color: color-mix(in oklab, var(--sp-sodio) 40%, var(--sp-fiacao));
+    background: linear-gradient(
+        160deg,
+        color-mix(in oklab, var(--sp-sodio) 6%, transparent),
+        transparent 45%
+      ),
+      var(--sp-laje);
+  }
+
+  .port__head {
+    display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 0.6rem;
   }
 
-  .ports__head a {
-    font-weight: 600;
+  .port__name {
+    font-weight: 620;
+    font-size: var(--step-0);
+    color: var(--sp-fg);
+    text-decoration: none;
   }
 
-  .pill--live {
-    font-weight: 400;
+  .port__name:hover {
+    color: var(--sp-marginal-vivo);
+  }
+
+  .port__status {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--sp-fg-muted);
+    background: var(--sp-concreto);
+    border: var(--border);
+    border-radius: 999px;
+    padding: 0.14rem 0.6rem;
+    white-space: nowrap;
+  }
+
+  .port__status--live {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
     color: var(--sp-sodio);
     border-color: color-mix(in oklab, var(--sp-sodio) 45%, var(--sp-fiacao));
     text-decoration: none;
   }
 
-  .pill--live:hover {
+  .port__status--live:hover {
     color: var(--sp-taxi);
+    border-color: var(--sp-sodio);
   }
 
-  .ports li p {
-    margin: 0.25rem 0 0;
+  .port__lamp {
+    width: 0.45em;
+    height: 0.45em;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 7px currentColor;
+  }
+
+  .port__blurb {
+    margin: 0;
     font-size: var(--step--1);
     color: var(--sp-fg-dim);
+  }
+
+  /* -------------------------------------------------------------- card meta */
+
+  .port__meta {
+    margin: auto 0 0;
+    padding-top: 0.65rem;
+    border-top: 1px solid color-mix(in oklab, var(--sp-fiacao) 60%, transparent);
+    display: grid;
+    gap: 0.3rem;
+    font-size: 0.72rem;
+  }
+
+  .port__meta div {
+    display: flex;
+    gap: 0.6rem;
+    align-items: baseline;
+  }
+
+  .port__meta dt {
+    flex: 0 0 2.1rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sp-fg-muted);
+  }
+
+  .port__meta dd {
+    margin: 0;
+    color: var(--sp-fg-dim);
+    overflow-wrap: anywhere;
+  }
+
+  /* --------------------------------------------------------------------- cta */
+
+  .cta {
+    margin-block: 3.5rem;
     max-width: var(--measure);
+  }
+
+  .cta h2 {
+    font-size: var(--step-1);
   }
 </style>
