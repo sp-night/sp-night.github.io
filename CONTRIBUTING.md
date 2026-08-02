@@ -27,6 +27,11 @@ The [17 planned targets](https://sp-night.github.io/ports) show what is covered;
 if your app needs a role the layer does not have yet, that is a real finding —
 open an issue.
 
+The list itself lives in [`resources/ports.yml`](resources/ports.yml) — the
+registry the /ports page is generated from. A new target is one entry there;
+when a port ships as its own `sp-night/<slug>` repo, adding its `repo:` line
+flips the card to "shipped".
+
 ## Reporting a colour problem
 
 A contrast bug is the most valuable issue you can file and the easiest to act
