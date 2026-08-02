@@ -9,9 +9,9 @@ const description = `SP Night for kitty, Alacritty, Ghostty, Neovim, tmux, fish,
   <p class="eyebrow">ports</p>
   <h1>One palette, {ports.length} targets</h1>
   <p class="lede">
-    Every port is generated from the same source, so no target ever drifts from the spec. None are
-    published yet: each will get its own page here — install instructions, a screenshot of the real
-    app — as it ships.
+    Every port is generated from the same source, so no target ever drifts from the spec. The first
+    one is out — <a href="https://github.com/sp-night/ghostty">Ghostty</a> ships as its own repo —
+    and the rest will follow the same way, each with real install instructions as it lands.
   </p>
 
   {
@@ -23,7 +23,15 @@ const description = `SP Night for kitty, Alacritty, Ghostty, Neovim, tmux, fish,
             <li>
               <span class="ports__head">
                 <a href={p.homepage}>{p.name}</a>
-                <span class="pill">planned</span>
+                {
+                  p.repo ? (
+                    <a class="pill pill--live" href={p.repo}>
+                      get the port ↗
+                    </a>
+                  ) : (
+                    <span class="pill">planned</span>
+                  )
+                }
               </span>
               <p>{p.blurb}</p>
             </li>
@@ -76,6 +84,17 @@ const description = `SP Night for kitty, Alacritty, Ghostty, Neovim, tmux, fish,
 
   .ports__head a {
     font-weight: 600;
+  }
+
+  .pill--live {
+    font-weight: 400;
+    color: var(--sp-sodio);
+    border-color: color-mix(in oklab, var(--sp-sodio) 45%, var(--sp-fiacao));
+    text-decoration: none;
+  }
+
+  .pill--live:hover {
+    color: var(--sp-taxi);
   }
 
   .ports li p {
