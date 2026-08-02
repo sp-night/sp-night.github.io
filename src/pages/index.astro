@@ -1,0 +1,360 @@
+---
+import Base from '../layouts/Base.astro';
+import Skyline from '../components/Skyline.astro';
+import HeroClock from '../components/HeroClock.astro';
+import TerminalMock from '../components/TerminalMock.astro';
+import FlavorSwitcher from '../components/FlavorSwitcher.astro';
+import { flavors, GROUPS } from '../data/palette';
+
+const facts = [
+  { n: '3', label: 'flavours', sub: 'all dark, by decision' },
+  { n: '22', label: 'colours each', sub: 'named after the city' },
+  { n: '70', label: 'contrast pairs', sub: 'audited per flavour' },
+  { n: '0', label: 'hand-written hex', sub: 'the palette is the only source' },
+];
+---
+
+<Base bare>
+  <section class="hero">
+    <div class="hero__glow" aria-hidden="true"></div>
+
+    <div class="wrap hero__inner">
+      <p class="eyebrow rise" style="--d: 0ms">a dark theme with São Paulo as its reference</p>
+      <h1 class="hero__title">
+        <span class="rise" style="--d: 90ms">The sodium lamp</span>
+        <span class="rise hero__accent lamp" style="--d: 180ms">turns the whole city</span>
+        <span class="rise" style="--d: 270ms">this colour.</span>
+      </h1>
+      <p class="lede hero__lede rise" style="--d: 380ms">
+        Exposed concrete, the free span of the MASP, the drizzle before the rain. Three dark
+        flavours built on one rule: every colour pairing is measured before it ships, never
+        eyeballed.
+      </p>
+
+      <div class="hero__actions rise" style="--d: 470ms">
+        <a class="btn btn--primary" href="/palette">See the palette</a>
+        <a class="btn" href="/spec">Read the spec</a>
+        <HeroClock />
+      </div>
+    </div>
+
+    <div class="hero__skyline"><Skyline /></div>
+  </section>
+
+  <section class="wrap section">
+    <ul class="facts" role="list">
+      {
+        facts.map((f, i) => (
+          <li class="fact reveal" style={`--d: ${i * 80}ms`}>
+            <span class="fact__n mono">{f.n}</span>
+            <span class="fact__label">{f.label}</span>
+            <span class="fact__sub muted">{f.sub}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="wrap section split reveal">
+    <div>
+      <p class="eyebrow">one palette, three cities</p>
+      <h2>Same city, three ways of looking at it</h2>
+      <p>
+        The flavours differ in hue and chroma, never in brightness — so nothing gets easier or
+        harder to read when you switch. Try it: the control below retints this entire page.
+      </p>
+      <div class="split__switch"><FlavorSwitcher /></div>
+      <dl class="flavor-list">
+        {
+          flavors.map((f) => (
+            <div>
+              <dt class="mono">{f.label}</dt>
+              <dd>{f.description}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+    <TerminalMock />
+  </section>
+
+  <section class="wrap section reveal">
+    <p class="eyebrow">the palette</p>
+    <h2>Twenty-two colours, named after the city</h2>
+    <p class="lede">
+      Five surfaces, three levels of text, eight accents and their bright pairs — each one carrying
+      the name of the thing in São Paulo it came from.
+    </p>
+
+    <div class="strip">
+      {
+        (['surfaces', 'text', 'accents', 'vivo'] as const).map((g) => (
+          <div class="strip__group">
+            <span class="strip__label mono muted">{GROUPS[g].label}</span>
+            <div class="strip__row">
+              {GROUPS[g].keys.map((k) => (
+                <span
+                  class="strip__chip"
+                  style={`background: var(--sp-${k.replace(/_/g, '-')})`}
+                  title={k}
+                />
+              ))}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    <p><a href="/palette">Every colour, with its meaning and contrast →</a></p>
+  </section>
+
+  <section class="wrap section reveal">
+    <p class="eyebrow">status</p>
+    <h2>The palette is settled. The ports are not published yet.</h2>
+    <p class="lede">
+      SP Night started as a personal lab and is being rebuilt as a proper theme organisation. The
+      colours on this site are final — what comes next is packaging the generator and publishing one
+      port at a time, each one with real install instructions rather than a promise.
+    </p>
+    <p>
+      <a href="/contribute">How this gets built, and how to help →</a>
+    </p>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding-top: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  /* the sodium wash: a lamp somewhere off-frame, warming the top of the page */
+  .hero__glow {
+    position: absolute;
+    z-index: -1;
+    top: -34vh;
+    left: 50%;
+    width: min(160vw, 1500px);
+    aspect-ratio: 1;
+    transform: translateX(-50%);
+    pointer-events: none;
+    background:
+      radial-gradient(
+        circle at 50% 50%,
+        color-mix(in oklab, var(--sp-sodio) 26%, transparent) 0%,
+        color-mix(in oklab, var(--sp-sodio) 9%, transparent) 34%,
+        transparent 62%
+      );
+    animation: lamp-wash 13s ease-in-out infinite;
+  }
+
+  @keyframes lamp-wash {
+    0%,
+    100% {
+      opacity: 0.75;
+      transform: translateX(-50%) scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: translateX(-50%) scale(1.06);
+    }
+  }
+
+  .hero__inner {
+    padding-bottom: clamp(2rem, 1rem + 4vw, 4rem);
+  }
+
+  .hero__title {
+    /* Wide enough that each line of the headline stays on its own line —
+       "turns the whole city" is 20 characters. */
+    max-width: 23ch;
+    text-wrap: balance;
+  }
+
+  .hero__title span {
+    display: block;
+  }
+
+  .hero__accent {
+    color: var(--sp-sodio);
+  }
+
+  /* a sodium lamp does not switch on cleanly — it stutters, then holds. */
+  .lamp {
+    animation: lamp-strike 2.4s 0.35s steps(1, end) 1 both;
+  }
+
+  @keyframes lamp-strike {
+    0%,
+    14% {
+      color: var(--sp-fg-muted);
+      text-shadow: none;
+    }
+    15%,
+    19% {
+      color: var(--sp-sodio);
+      text-shadow: 0 0 26px color-mix(in oklab, var(--sp-sodio) 55%, transparent);
+    }
+    20%,
+    27% {
+      color: var(--sp-fg-muted);
+      text-shadow: none;
+    }
+    28%,
+    31% {
+      color: var(--sp-sodio);
+      text-shadow: 0 0 26px color-mix(in oklab, var(--sp-sodio) 55%, transparent);
+    }
+    32%,
+    36% {
+      color: var(--sp-fg-muted);
+      text-shadow: none;
+    }
+    37%,
+    100% {
+      color: var(--sp-sodio);
+      text-shadow: 0 0 34px color-mix(in oklab, var(--sp-sodio) 40%, transparent);
+    }
+  }
+
+  .hero__lede {
+    margin-top: 1.25rem;
+  }
+
+  .hero__actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+  }
+
+  /* the skyline drifts a little slower than the page scrolls */
+  .hero__skyline {
+    will-change: transform;
+    transform: translate3d(0, calc(var(--sp-scroll, 0) * 0.06px), 0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__glow,
+    .lamp {
+      animation: none;
+    }
+    .lamp {
+      color: var(--sp-sodio);
+    }
+    .hero__skyline {
+      transform: none;
+    }
+  }
+
+  .facts {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .fact {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding: 1rem 1.1rem;
+    background: var(--sp-laje);
+    border: var(--border);
+    border-radius: var(--radius);
+  }
+
+  .fact__n {
+    font-size: var(--step-2);
+    color: var(--sp-sodio);
+    line-height: 1;
+  }
+
+  .fact__label {
+    font-weight: 600;
+  }
+
+  .fact__sub {
+    font-size: var(--step--1);
+  }
+
+  .split {
+    display: grid;
+    gap: clamp(1.5rem, 1rem + 3vw, 3.5rem);
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  @media (min-width: 62rem) {
+    .split {
+      grid-template-columns: 1fr 1.1fr;
+    }
+  }
+
+  .split__switch {
+    margin-bottom: 1.5rem;
+  }
+
+  .flavor-list {
+    margin: 0;
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .flavor-list dt {
+    color: var(--sp-sodio);
+    font-size: var(--step--1);
+  }
+
+  .flavor-list dd {
+    margin: 0.15rem 0 0;
+    color: var(--sp-fg-dim);
+    font-size: var(--step--1);
+  }
+
+  .strip {
+    display: grid;
+    gap: 0.9rem;
+    margin-block: 1.75rem;
+  }
+
+  .strip__label {
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .strip__row {
+    display: flex;
+    gap: 4px;
+    margin-top: 0.35rem;
+    flex-wrap: wrap;
+  }
+
+  .strip__chip {
+    height: 2.4rem;
+    flex: 1 1 3rem;
+    border-radius: 6px;
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--sp-vao) 40%, transparent);
+    transition: background-color 0.45s ease, transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1),
+      box-shadow 0.25s ease;
+  }
+
+  .strip__row:hover .strip__chip {
+    opacity: 0.55;
+  }
+
+  .strip__chip:hover {
+    opacity: 1;
+    transform: translateY(-4px) scaleY(1.12);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in oklab, var(--sp-vao) 40%, transparent),
+      0 8px 22px -8px currentColor;
+  }
+
+</style>

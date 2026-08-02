@@ -1,0 +1,295 @@
+---
+import Base from '../layouts/Base.astro';
+import { ports, GROUP_LABELS, type PortGroup } from '../data/ports';
+import { flavors, keyVar } from '../data/palette';
+
+const groups = Object.keys(GROUP_LABELS) as PortGroup[];
+
+const steps = [
+  {
+    n: '1',
+    title: 'Know what a port is',
+    body: `A port is one template file. Not a copy of the colours — a template with holes in it, which the generator fills once per flavour. Writing a port means describing the shape of your app's config, not picking colours: those decisions are already made in the spec.`,
+  },
+  {
+    n: '2',
+    title: 'Find the roles you need',
+    body: `Open the spec and look for what your app is asking for. A terminal wants the sixteen ansi roles. An editor wants the syntax group. A status bar mostly wants ui. If your app needs something the role layer does not have yet, that is a conversation worth having — a missing role is a real finding.`,
+  },
+  {
+    n: '3',
+    title: 'Write the template',
+    body: `Take your own config file, replace each colour with the role that means it, and save it as a template. The generator writes one finished file per flavour from that single source.`,
+  },
+  {
+    n: '4',
+    title: 'Never reach into the palette',
+    body: `This is the one rule that matters. Ask for a role, not a colour. A template that hardcodes sodio breaks the moment a flavour is added or a colour is retuned — and the whole point of this project is that nothing drifts.`,
+  },
+  {
+    n: '5',
+    title: 'Run the checks',
+    body: `The generator audits contrast for every pair, checks that no two accents have collapsed into each other, and reruns the whole build to confirm no file is stale. If your port emits colour pairs of its own, they get audited too.`,
+  },
+  {
+    n: '6',
+    title: 'Submit it',
+    body: `A port lands with a README, a screenshot of the real app, install instructions and a code sample worth looking at. That is the bar — a screenshot is what convinces someone to install a theme.`,
+  },
+];
+---
+
+<Base
+  title="Contribute"
+  description="How SP Night is built and how to add a port: what a template is, which rules it has to follow, and what a submission needs."
+>
+  <p class="eyebrow">contribute</p>
+  <h1>How to help build this</h1>
+  <p class="lede">
+    SP Night is moving out of a personal lab and into a real organisation. Some of what follows
+    already works locally; some of it is being packaged right now. This page is honest about which
+    is which.
+  </p>
+
+  <aside class="status">
+    <strong class="mono">where things stand</strong>
+    <p>
+      The palette and the generator exist and work — three flavours, {ports.length} targets, a
+      contrast audit that fails the build. What does not exist yet is the public repository: the
+      palette is being extracted into its own package and the generator into an installable CLI.
+      Until those are published, there is no <code>git clone</code> to give you that would actually
+      run.
+    </p>
+    <p class="muted">
+      If you want to be the first port author, the useful thing to do today is tell me which app you
+      want and what its config looks like.
+    </p>
+  </aside>
+
+  <section aria-labelledby="how">
+    <h2 id="how">Adding a port, step by step</h2>
+    <ol class="steps">
+      {
+        steps.map((s) => (
+          <li>
+            <span class="steps__n mono">{s.n}</span>
+            <div>
+              <h3>{s.title}</h3>
+              <p>{s.body}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section aria-labelledby="example">
+    <h2 id="example">What a template looks like</h2>
+    <p>
+      Here is the whole idea in four lines. On the left, what you write once. On the right, what the
+      generator produces for each of the three flavours.
+    </p>
+
+    <div class="side-by-side">
+      <div>
+        <span class="side__label mono muted">template · written once</span>
+        <pre class="mono block"><code>background  {'{{ .R.ui.bg }}'}
+foreground  {'{{ .R.ui.fg }}'}
+cursor      {'{{ .R.ui.cursor }}'}
+color4      {'{{ .R.ansi.blue }}'}</code></pre>
+      </div>
+      <div>
+        <span class="side__label mono muted">generated · one per flavour</span>
+        {
+          flavors.map((f) => (
+            <pre class="mono block" data-f={f.id}><code>background  <span class="chip" style={`background: ${keyVar('laje')}; color: ${keyVar('fg')}`}>{f.colors.laje!.hex}</span>
+foreground  <span style={`color: ${keyVar('fg')}`}>{f.colors.fg!.hex}</span>
+cursor      <span style={`color: ${keyVar('sodio')}`}>{f.colors.sodio!.hex}</span>
+color4      <span style={`color: ${keyVar('marginal')}`}>{f.colors.marginal!.hex}</span></code></pre>
+          ))
+        }
+      </div>
+    </div>
+
+    <p class="muted">
+      Those are the real values for the flavour selected in the header — switch it and the generated
+      side changes while the template does not. That is the whole point.
+    </p>
+  </section>
+
+  <section aria-labelledby="targets">
+    <h2 id="targets">Targets that already generate</h2>
+    <p>
+      These exist in the lab and are being prepared for publication. They are listed so you can see
+      what is covered — and, more usefully, what is not.
+    </p>
+
+    <div class="targets">
+      {
+        groups.map((g) => (
+          <div class="targets__group">
+            <h3 class="mono">{GROUP_LABELS[g]}</h3>
+            <ul role="list">
+              {ports
+                .filter((p) => p.group === g)
+                .map((p) => (
+                  <li>{p.name}</li>
+                ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+
+    <p class="muted">
+      Nothing for VS Code, Zed, Emacs, Firefox, Discord, Obsidian, GitHub or a dozen other obvious
+      places. That is where a new port would matter most.
+    </p>
+  </section>
+
+  <section aria-labelledby="reporting">
+    <h2 id="reporting">Reporting a colour problem</h2>
+    <p>
+      A contrast bug is the most valuable issue you can file, and the easiest to act on. Include the
+      two colours, where they meet, and the ratio if you measured it — for example: “<code
+        class="mono">fg_muted</code> on <code class="mono">vidro</code> in the Waybar tooltip, 3.02:1,
+      unreadable on my monitor.”
+    </p>
+    <p>
+      Judgement calls are welcome too. The jaragua flavour was rebuilt because its surfaces read as
+      dark green rather than black, and that started as somebody simply not enjoying looking at it.
+    </p>
+  </section>
+</Base>
+
+<style>
+  section {
+    margin-block: 3.25rem;
+    max-width: var(--measure);
+  }
+
+  section h2 {
+    font-size: var(--step-1);
+  }
+
+  .status {
+    padding: 1.1rem 1.25rem;
+    background: var(--sp-laje);
+    border: var(--border);
+    border-left: 3px solid var(--sp-taxi);
+    border-radius: var(--radius);
+    margin-block: 2rem;
+    max-width: var(--measure);
+  }
+
+  .status strong {
+    display: block;
+    color: var(--sp-taxi);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .status p {
+    font-size: var(--step--1);
+    color: var(--sp-fg-dim);
+  }
+
+  .status p:last-child {
+    margin-bottom: 0;
+  }
+
+  .steps {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+    margin-block: 1.5rem;
+  }
+
+  .steps li {
+    display: flex;
+    gap: 0.9rem;
+    align-items: flex-start;
+  }
+
+  .steps__n {
+    flex: 0 0 auto;
+    width: 1.9rem;
+    height: 1.9rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid var(--sp-sodio);
+    color: var(--sp-sodio);
+    font-size: var(--step--1);
+  }
+
+  .steps h3 {
+    font-size: var(--step-0);
+    margin: 0.15rem 0 0.3rem;
+  }
+
+  .steps p {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--sp-fg-dim);
+  }
+
+  .side-by-side {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    margin-block: 1.25rem;
+  }
+
+  .side__label {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  .chip {
+    padding: 0 0.25em;
+    border-radius: 3px;
+  }
+
+  .block {
+    margin: 0;
+    padding: 0.85rem 1rem;
+    background: var(--sp-vao);
+    border: var(--border);
+    border-radius: 8px;
+    font-size: var(--step--1);
+    line-height: 1.7;
+    overflow-x: auto;
+  }
+
+  .targets {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+    margin-block: 1.25rem;
+  }
+
+  .targets__group h3 {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--sp-fg-muted);
+    margin-bottom: 0.4rem;
+  }
+
+  .targets__group ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.2rem;
+    font-size: var(--step--1);
+    color: var(--sp-fg-dim);
+  }
+</style>

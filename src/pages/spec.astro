@@ -1,0 +1,591 @@
+---
+import Base from '../layouts/Base.astro';
+import { flavors, GROUPS, keyVar, type ColorKey } from '../data/palette';
+
+const base = flavors[0]!;
+const roles = base.roles;
+
+/** Contrast policy from the generator (tools/gen/contrast.go). */
+const policy = [
+  { surface: 'vao', min: '4.5:1', kind: 'gate', why: 'the deepest background — floats, popups, the terminal' },
+  { surface: 'laje', min: '4.5:1', kind: 'gate', why: 'the default surface; everything readable sits here' },
+  { surface: 'concreto', min: '4.5:1', kind: 'gate', why: 'panels, cards and bars' },
+  { surface: 'vidro', min: '3.0:1', kind: 'gate', why: 'selection and elevation — short-lived, never body text' },
+  { surface: 'fg_muted', min: '3.0:1', kind: 'warn', why: 'ornaments and disabled text: reported, not blocking' },
+  { surface: 'fiacao', min: '1.5:1', kind: 'warn', why: 'borders are structure, not text' },
+];
+
+const syntaxRows: Array<[string, ColorKey]> = [
+  ['keyword, conditional, repeat', 'marginal'],
+  ['function, method, constructor, operator', 'sereno'],
+  ['type, namespace', 'temporal'],
+  ['macro, parameter, escape', 'estaiada'],
+  ['constant, number, boolean', 'sodio'],
+  ['builtin, attribute', 'taxi'],
+  ['string, character', 'ibira'],
+  ['variable, property, field', 'fg'],
+  ['punctuation, comment', 'fg_dim'],
+  ['tag', 'brasa'],
+  ['deprecated', 'fg_muted'],
+];
+
+const glossary = [
+  {
+    term: 'flavour',
+    def: 'One complete variant of the theme — noite, garoa or jaragua. Same 22 names, different values.',
+  },
+  {
+    term: 'palette key',
+    def: 'The name of a colour, like sodio or laje. Keys are in Portuguese because each one is named after something in São Paulo.',
+  },
+  {
+    term: 'role',
+    def: 'What a colour is *for*, like syntax.keyword or ansi.blue. A role points at a palette key, so you can repaint every app by changing one line.',
+  },
+  {
+    term: 'target',
+    def: 'An app the theme is generated for — kitty, Neovim, tmux. Each target is one template.',
+  },
+  {
+    term: 'contrast ratio',
+    def: 'How far apart two colours are in brightness, from 1:1 (identical) to 21:1 (black on white). 4.5:1 is the WCAG AA threshold for normal text.',
+  },
+  {
+    term: 'AA',
+    def: 'The middle accessibility level of WCAG, the web accessibility standard. Text at 4.5:1 or better passes.',
+  },
+  {
+    term: 'OKLCH',
+    def: 'A way of describing a colour as lightness, chroma (how saturated) and hue (which colour). Unlike hex or HSL, equal steps in it look equal to the eye.',
+  },
+  {
+    term: 'ΔE and ΔL',
+    def: 'The distance between two colours (ΔE) and the part of that distance that is pure lightness (ΔL). Used to keep two accents from collapsing into each other.',
+  },
+];
+---
+
+<Base
+  title="Spec"
+  description="What each colour in SP Night is for, and the rules any port has to follow: contrast thresholds, accent separation and how syntax roles are assigned."
+>
+  <p class="eyebrow">specification</p>
+  <h1>What each colour is for</h1>
+  <p class="lede">
+    SP Night is one file of colours, a layer of names on top of it, and a generator that writes the
+    theme for every app. This page is the reference for what those colours mean and which rules a
+    port has to hold. If you want to build one, start at
+    <a href="/contribute">contribute</a> instead — this page is the lookup table it points back to.
+  </p>
+
+  <nav class="toc mono" aria-label="On this page">
+    <a href="#how">How it fits together</a>
+    <a href="#colors">The colours</a>
+    <a href="#accent">Two kinds of accent</a>
+    <a href="#syntax">Assignment rules</a>
+    <a href="#contrast">Contrast policy</a>
+    <a href="#separation">Accent separation</a>
+    <a href="#glossary">Glossary</a>
+  </nav>
+
+  <section aria-labelledby="how">
+    <h2 id="how">How it fits together</h2>
+    <p>
+      Colour flows in one direction, and each step only knows about the one before it. That is the
+      whole architecture:
+    </p>
+
+    <ol class="layers">
+      <li>
+        <strong class="mono">1 · palette</strong>
+        <span>
+          22 named colours per flavour, in a single JSON file. This is the only place a hex value is
+          ever written down.
+        </span>
+      </li>
+      <li>
+        <strong class="mono">2 · roles</strong>
+        <span>
+          A second file that says what each colour is for — <code>ansi.blue</code>,
+          <code>syntax.keyword</code>, <code>ui.cursor</code>. A role names a palette key; it never
+          contains a colour itself.
+        </span>
+      </li>
+      <li>
+        <strong class="mono">3 · templates</strong>
+        <span>
+          One file per app, with holes in it. The generator fills the holes with roles and writes a
+          finished config for every flavour.
+        </span>
+      </li>
+    </ol>
+
+    <h3>A worked example</h3>
+    <p>
+      Say you want kitty's ANSI blue. The template for kitty has this line — the double braces are a
+      hole the generator fills:
+    </p>
+    <pre class="mono example"><code>color4  {'{{ .R.ansi.blue }}'}</code></pre>
+    <p>The generator resolves it in two hops:</p>
+    <p class="chain mono">
+      <span>ansi.blue</span>
+      <span aria-hidden="true">→</span>
+      <span>marginal</span>
+      <span aria-hidden="true">→</span>
+      {
+        flavors.map((f) => (
+          <span class="chain__hex" data-f={f.id} style={`color: ${keyVar('marginal')}`}>
+            {f.colors.marginal!.hex}
+          </span>
+        ))
+      }
+    </p>
+    <p>and writes, into the build of <code>kitty.conf</code> for the flavour you have selected:</p>
+    {
+      flavors.map((f) => (
+        <pre class="mono example" data-f={f.id}><code>color4  {f.colors.marginal!.hex}</code></pre>
+      ))
+    }
+    <p>
+      The point of the middle hop is that nobody has to remember which blue is the ANSI blue.
+      Change <code>ansi.blue</code> once and every terminal, editor and status bar follows.
+    </p>
+
+    <div class="rule rule--bad">
+      <span class="mono" aria-hidden="true">✗</span>
+      <code>color4 {'{{ .C.marginal }}'}</code>
+      <span class="muted">reaching past the roles, straight into the palette</span>
+    </div>
+    <div class="rule rule--good">
+      <span class="mono" aria-hidden="true">✓</span>
+      <code>color4 {'{{ .R.ansi.blue }}'}</code>
+      <span class="muted">asking for the role, letting it resolve</span>
+    </div>
+  </section>
+
+  <section aria-labelledby="colors">
+    <h2 id="colors">The colours</h2>
+    <p>
+      Every flavour has the same 22 keys. Only the values change, so a template written once works
+      for all of them.
+    </p>
+
+    {
+      (['surfaces', 'text', 'accents'] as const).map((g) => (
+        <>
+          <h3>{GROUPS[g].label}</h3>
+          <p class="muted">{GROUPS[g].blurb}</p>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">colour</th>
+                  <th scope="col">what it is for</th>
+                </tr>
+              </thead>
+              <tbody>
+                {GROUPS[g].keys.map((k) => (
+                  <tr>
+                    <th scope="row" class="mono">
+                      <span class="dot" style={`background: ${keyVar(k)}`} aria-hidden="true" />
+                      {k}
+                    </th>
+                    <td>{base.colors[k]!.meaning.en}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      ))
+    }
+
+    <h3>Bright pairs</h3>
+    <p>
+      Six accents have a brighter twin, used for the terminal's bright colour slots: same hue, same
+      saturation, 0.06 lighter in OKLCH. They are written into the palette rather than calculated on
+      the fly, so they go through the same contrast audit as everything else.
+    </p>
+    <p>
+      Two accents have no terminal slot at all, on purpose — <code class="mono">sodio</code> and
+      <code class="mono">estaiada</code>. The sixteen slots already have owners, and these two are
+      identity colours rather than text colours.
+    </p>
+  </section>
+
+  <section aria-labelledby="accent">
+    <h2 id="accent">Two kinds of accent</h2>
+    <p>
+      The most common way to get this theme wrong is to use the orange everywhere. There are two
+      accent roles and they are not interchangeable:
+    </p>
+    <div class="two">
+      <div class="card">
+        <h3 class="mono" style={`color: ${keyVar('sodio')}`}>ui.accent → sodio</h3>
+        <p>
+          Identity. Terminals, status bars, the cursor. This is the colour people recognise the
+          theme by, and it should stay rare enough to mean something.
+        </p>
+      </div>
+      <div class="card">
+        <h3 class="mono" style={`color: ${keyVar('marginal')}`}>ui.accent_alt → marginal</h3>
+        <p>
+          System widgets. Selection and focus in GTK, Qt and KDE apps. A file manager should still
+          look like a file manager — its selection highlight is blue, not orange.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="syntax">
+    <h2 id="syntax">Assignment rules</h2>
+    <p>
+      Syntax colours are assigned by meaning, and the same meaning keeps the same colour in every
+      language. A keyword is blue in Go, in Rust and in CSS.
+    </p>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">role</th>
+            <th scope="col">colour</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            syntaxRows.map(([label, key]) => (
+              <tr>
+                <th scope="row">{label}</th>
+                <td class="mono">
+                  <span class="dot" style={`background: ${keyVar(key)}`} aria-hidden="true" />
+                  {key}
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+    <p>
+      Variables stay <code class="mono">fg</code> on purpose. If everything is coloured then nothing
+      is — the hierarchy comes from what is left plain.
+    </p>
+    <p>
+      A diff has exactly one pattern:
+      <span class="mono" style={`color: ${keyVar(roles.git!.added!.key)}`}>added is green</span>,
+      <span class="mono" style={`color: ${keyVar(roles.git!.modified!.key)}`}>modified is yellow</span>,
+      <span class="mono" style={`color: ${keyVar(roles.git!.removed!.key)}`}>removed is red</span>.
+      Everything structural — hunk headers, renames, untracked files — stays neutral. Never purple,
+      blue or orange inside a diff.
+    </p>
+  </section>
+
+  <section aria-labelledby="contrast">
+    <h2 id="contrast">Contrast policy</h2>
+    <p>
+      Every foreground is measured against every surface it can legally appear on: 70 pairs per
+      flavour. A <span class="tag tag--gate">gate</span> that fails stops the build; a
+      <span class="tag tag--warn">warn</span> is reported and looked at.
+    </p>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">against</th>
+            <th scope="col">minimum</th>
+            <th scope="col"><span class="visually-hidden">severity</span></th>
+            <th scope="col">why</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            policy.map((p) => (
+              <tr>
+                <th scope="row" class="mono">{p.surface}</th>
+                <td class="mono">{p.min}</td>
+                <td>
+                  <span class={`tag tag--${p.kind}`}>{p.kind}</span>
+                </td>
+                <td>{p.why}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+    <p>
+      <code class="mono">fg_dim</code> carries comments and secondary text, so it holds full AA on
+      <code class="mono">laje</code> — a comment you cannot read is a comment you delete.
+    </p>
+  </section>
+
+  <section aria-labelledby="separation">
+    <h2 id="separation">Accent separation</h2>
+    <p>
+      Passing contrast against the background is not enough. Two accents can both be perfectly
+      readable and still be impossible to tell apart from each other. That happened here:
+      <code class="mono">estaiada</code> measured 8.68:1 and <code class="mono">sereno</code> 8.63:1,
+      both fine, both the same colour to the eye.
+    </p>
+    <p>So there is a second rule, measured in OKLCH:</p>
+    <p class="formula mono">ΔE &lt; 0.10 ⟹ ΔL ≥ 0.04</p>
+    <p class="muted">
+      In words: if two accents are close in hue and saturation, they must be far enough apart in
+      lightness. Colour-vision deficiency is simulated too — protanopia, deuteranopia and
+      tritanopia — but as a diagnostic rather than a hard rule: the constraints already fight each
+      other, and no mature theme solves this one completely.
+    </p>
+  </section>
+
+  <section aria-labelledby="glossary">
+    <h2 id="glossary">Glossary</h2>
+    <dl class="glossary">
+      {
+        glossary.map((g) => (
+          <div>
+            <dt class="mono">{g.term}</dt>
+            <dd>{g.def}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+</Base>
+
+<style>
+  section {
+    margin-block: 3.25rem;
+    max-width: var(--measure);
+  }
+
+  section h2 {
+    font-size: var(--step-1);
+  }
+
+  section h3 {
+    font-size: var(--step-0);
+    margin-top: 1.75rem;
+    color: var(--sp-fg);
+  }
+
+  .toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+    padding: 0.9rem 1.1rem;
+    background: var(--sp-laje);
+    border: var(--border);
+    border-radius: var(--radius);
+    font-size: var(--step--1);
+    margin-block: 2rem;
+    max-width: var(--measure);
+  }
+
+  /* Chips rather than bare words — as a run of plain grey text this read as a
+     paragraph, not as navigation. */
+  .toc a {
+    color: var(--sp-fg-dim);
+    text-decoration: none;
+    padding: 0.15rem 0.6rem;
+    border: var(--border);
+    border-radius: 999px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .toc a:hover {
+    color: var(--sp-fg);
+    border-color: var(--sp-sodio);
+  }
+
+  .layers {
+    display: grid;
+    gap: 0.85rem;
+    padding-left: 0;
+    list-style: none;
+    margin-block: 1.25rem;
+  }
+
+  .layers li {
+    padding: 0.8rem 1rem;
+    background: var(--sp-laje);
+    border: var(--border);
+    border-left: 3px solid var(--sp-sodio);
+    border-radius: 8px;
+  }
+
+  .layers strong {
+    display: block;
+    color: var(--sp-sodio);
+    font-size: var(--step--1);
+    margin-bottom: 0.2rem;
+  }
+
+  .layers span {
+    color: var(--sp-fg-dim);
+    font-size: var(--step--1);
+  }
+
+  .example {
+    margin: 0.6rem 0 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--sp-vao);
+    border: var(--border);
+    border-radius: 8px;
+    font-size: var(--step--1);
+    overflow-x: auto;
+  }
+
+  .chain {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    font-size: var(--step--1);
+    padding: 0.7rem 1rem;
+    background: var(--sp-laje);
+    border: var(--border);
+    border-radius: 8px;
+  }
+
+  .chain span:not(.chain__hex) {
+    color: var(--sp-fg-dim);
+  }
+
+  .chain__hex {
+    font-weight: 650;
+  }
+
+  .rule {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding: 0.6rem 0.9rem;
+    border: var(--border);
+    border-radius: 8px;
+    margin-top: 0.5rem;
+    font-size: var(--step--1);
+    background: var(--sp-laje);
+  }
+
+  .rule--bad > .mono:first-child {
+    color: var(--sp-brasa);
+  }
+
+  .rule--good > .mono:first-child {
+    color: var(--sp-ibira);
+  }
+
+  .rule .muted {
+    margin-left: auto;
+    font-size: 0.72rem;
+  }
+
+  .table-scroll {
+    overflow-x: auto;
+    margin-block: 1rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--step--1);
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 0.45rem 0.7rem;
+    border-bottom: var(--border);
+    vertical-align: top;
+  }
+
+  thead th {
+    color: var(--sp-fg-muted);
+    font-weight: 600;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  tbody th {
+    color: var(--sp-fg);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  td {
+    color: var(--sp-fg-dim);
+  }
+
+  .dot {
+    display: inline-block;
+    width: 0.7em;
+    height: 0.7em;
+    border-radius: 50%;
+    margin-right: 0.45em;
+  }
+
+  .two {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  }
+
+  .two h3 {
+    margin-top: 0;
+    font-size: var(--step--1);
+  }
+
+  .two p {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--sp-fg-dim);
+  }
+
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+  }
+
+  .tag--gate {
+    color: var(--sp-ibira);
+  }
+
+  .tag--warn {
+    color: var(--sp-taxi);
+  }
+
+  .formula {
+    font-size: var(--step-1);
+    color: var(--sp-estaiada);
+    padding: 0.9rem 1.1rem;
+    background: var(--sp-laje);
+    border: var(--border);
+    border-radius: var(--radius);
+    text-align: center;
+  }
+
+  .glossary {
+    display: grid;
+    gap: 0.9rem;
+    margin: 0;
+  }
+
+  .glossary dt {
+    color: var(--sp-sodio);
+    font-size: var(--step--1);
+  }
+
+  .glossary dd {
+    margin: 0.15rem 0 0;
+    color: var(--sp-fg-dim);
+    font-size: var(--step--1);
+  }
+</style>
