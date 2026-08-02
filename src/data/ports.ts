@@ -130,6 +130,7 @@ export const ports: Port[] = [
     dist: 'dist/{flavor}/eza/sp_night_{flavor}.sh',
     install: 'sourced from your shell rc',
     homepage: 'https://eza.rocks/',
+    repo: 'https://github.com/sp-night/eza',
   },
   {
     slug: 'waybar',
