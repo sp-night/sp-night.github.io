@@ -36,6 +36,18 @@ ports:
     homepage: https://ghostty.org/
     repo: https://github.com/sp-night/ghostty
 
+  - slug: kitty
+    name: kitty
+    group: terminal
+    blurb: The 16-colour ANSI mapping, plus cursor, selection, splits, the tab bar and the three mark slots.
+    install: ~/.config/kitty/sp_night_{flavor}.conf
+    activate: include sp_night_{flavor}.conf
+    note: >-
+      kitty applies the last value it reads, so the `include` has to come after
+      anything else in your config that sets colours.
+    homepage: https://sw.kovidgoyal.net/kitty/
+    repo: https://github.com/sp-night/kitty
+
   - slug: eza
     name: eza
     group: shell
