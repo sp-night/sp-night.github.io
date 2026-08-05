@@ -48,6 +48,19 @@ ports:
     homepage: https://sw.kovidgoyal.net/kitty/
     repo: https://github.com/sp-night/kitty
 
+  - slug: alacritty
+    name: Alacritty
+    group: terminal
+    blurb: The 16-colour ANSI mapping, plus the cursor, vi mode, search hits, hints, the footer bar and the line indicator.
+    install: ~/.config/alacritty/themes/sp_night_{flavor}.toml
+    activate: import = ["~/.config/alacritty/themes/sp_night_{flavor}.toml"]
+    note: >-
+      Alacritty pulls a theme in through `import`, which moved into `[general]`
+      in 0.14. On 0.13 it is a top-level `import = [...]`, and TOML wants it
+      above every table header either way.
+    homepage: https://alacritty.org/
+    repo: https://github.com/sp-night/alacritty
+
   - slug: eza
     name: eza
     group: shell
