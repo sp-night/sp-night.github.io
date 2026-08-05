@@ -118,6 +118,8 @@ below can be installed today. The registry is
 | Port | Group | Installs to |
 | --- | --- | --- |
 | [Ghostty](https://github.com/sp-night/ghostty) | Terminals | `~/.config/ghostty/themes/sp_night_{flavor}` |
+| [kitty](https://github.com/sp-night/kitty) | Terminals | `~/.config/kitty/sp_night_{flavor}.conf` |
+| [Alacritty](https://github.com/sp-night/alacritty) | Terminals | `~/.config/alacritty/themes/sp_night_{flavor}.toml` |
 | [eza](https://github.com/sp-night/eza) | Shell & CLI | `~/.config/eza/theme.yml` |
 <!-- ports-table:end -->
 
