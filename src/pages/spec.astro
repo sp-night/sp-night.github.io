@@ -8,6 +8,7 @@ import {
   MEASURED_PAIRS,
   CONTRAST_POLICY,
   keyVar,
+  org,
   type ColorKey,
 } from '../data/palette';
 
@@ -100,6 +101,13 @@ const glossary = [
     that second layer, written out in the app's own format. This page is the reference for what the
     colours mean and which rules a port has to hold. If you want to build one, start at
     <a href="/contribute">contribute</a> instead — this page is the lookup table it points back to.
+  </p>
+
+  <p class="muted">
+    The two files this page describes are published as data —
+    <a href="/palette.json">/palette.json</a> and <a href="/roles.json">/roles.json</a> — and kept,
+    with the tool that checks them, in <a href={org.engine}>sp-night/sp-night</a>. Anything that
+    reads them produces a theme that agrees with every port.
   </p>
 
   <nav class="toc mono" aria-label="On this page">

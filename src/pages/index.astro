@@ -4,7 +4,8 @@ import Skyline from '../components/Skyline.astro';
 import HeroClock from '../components/HeroClock.astro';
 import TerminalMock from '../components/TerminalMock.astro';
 import FlavorSwitcher from '../components/FlavorSwitcher.astro';
-import { flavors, GROUPS, GROUP_IDS, COLOUR_COUNT } from '../data/palette';
+import GithubIcon from '../components/GithubIcon.astro';
+import { flavors, GROUPS, GROUP_IDS, COLOUR_COUNT, org } from '../data/palette';
 import { ports } from '../data/ports';
 import { HOME_PREVIEW } from '../data/content';
 
@@ -45,9 +46,14 @@ const facts = [
         eyeballed.
       </p>
 
+      {/* The first action is the one that ends with a theme installed. The
+          palette is the beautiful page, but it installs nothing. */}
       <div class="hero__actions rise" style="--d: 470ms">
-        <a class="btn btn--primary" href="/palette">See the palette</a>
-        <a class="btn" href="/spec">Read the spec</a>
+        <a class="btn btn--primary" href="/ports">Install a theme</a>
+        <a class="btn" href="/palette">See the palette</a>
+        <a class="btn btn--ghost" href={org.url}>
+          <GithubIcon size={16} /> GitHub
+        </a>
         <HeroClock />
       </div>
     </div>
