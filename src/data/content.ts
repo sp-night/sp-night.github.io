@@ -20,6 +20,7 @@ export const colorMeaningEn: Record<string, string> = {
   concreto: 'panels, cards and bars — exposed concrete',
   vidro: 'selection and elevation — glass reflecting the street',
   fiacao: 'borders and dividers — overhead wiring cutting across the sky',
+  fg_vivo: 'lit text — terminal bright white, bold text',
   fg: 'primary text',
   fg_dim: 'secondary text and comments',
   fg_muted: 'disabled text, ornaments',
