@@ -337,20 +337,21 @@ ports:
       cp alacritty/themes/*.toml ~/.config/alacritty/themes/
       ```
 
-      Three keys the theme deliberately leaves alone, all for one reason: this
+      Two keys the theme deliberately leaves alone, both for one reason: this
       project does not ship a colour nobody measured.
 
       `[colors.dim]` is absent. The palette's bright ladder covers the six ANSI
       accents and stops there, so there is no measured dim set to write, and
       Alacritty derives faint text on its own.
 
-      `primary.bright_foreground` is absent. The role layer has no colour above
-      `ui.fg` for text, and Alacritty falls back to `foreground`, which is the
-      value that key would have carried anyway.
-
       `draw_bold_text_with_bright_colors` is absent because it is behaviour
       rather than colour. Set it in your own config if you want bold text to use
       `[colors.bright]`; the theme will not decide that for you.
+
+      `primary.bright_foreground` was on that list until the palette gained
+      `fg_vivo`. It is set now, to the same value `ansi.bright_white` carries —
+      a measured colour rather than a brightened guess, which is what put it on
+      the list in the first place.
 
     mapping:
       - key: "`colors.normal.*` / `colors.bright.*`"
