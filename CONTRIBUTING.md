@@ -32,10 +32,17 @@ published as data —
 If your app needs a role the layer does not have yet, that is a real finding —
 open an issue.
 
-Once the repo exists, add one entry to [`resources/ports.yml`](resources/ports.yml)
-and it appears on [the ports page](https://sp-night.github.io/ports). Entries
-without a published `repo:` are rejected by the tests: nothing is listed before
-it can be installed.
+Once the repo exists, add one entry to the catalogue in
+[`sp-night/sp-night`](https://github.com/sp-night/sp-night) at
+`registry/ports.yml` — **not** in this repository, which vendors a copy that the
+next sync overwrites. Merging that entry opens a pull request here, and merging
+*that* publishes the port's own page at `/ports/<slug>`: install instructions,
+the key-to-role table and a preview, all generated from the entry.
+
+So the entry is worth filling in properly. `install_guide` is the one field
+nothing can derive — it is where an app's particular awkwardness gets explained,
+like Ghostty's theme files having no extension. Entries without a published
+`repo:` are rejected by the tests: nothing is listed before it can be installed.
 
 ## Reporting a colour problem
 

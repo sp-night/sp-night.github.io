@@ -309,3 +309,46 @@ se o motor mudar de sintaxe.
 
 **Verificação final:** `npm run build` sem erros/avisos, todas as rotas geradas, zero hex fora de `src/data/`
 (`grep -rE "#[0-9a-fA-F]{6}" src --exclude-dir=data` deve vir vazio).
+
+**Rodada 6 — o site deixa de ser de uma pessoa, e o catálogo passa a mandar** (2026-08-06)
+
+Duas mudanças de estrutura e uma de posição.
+
+**1. O crédito vira coletivo.** `"author": "Rogerio Junior"` morava no contrato
+(`palette.json`), e de lá vazava para o rodapé de toda página, para o JSON-LD de toda
+página e para o `/palette.json` público. Virou `SP Night`, **no motor primeiro** — a cópia
+do site é sobrescrita pelo sync, então mudar só aqui seria revertido. O rodapé credita quem
+contribui e linka para a lista; o JSON-LD ganhou um nó `Organization`. O `CODE_OF_CONDUCT`
+apontava para `@rogeradas`, que é 404: corrigido para `@rogeriojunior31` e mantido pessoal,
+porque um contato de conduta precisa alcançar uma pessoa.
+
+**2. O catálogo do motor passa a ser a fonte, inteiro.** `resources/ports.yml` era uma cópia
+reduzida — nove campos, redigitados — enquanto `registry/ports.yml` já carregava
+`install_guide`, a tabela chave→papel e a spec declarativa do preview. Agora
+`src/data/ports.yml` e `copy.yml` são vendorizados byte a byte, junto de `palette.json`,
+`roles.json` e `contrast.json`. **Isso reverte a decisão S1** ("sem páginas por port"): existe
+`/ports/[slug]`, e ele não é escrito à mão — é gerado da entrada. A §7 deste documento já
+descrevia exatamente essa forma; a S1 é que estava desatualizada.
+
+O loader lê os YAML por `?raw` do Vite. O `readFileSync(new URL('../../…'))` anterior só
+resolvia porque o chunk SSR calhava de ficar dois níveis abaixo da raiz no build.
+
+**3. Os previews são desenhados pelo motor, não copiados dos ports.** Um preview deriva do
+catálogo e da paleta — os dois que o job de sync copia no mesmo commit. Pegar o SVG commitado
+na main de cada port entregaria a paleta anterior toda vez, porque o `regenerate` só abre PR
+nesses repos. No momento em que isso foi escrito a diferença era exatamente o `fg_vivo`.
+
+| mudança | motivo |
+|---|---|
+| `sync-ports.yml` ganha gatilho `push` em `registry/**`, com `regenerate` pulado | listar um port é o que o publica; esperar o próximo release faria a página sair quando o motor calhasse de lançar |
+| `TerminalMock` passa a receber a spec de preview; a sessão da home virou `HOME_PREVIEW` | era o único preview do site que nada checava, e `roleVar` responde `currentColor` a papel inexistente |
+| `@astrojs/markdown-remark` declarado; `remarkAlerts` local (~20 linhas) | é o processador que o Astro já usa para `.md` — um dialeto, não dois. `> [!NOTE]` aparecia literal em 3 dos 4 guias |
+| `CodeBlock` finalmente usado | existia desde a Rodada 1 sem nenhum importador; é ele que dá o botão de copiar aos blocos do guia |
+| tabela do README com gate em `tests/readme.test.ts` | listava 2 dos 4 ports porque `npm run assets` é manual |
+| bandas lidas do contrato em `gen-assets.mjs` | tinha as quatro listas cravadas, e todo SVG gerado perdeu o `fg_vivo` em silêncio |
+| "Twenty-two" e "three levels of text" derivados | o `fg_vivo` transformou os dois em mentira no mesmo commit |
+| header, hero, rodapé e `/contribute` ganham caminhos para o GitHub | **reverte a Rodada 5** no ponto "nenhuma página cita o gerador": o repo é público e quem quer participar precisa achá-lo. O site continua descrevendo o contrato, não a ferramenta |
+| `/contribute#contributors` + faixa na home, com filtro de bots testado | não existia crédito coletivo em lugar nenhum |
+
+**Pendência:** revisão visual em navegador. O Firefox headless não roda no ambiente em que
+esta rodada foi feita, então as capturas nos 3 flavors em 1280px e 390px continuam devendo.
