@@ -524,49 +524,8 @@ const glossary = [
     font-size: 0.72rem;
   }
 
-  .table-scroll {
-    overflow-x: auto;
-    margin-block: 1rem;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: var(--step--1);
-  }
-
-  th,
-  td {
-    text-align: left;
-    padding: 0.45rem 0.7rem;
-    border-bottom: var(--border);
-    vertical-align: top;
-  }
-
-  @media (max-width: 34rem) {
-    th,
-    td {
-      padding: 0.4rem 0.45rem;
-    }
-  }
-
-  thead th {
-    color: var(--sp-fg-muted);
-    font-weight: 600;
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  tbody th {
-    color: var(--sp-fg);
-    font-weight: 500;
-    white-space: nowrap;
-  }
-
-  td {
-    color: var(--sp-fg-dim);
-  }
+  /* .table-scroll and the table rules moved to global.css when the port pages
+     grew a mapping table of their own. */
 
   .dot {
     display: inline-block;

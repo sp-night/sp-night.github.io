@@ -119,6 +119,56 @@ function ogSvg(flavor) {
 }
 
 /**
+ * The social card for one port page.
+ *
+ * Same scene as the site card, so a shared port link is recognisably the same
+ * project — the headline is the only thing that changes. One card per port in
+ * the default flavour, because a page emits exactly one og:image and three
+ * would be two dead files each.
+ */
+function portOgSvg(flavorId, flavor, port) {
+  const c = flavor.colors;
+  const install = port.install.replaceAll('{flavor}', flavorId);
+  const swatches = ACCENTS.map(
+    (k, i) => `<rect x="${72 + i * 52}" y="470" width="40" height="40" rx="8" fill="${c[k]}"/>`,
+  ).join('');
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${c.vao}"/>
+      <stop offset="0.72" stop-color="${c.vao}"/>
+      <stop offset="1" stop-color="${c.laje}"/>
+    </linearGradient>
+    <radialGradient id="lamp" cx="0.5" cy="0.1" r="0.75">
+      <stop offset="0" stop-color="${c.sodio}" stop-opacity="0.26"/>
+      <stop offset="0.55" stop-color="${c.sodio}" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="${c.sodio}" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#sky)"/>
+  <rect width="1200" height="630" fill="url(#lamp)"/>
+  <g opacity="0.5">${skyline(c)}</g>
+  <rect x="0" y="626" width="1200" height="4" fill="${c.vao}"/>
+
+  <g transform="translate(72 76) scale(0.72)">${markInline(flavor)}</g>
+  <text x="132" y="114" font-family="ui-monospace, monospace" font-size="30" font-weight="700" fill="${c.fg}">SP Night</text>
+
+  <text x="72" y="268" font-family="ui-sans-serif, system-ui, sans-serif" font-size="76" font-weight="640" fill="${c.fg}">SP Night for</text>
+  <text x="72" y="352" font-family="ui-sans-serif, system-ui, sans-serif" font-size="76" font-weight="640" fill="${c.sodio}">${esc(port.name)}</text>
+
+  <text x="72" y="414" font-family="ui-monospace, monospace" font-size="26" fill="${c.fg_dim}">${esc(install)}</text>
+
+  ${swatches}
+</svg>`;
+}
+
+/** SVG text is XML: a port name or path with an ampersand would break the card. */
+const esc = (s) =>
+  s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+
+/**
  * The mark: Pico do Jaraguá at dusk. Jaraguá (1,135 m) and Pico do Papagaio
  * (1,127 m) are almost the same height and split by a saddle, so the massif
  * reads as rounded domes — eroded Atlantic-forest mountain, not alpine rock.
@@ -301,5 +351,14 @@ function portsTable() {
 }
 
 replaceReadmeBlock('ports-table', portsTable());
+
+/* One social card per port page. The default flavour only — a page emits one
+   og:image, so three would be two dead files each. */
+const DEFAULT_FLAVOR = 'noite';
+for (const p of registry.ports) {
+  const svg = portOgSvg(DEFAULT_FLAVOR, palette.flavors[DEFAULT_FLAVOR], p);
+  await sharp(Buffer.from(svg)).png().toFile(join(root, `public/og-port-${p.slug}.png`));
+}
+console.log(`og-port-*.png (${registry.ports.length})`);
 
 console.log(`\n${SURFACES.length} surfaces · ${ACCENTS.length} accents · ${Object.keys(palette.flavors).length} flavours`);

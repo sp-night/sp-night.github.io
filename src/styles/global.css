@@ -472,3 +472,124 @@ hr {
     transform: none;
   }
 }
+
+/* ---------------------------------------------------------------- tables */
+
+/* Lifted out of /spec when the port pages grew a mapping table of their own.
+   Two pages' worth of duplicated table CSS is the same drift in miniature. */
+
+.table-scroll {
+  overflow-x: auto;
+  margin-block: 1rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--step--1);
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.45rem 0.7rem;
+  border-bottom: var(--border);
+  vertical-align: top;
+}
+
+@media (max-width: 34rem) {
+  th,
+  td {
+    padding: 0.4rem 0.45rem;
+  }
+}
+
+thead th {
+  color: var(--sp-fg-muted);
+  font-weight: 600;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+tbody th {
+  color: var(--sp-fg);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+td {
+  color: var(--sp-fg-dim);
+}
+
+/* ------------------------------------------------- rendered markdown */
+
+/* The install guide arrives as HTML through set:html, which Astro's scoped
+   styles do not reach — these have to be global or the guide renders as
+   unstyled body text, which fails by looking wrong rather than by failing. */
+
+.guide > div > :first-child {
+  margin-top: 0;
+}
+
+.guide p,
+.guide li {
+  max-width: var(--measure);
+  color: var(--sp-fg-dim);
+}
+
+.guide ul,
+.guide ol {
+  padding-left: 1.2rem;
+}
+
+.guide h2,
+.guide h3 {
+  margin-top: 2rem;
+}
+
+.guide blockquote {
+  margin: 1rem 0;
+  padding-left: 1rem;
+  border-left: 2px solid var(--sp-fiacao);
+  color: var(--sp-fg-muted);
+}
+
+/* GitHub's alert syntax, turned into an aside by remarkAlerts. */
+.callout {
+  margin: 1.2rem 0;
+  padding: 0.8rem 1rem;
+  background: var(--sp-concreto);
+  border: var(--border);
+  border-left: 3px solid var(--sp-sodio);
+  border-radius: var(--radius);
+}
+
+.callout > :first-child {
+  margin-top: 0;
+}
+
+.callout > :last-child {
+  margin-bottom: 0;
+}
+
+.callout::before {
+  content: attr(data-kind);
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sp-sodio);
+  margin-bottom: 0.35rem;
+}
+
+.callout[data-kind='warning'],
+.callout[data-kind='caution'] {
+  border-left-color: var(--sp-brasa);
+}
+
+.callout[data-kind='warning']::before,
+.callout[data-kind='caution']::before {
+  color: var(--sp-brasa);
+}

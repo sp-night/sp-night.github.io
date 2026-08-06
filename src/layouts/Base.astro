@@ -11,6 +11,9 @@ interface Props {
   bare?: boolean;
   /** Pages that must not be indexed (the 404). */
   noindex?: boolean;
+  /** Site-root path to a social card, for pages that earn their own. */
+  ogImage?: string;
+  ogImageAlt?: string;
 }
 
 const {
@@ -18,6 +21,8 @@ const {
   description = theme.description,
   bare = false,
   noindex = false,
+  ogImage: ogImagePath,
+  ogImageAlt: ogImageAltProp,
 } = Astro.props;
 
 const pageTitle = title ? `${title} · ${theme.label}` : `${theme.label} — a São Paulo dark theme`;
@@ -34,8 +39,10 @@ const seed = flavor(defaultFlavor);
 // Social cards need an absolute URL; `site` is set in astro.config.mjs, with a
 // dev-origin fallback for local servers where it may be absent.
 const origin = Astro.site ?? 'http://localhost:4321';
-const ogImage = new URL(`/og-${defaultFlavor}.png`, origin).href;
-const ogImageAlt = `${theme.label} — the São Paulo skyline at night under the sodium lamp, with the eight accent colours as swatches`;
+const ogImage = new URL(ogImagePath ?? `/og-${defaultFlavor}.png`, origin).href;
+const ogImageAlt =
+  ogImageAltProp ??
+  `${theme.label} — the São Paulo skyline at night under the sodium lamp, with the eight accent colours as swatches`;
 
 // Canonical carries the trailing slash, matching the URLs the sitemap emits.
 const canonical = new URL(path === '/' ? '/' : `${path}/`, origin).href;

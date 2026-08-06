@@ -1,0 +1,190 @@
+---
+/**
+ * One page per port, generated from the catalogue.
+ *
+ * Nothing here is written for a particular app: the name, the blurb, the
+ * install path, the guide, the key-to-role table and the preview all come from
+ * the entry the engine already keeps. A port added to the catalogue arrives
+ * here with a page, which is the whole reason the catalogue is vendored in
+ * full rather than reduced to what a card needed.
+ */
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import Base from '../../layouts/Base.astro';
+import CodeBlock from '../../components/CodeBlock.astro';
+import Guide from '../../components/Guide.astro';
+import { GROUP_LABELS, copy, expand, keyLabel, ports } from '../../data/ports';
+import { inlineMd, renderMd } from '../../data/guide';
+import { flavors } from '../../data/palette';
+
+export const getStaticPaths = (() =>
+  ports.map((p, i) => ({
+    params: { slug: p.slug },
+    props: { port: p, prev: ports[i - 1], next: ports[i + 1] },
+  }))) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+const { port, prev, next } = Astro.props as Props;
+
+const blurb = await inlineMd(port.blurb);
+const note = port.note ? await inlineMd(port.note) : undefined;
+
+const mapping = await Promise.all(
+  port.mapping.map(async (row) => ({
+    key: await inlineMd(row.key),
+    role: await inlineMd(row.role),
+    meaning: row.meaning ? await inlineMd(row.meaning) : '',
+  })),
+);
+
+/* The mapping section's prose is shared with every port README, so the sentence
+   reads the same in both places. Its links are repo-relative there and have to
+   be absolute here. */
+const mappingSection = await renderMd(
+  copy.mapping_section
+    .replaceAll('({template})', `(${port.repo}/blob/main/${port.template})`)
+    .replaceAll('(themes)', `(${port.repo}/tree/main/themes)`)
+    .replaceAll('{template}', port.template)
+    .replaceAll('{keylabel}', keyLabel(port).toLowerCase())
+    .replaceAll('{scope}', port.mapping_scope ?? '')
+    .replaceAll('{closer}', port.mapping_closer ?? 'what a colour means'),
+);
+
+const provenance = await renderMd(copy.provenance);
+const flavoursIntro = await renderMd(copy.flavours_intro);
+---
+
+<Base
+  title={port.name}
+  description={`SP Night for ${port.name} — ${port.blurb}`}
+  ogImage={`/og-port-${port.slug}.png`}
+  ogImageAlt={`SP Night for ${port.name}, installed to ${port.install}`}
+>
+  <p class="eyebrow"><a href="/ports">ports</a> · {GROUP_LABELS[port.group]}</p>
+  <h1>SP Night for {port.name}</h1>
+  <p class="lede" set:html={blurb} />
+
+  <p class="links mono">
+    <a href={port.repo}>the repository ↗</a>
+    <a href={port.homepage}>{port.name} ↗</a>
+    <a href={`${port.repo}/blob/main/${port.template}`}>{port.template} ↗</a>
+  </p>
+
+  <section aria-labelledby="preview">
+    <h2 id="preview" class="visually-hidden">Preview</h2>
+    {
+      flavors.map((f) => (
+        <img
+          class="shot"
+          data-f={f.id}
+          src={`/previews/${port.slug}-${f.id}.svg`}
+          width="880"
+          height="520"
+          alt={`${port.name} themed with SP Night ${f.label}`}
+          loading={f.id === flavors[0]!.id ? 'eager' : 'lazy'}
+        />
+      ))
+    }
+    <div class="caption muted" set:html={flavoursIntro} />
+  </section>
+
+  <section aria-labelledby="install">
+    <h2 id="install">Install</h2>
+
+    {flavors.map((f) => (
+      <CodeBlock flavor={f.id} label="the file goes here" code={expand(port.install, f.id, f.label)} />
+    ))}
+    {port.activate &&
+      flavors.map((f) => (
+        <CodeBlock flavor={f.id} label="then add this" code={expand(port.activate!, f.id, f.label)} />
+      ))}
+
+    <p class="muted">
+      Those are the paths for the flavour selected in the header — switch it and they follow.
+    </p>
+
+    {note && <aside class="callout" data-kind="note" set:html={note} />}
+
+    <Guide markdown={port.install_guide} />
+  </section>
+
+  <section aria-labelledby="themed">
+    <h2 id="themed">What gets themed</h2>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">{keyLabel(port)}</th>
+            <th scope="col">role</th>
+            <th scope="col">what it is</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            mapping.map((row) => (
+              <tr>
+                <th scope="row" set:html={row.key} />
+                <td class="mono" set:html={row.role} />
+                <td set:html={row.meaning} />
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="guide" set:html={mappingSection} />
+    <p><a href="/spec">What each role means →</a></p>
+  </section>
+
+  <section aria-labelledby="provenance">
+    <h2 id="provenance">Where the colours come from</h2>
+    <div class="guide" set:html={provenance} />
+  </section>
+
+  <nav class="port-nav mono" aria-label="Other ports">
+    {prev ? <a href={`/ports/${prev.slug}`}>← {prev.name}</a> : <span />}
+    <a href="/ports">all ports</a>
+    {next ? <a href={`/ports/${next.slug}`}>{next.name} →</a> : <span />}
+  </nav>
+</Base>
+
+<style>
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.2rem;
+    font-size: var(--step--1);
+    margin-bottom: 2.5rem;
+  }
+
+  .shot {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: var(--border);
+    border-radius: var(--radius);
+    background: var(--sp-vao);
+  }
+
+  .caption {
+    font-size: var(--step--1);
+    margin-top: 0.7rem;
+  }
+
+  section {
+    margin-block: 3.5rem;
+  }
+
+  h2 {
+    padding-top: 0.6rem;
+    border-top: var(--border);
+  }
+
+  .port-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: var(--step--1);
+    padding-top: 1.5rem;
+    border-top: var(--border);
+  }
+</style>

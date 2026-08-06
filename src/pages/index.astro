@@ -6,6 +6,7 @@ import TerminalMock from '../components/TerminalMock.astro';
 import FlavorSwitcher from '../components/FlavorSwitcher.astro';
 import { flavors, GROUPS, GROUP_IDS, COLOUR_COUNT } from '../data/palette';
 import { ports } from '../data/ports';
+import { HOME_PREVIEW } from '../data/content';
 
 /**
  * Derived, never asserted: the counts below come from the data this page
@@ -88,7 +89,7 @@ const facts = [
         }
       </dl>
     </div>
-    <TerminalMock />
+    <TerminalMock preview={HOME_PREVIEW} />
   </section>
 
   <section class="wrap section reveal">

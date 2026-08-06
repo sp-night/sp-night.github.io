@@ -23,6 +23,7 @@ import {
   portsByGroup,
 } from '../src/data/ports';
 import { flavors } from '../src/data/palette';
+import { HOME_PREVIEW } from '../src/data/content';
 import { previewText, spanColor } from '../src/data/preview';
 
 const previewsDir = new URL('../public/previews/', import.meta.url);
@@ -162,6 +163,24 @@ describe('the catalogue agrees with the vendored palette', () => {
         }
       }
     }
+  });
+});
+
+describe("the home page's mock", () => {
+  /* It is declared in the catalogue's shape rather than as markup precisely so
+     it lands here. As hardcoded spans it was the one preview on the site that
+     nothing checked, and roleVar() answers an unknown role with currentColor. */
+  it('paints with roles and keys that exist', () => {
+    for (const line of HOME_PREVIEW.body) {
+      for (const s of line) {
+        expect(Boolean(s.r) !== Boolean(s.c), `"${s.t}"`).toBe(true);
+        expect(() => spanColor(s), `"${s.t}"`).not.toThrow();
+      }
+    }
+    for (const key of HOME_PREVIEW.swatches.keys ?? []) {
+      expect(() => spanColor({ t: '', c: key }), `swatch ${key}`).not.toThrow();
+    }
+    expect(HOME_PREVIEW.swatches.label).toBeTruthy();
   });
 });
 
