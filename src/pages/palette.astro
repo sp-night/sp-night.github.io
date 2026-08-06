@@ -1,9 +1,9 @@
 ---
 import Base from '../layouts/Base.astro';
 import ColorCard from '../components/ColorCard.astro';
-import { GROUPS, flavors, type ColorGroup } from '../data/palette';
+import { GROUPS, GROUP_IDS, flavors } from '../data/palette';
 
-const groupOrder: ColorGroup[] = ['surfaces', 'text', 'accents', 'vivo'];
+const groupOrder = GROUP_IDS;
 ---
 
 <Base
@@ -41,11 +41,11 @@ const groupOrder: ColorGroup[] = ['surfaces', 'text', 'accents', 'vivo'];
     groupOrder.map((g) => (
       <section class="group" aria-labelledby={`group-${g}`}>
         <div class="group__head">
-          <h2 id={`group-${g}`}>{GROUPS[g].label}</h2>
-          <p class="muted">{GROUPS[g].blurb}</p>
+          <h2 id={`group-${g}`}>{GROUPS[g]!.label}</h2>
+          <p class="muted">{GROUPS[g]!.blurb}</p>
         </div>
         <div class="group__grid">
-          {GROUPS[g].keys.map((key) => (
+          {GROUPS[g]!.keys.map((key) => (
             <ColorCard colorKey={key} />
           ))}
         </div>

@@ -4,7 +4,7 @@ import Skyline from '../components/Skyline.astro';
 import HeroClock from '../components/HeroClock.astro';
 import TerminalMock from '../components/TerminalMock.astro';
 import FlavorSwitcher from '../components/FlavorSwitcher.astro';
-import { flavors, GROUPS } from '../data/palette';
+import { flavors, GROUPS, GROUP_IDS } from '../data/palette';
 import { ports } from '../data/ports';
 
 /**
@@ -97,11 +97,11 @@ const facts = [
 
     <div class="strip">
       {
-        (['surfaces', 'text', 'accents', 'vivo'] as const).map((g) => (
+        GROUP_IDS.map((g) => (
           <div class="strip__group">
-            <span class="strip__label mono muted">{GROUPS[g].label}</span>
+            <span class="strip__label mono muted">{GROUPS[g]!.label}</span>
             <div class="strip__row">
-              {GROUPS[g].keys.map((k) => (
+              {GROUPS[g]!.keys.map((k) => (
                 <span
                   class="strip__chip"
                   style={`background: var(--sp-${k.replace(/_/g, '-')})`}

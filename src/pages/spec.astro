@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { flavors, GROUPS, keyVar, type ColorKey } from '../data/palette';
+import { flavors, GROUPS, GROUP_IDS, COLOUR_COUNT, MEASURED_PAIRS, keyVar, type ColorKey } from '../data/palette';
 
 const base = flavors[0]!;
 const roles = base.roles;
@@ -32,7 +32,7 @@ const syntaxRows: Array<[string, ColorKey]> = [
 const glossary = [
   {
     term: 'flavour',
-    def: 'One complete variant of the theme — noite, garoa or jaragua. Same 22 names, different values.',
+    def: `One complete variant of the theme — noite, garoa or jaragua. Same ${COLOUR_COUNT} names, different values.`,
   },
   {
     term: 'palette key',
@@ -99,7 +99,7 @@ const glossary = [
       <li>
         <strong class="mono">1 · palette</strong>
         <span>
-          23 named colours per flavour, in a single JSON file. This is the only place a hex value is
+          {COLOUR_COUNT} named colours per flavour, in a single JSON file. This is the only place a hex value is
           ever written down.
         </span>
       </li>
@@ -168,15 +168,15 @@ const glossary = [
   <section aria-labelledby="colors">
     <h2 id="colors">The colours</h2>
     <p>
-      Every flavour has the same 22 keys. Only the values change, so a port mapped once works for
+      Every flavour has the same {COLOUR_COUNT} keys. Only the values change, so a port mapped once works for
       all of them.
     </p>
 
     {
-      (['surfaces', 'text', 'accents'] as const).map((g) => (
+      GROUP_IDS.filter((g) => g !== 'vivo').map((g) => (
         <>
-          <h3>{GROUPS[g].label}</h3>
-          <p class="muted">{GROUPS[g].blurb}</p>
+          <h3>{GROUPS[g]!.label}</h3>
+          <p class="muted">{GROUPS[g]!.blurb}</p>
           <div class="table-scroll">
             <table>
               <thead>
@@ -186,7 +186,7 @@ const glossary = [
                 </tr>
               </thead>
               <tbody>
-                {GROUPS[g].keys.map((k) => (
+                {GROUPS[g]!.keys.map((k) => (
                   <tr>
                     <th scope="row" class="mono">
                       <span class="dot" style={`background: ${keyVar(k)}`} aria-hidden="true" />
@@ -202,7 +202,7 @@ const glossary = [
       ))
     }
 
-    <h3>Bright pairs</h3>
+    <h3>{GROUPS.vivo!.label}</h3>
     <p>
       Six accents have a brighter twin, used for the terminal's bright colour slots: same hue, same
       saturation, 0.06 lighter in OKLCH. They are written into the palette rather than calculated on
@@ -299,7 +299,7 @@ const glossary = [
   <section aria-labelledby="contrast">
     <h2 id="contrast">Contrast policy</h2>
     <p>
-      Every foreground is measured against every surface it can legally appear on: 74 pairs per
+      Every foreground is measured against every surface it can legally appear on: {MEASURED_PAIRS} pairs per
       flavour. A <span class="tag tag--gate">gate</span> that fails stops the build; a
       <span class="tag tag--warn">warn</span> is reported and looked at.
     </p>
