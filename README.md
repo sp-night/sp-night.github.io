@@ -168,5 +168,5 @@ propose a port or report a colour problem, and [`SITE.md`](SITE.md) for the full
 design plan and decision log.
 
 <p align="center">
-  <sub>SP Night — built by Rogerio Junior · MIT</sub>
+  <sub>SP Night — built by <a href="https://github.com/sp-night/sp-night.github.io/graphs/contributors">its contributors</a> · MIT</sub>
 </p>

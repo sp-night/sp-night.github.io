@@ -319,13 +319,37 @@ export const defaultFlavor: FlavorId = 'noite';
 export const flavor = (id: FlavorId): Flavor =>
   flavors.find((f) => f.id === id) ?? flavors[0]!;
 
+/**
+ * Where the project lives. Every GitHub link on the site comes from here, so a
+ * repository that moves is one edit rather than a grep.
+ */
+export const org = {
+  url: 'https://github.com/sp-night',
+  /** The contract and the tool: the palette, the role layer and the engine. */
+  engine: 'https://github.com/sp-night/sp-night',
+  /** This site. */
+  site: 'https://github.com/sp-night/sp-night.github.io',
+  issues: 'https://github.com/sp-night/sp-night.github.io/issues',
+  contributing: 'https://github.com/sp-night/sp-night.github.io/blob/main/CONTRIBUTING.md',
+  conduct: 'https://github.com/sp-night/sp-night.github.io/blob/main/CODE_OF_CONDUCT.md',
+  license: 'https://github.com/sp-night/sp-night.github.io/blob/main/LICENSE',
+  /** `?template=` targets, so the two issue forms are reachable from the site. */
+  colourProblem:
+    'https://github.com/sp-night/sp-night.github.io/issues/new?template=colour-problem.yml',
+  portProposal:
+    'https://github.com/sp-night/sp-night.github.io/issues/new?template=port-proposal.yml',
+};
+
 export const theme = {
   name: raw.name,
   label: raw.label,
   author: raw.author,
-  repoUrl: 'https://github.com/sp-night',
+  repoUrl: org.url,
+  // No count that this module cannot derive. The old copy claimed "17 targets"
+  // long after the registry had been cut to what is actually published, and it
+  // was the meta description of every page.
   description:
-    `A dark colour scheme with São Paulo as its reference: the sodium street lamp, exposed concrete, the free span of the MASP, the drizzle before the rain. Three flavours, ${COLOUR_COUNT} colours, 17 targets generated from a single file.`,
+    `A dark colour scheme with São Paulo as its reference: the sodium street lamp, exposed concrete, the free span of the MASP, the drizzle before the rain. Three flavours, ${COLOUR_COUNT} colours, every pairing measured before it ships.`,
 };
 
 /** `var(--sp-…)` for a palette key. */

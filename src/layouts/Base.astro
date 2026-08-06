@@ -2,7 +2,7 @@
 import '../styles/global.css';
 import FlavorSwitcher from '../components/FlavorSwitcher.astro';
 import Logo from '../components/Logo.astro';
-import { flavorStylesheet, defaultFlavor, theme, flavor } from '../data/palette';
+import { flavorStylesheet, defaultFlavor, theme, flavor, org } from '../data/palette';
 
 interface Props {
   title?: string;
@@ -59,8 +59,16 @@ const jsonLd = {
       url: `${origin}`,
       description: theme.description,
       license: 'https://opensource.org/license/MIT',
-      author: { '@type': 'Person', name: theme.author },
-      sameAs: [theme.repoUrl, `${theme.repoUrl}/sp-night.github.io`],
+      author: { '@id': `${origin}#org` },
+      sameAs: [org.url, org.engine, org.site],
+    },
+    {
+      '@type': 'Organization',
+      '@id': `${origin}#org`,
+      name: theme.label,
+      url: `${origin}`,
+      logo: new URL(`/logo-${defaultFlavor}.svg`, origin).href,
+      sameAs: [org.url],
     },
   ],
 };
@@ -95,7 +103,7 @@ const jsonLd = {
     <link id="favicon" rel="icon" href={`/favicon-${defaultFlavor}.svg`} type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
     <style set:html={`  ${flavorStylesheet()}`}></style>
 
@@ -144,7 +152,8 @@ const jsonLd = {
     <footer class="site-footer">
       <div class="wrap site-footer__inner">
         <span>
-          {theme.label} — a dark theme with São Paulo as its reference. Built by {theme.author}.
+          {theme.label} — a dark theme with São Paulo as its reference. Built by the{' '}
+          <a href="/contribute#contributors">people who contribute to it</a>.
         </span>
         <span class="mono">
           <a href={theme.repoUrl}>github.com/sp-night</a> · MIT
