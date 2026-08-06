@@ -551,7 +551,7 @@ ports:
           - {t: "-", r: ui.fg_muted}
           - {t: "x", r: diagnostic.ok}
           - {t: "     -", r: ui.fg_muted}
-          - {t: " rogeradas  ", r: ui.fg_dim}
+          - {t: " sp-night   ", r: ui.fg_dim}
           - {t: "2 Aug 20:14", r: ui.fg_muted}
           - {t: "   ", r: ui.fg_muted}
           - {t: "--", r: ui.fg_muted}
@@ -569,7 +569,7 @@ ports:
           - {t: "-", r: ui.fg_muted}
           - {t: "  1.1", r: syntax.number}
           - {t: "k", r: ui.fg_dim}
-          - {t: " rogeradas  ", r: ui.fg_dim}
+          - {t: " sp-night   ", r: ui.fg_dim}
           - {t: "2 Aug 20:14", r: ui.fg_muted}
           - {t: "   ", r: ui.fg_muted}
           - {t: "-", r: ui.fg_muted}
@@ -587,7 +587,7 @@ ports:
           - {t: "-", r: ui.fg_muted}
           - {t: "-", r: ui.fg_muted}
           - {t: "   851", r: syntax.number}
-          - {t: " rogeradas  ", r: ui.fg_dim}
+          - {t: " sp-night   ", r: ui.fg_dim}
           - {t: "2 Aug 20:14", r: ui.fg_muted}
           - {t: "   ", r: ui.fg_muted}
           - {t: "N", r: git.added}
@@ -606,7 +606,7 @@ ports:
           - {t: "x", r: diagnostic.ok}
           - {t: "  4.2", r: syntax.number}
           - {t: "k", r: ui.fg_dim}
-          - {t: " rogeradas  ", r: ui.fg_dim}
+          - {t: " sp-night   ", r: ui.fg_dim}
           - {t: "2 Aug 20:14", r: ui.fg_muted}
           - {t: "   ", r: ui.fg_muted}
           - {t: "--", r: ui.fg_muted}
@@ -623,7 +623,7 @@ ports:
           - {t: "w", r: diagnostic.error}
           - {t: "x", r: diagnostic.ok}
           - {t: "     -", r: ui.fg_muted}
-          - {t: " rogeradas  ", r: ui.fg_dim}
+          - {t: " sp-night   ", r: ui.fg_dim}
           - {t: "2 Aug 20:14", r: ui.fg_muted}
           - {t: "   ", r: ui.fg_muted}
           - {t: "--", r: ui.fg_muted}
