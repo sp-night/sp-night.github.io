@@ -2,7 +2,8 @@
 import '../styles/global.css';
 import FlavorSwitcher from '../components/FlavorSwitcher.astro';
 import Logo from '../components/Logo.astro';
-import { flavorStylesheet, defaultFlavor, theme, flavor } from '../data/palette';
+import GithubIcon from '../components/GithubIcon.astro';
+import { flavorStylesheet, defaultFlavor, theme, flavor, org } from '../data/palette';
 
 interface Props {
   title?: string;
@@ -11,6 +12,9 @@ interface Props {
   bare?: boolean;
   /** Pages that must not be indexed (the 404). */
   noindex?: boolean;
+  /** Site-root path to a social card, for pages that earn their own. */
+  ogImage?: string;
+  ogImageAlt?: string;
 }
 
 const {
@@ -18,6 +22,8 @@ const {
   description = theme.description,
   bare = false,
   noindex = false,
+  ogImage: ogImagePath,
+  ogImageAlt: ogImageAltProp,
 } = Astro.props;
 
 const pageTitle = title ? `${title} · ${theme.label}` : `${theme.label} — a São Paulo dark theme`;
@@ -29,13 +35,46 @@ const nav = [
   { href: '/contribute', label: 'contribute' },
 ];
 const current = (href: string) => (path === href || path.startsWith(href + '/') ? 'page' : undefined);
+
+/* The footer is where someone who wants to take part looks. It used to be one
+   sentence and one link to the org. */
+const footerCols = [
+  {
+    title: 'the project',
+    links: [
+      { href: org.url, label: 'the organisation ↗' },
+      { href: org.engine, label: 'the contract and the tool ↗' },
+      { href: org.site, label: 'this website ↗' },
+      { href: '/ports', label: 'every port' },
+    ],
+  },
+  {
+    title: 'the contract',
+    links: [
+      { href: '/palette.json', label: 'palette.json' },
+      { href: '/roles.json', label: 'roles.json' },
+      { href: '/spec', label: 'the spec' },
+    ],
+  },
+  {
+    title: 'taking part',
+    links: [
+      { href: '/contribute', label: 'how to contribute' },
+      { href: org.colourProblem, label: 'report a colour problem ↗' },
+      { href: org.portProposal, label: 'propose a port ↗' },
+      { href: org.conduct, label: 'code of conduct ↗' },
+    ],
+  },
+];
 const seed = flavor(defaultFlavor);
 
 // Social cards need an absolute URL; `site` is set in astro.config.mjs, with a
 // dev-origin fallback for local servers where it may be absent.
 const origin = Astro.site ?? 'http://localhost:4321';
-const ogImage = new URL(`/og-${defaultFlavor}.png`, origin).href;
-const ogImageAlt = `${theme.label} — the São Paulo skyline at night under the sodium lamp, with the eight accent colours as swatches`;
+const ogImage = new URL(ogImagePath ?? `/og-${defaultFlavor}.png`, origin).href;
+const ogImageAlt =
+  ogImageAltProp ??
+  `${theme.label} — the São Paulo skyline at night under the sodium lamp, with the eight accent colours as swatches`;
 
 // Canonical carries the trailing slash, matching the URLs the sitemap emits.
 const canonical = new URL(path === '/' ? '/' : `${path}/`, origin).href;
@@ -59,8 +98,16 @@ const jsonLd = {
       url: `${origin}`,
       description: theme.description,
       license: 'https://opensource.org/license/MIT',
-      author: { '@type': 'Person', name: theme.author },
-      sameAs: [theme.repoUrl, `${theme.repoUrl}/sp-night.github.io`],
+      author: { '@id': `${origin}#org` },
+      sameAs: [org.url, org.engine, org.site],
+    },
+    {
+      '@type': 'Organization',
+      '@id': `${origin}#org`,
+      name: theme.label,
+      url: `${origin}`,
+      logo: new URL(`/logo-${defaultFlavor}.svg`, origin).href,
+      sameAs: [org.url],
     },
   ],
 };
@@ -95,7 +142,7 @@ const jsonLd = {
     <link id="favicon" rel="icon" href={`/favicon-${defaultFlavor}.svg`} type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
     <style set:html={`  ${flavorStylesheet()}`}></style>
 
@@ -131,7 +178,16 @@ const jsonLd = {
         <nav class="nav" aria-label="Main">
           {nav.map((i) => <a href={i.href} aria-current={current(i.href)}>{i.label}</a>)}
         </nav>
-        <FlavorSwitcher />
+        <div class="site-header__end">
+          <FlavorSwitcher />
+          {/* The way out to the project. There was none in the chrome except a
+              line of footer text, on a site whose whole point is to send people
+              to four repositories. */}
+          <a class="gh" href={org.url} aria-label="SP Night on GitHub">
+            <GithubIcon size={17} />
+            <span>GitHub</span>
+          </a>
+        </div>
       </div>
     </header>
 
@@ -142,13 +198,34 @@ const jsonLd = {
     <p id="copy-status" class="visually-hidden" role="status" aria-live="polite"></p>
 
     <footer class="site-footer">
-      <div class="wrap site-footer__inner">
-        <span>
-          {theme.label} — a dark theme with São Paulo as its reference. Built by {theme.author}.
-        </span>
-        <span class="mono">
-          <a href={theme.repoUrl}>github.com/sp-night</a> · MIT
-        </span>
+      <div class="wrap site-footer__cols">
+        <div class="site-footer__about">
+          <a class="brand" href="/"><Logo size={22} id="foot" />{theme.label}</a>
+          <p>
+            A dark theme with São Paulo as its reference. Built by the{' '}
+            <a href="/contribute#contributors">people who contribute to it</a>.
+          </p>
+        </div>
+
+        {
+          footerCols.map((col) => (
+            <nav class="site-footer__col" aria-label={col.title}>
+              <h2 class="mono">{col.title}</h2>
+              <ul role="list">
+                {col.links.map((l) => (
+                  <li>
+                    <a href={l.href}>{l.label}</a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))
+        }
+      </div>
+
+      <div class="wrap site-footer__base mono">
+        <span>MIT</span>
+        <a href={org.url}>github.com/sp-night</a>
       </div>
     </footer>
 

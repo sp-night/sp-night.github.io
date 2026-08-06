@@ -7,6 +7,8 @@
  * titles and ledes live in the pages themselves, next to the markup they
  * describe.
  */
+import type { Preview } from './ports';
+
 /** Flavour ids, spelled out here so this module has no runtime dependency on the palette. */
 export type FlavorId = 'noite' | 'garoa' | 'jaragua';
 
@@ -66,4 +68,94 @@ export const flavorCopy: Record<FlavorId, FlavorCopy> = {
       en: 'The same night, seen from the highest point in the city. Near-black surfaces, with the forest left to the accents — and the red-and-white tower lit at the summit.',
     },
   },
+};
+
+/**
+ * The home page's terminal mock, in the same shape the catalogue declares a
+ * port's preview in.
+ *
+ * It lives here because it is editorial: an invented session, chosen to show
+ * the syntax roles off. Keeping it in the catalogue's shape rather than as
+ * markup means the home mock is validated by the same tests that check every
+ * port's preview — that each role resolves, and that no span paints with
+ * nothing. As hardcoded markup it went unchecked, and `roleVar` fails silently.
+ */
+export const HOME_PREVIEW: Preview = {
+  title: 'ghostty — sp_night',
+  swatches: {
+    label: 'the eight accents, and their bright pairs',
+    keys: [
+      'brasa',
+      'sodio',
+      'taxi',
+      'ibira',
+      'estaiada',
+      'sereno',
+      'marginal',
+      'temporal',
+      'brasa_vivo',
+      'taxi_vivo',
+      'ibira_vivo',
+      'sereno_vivo',
+      'marginal_vivo',
+      'temporal_vivo',
+    ],
+  },
+  body: [
+    [
+      { t: '~/sp-night ', r: 'ui.accent' },
+      { t: '(main) ', r: 'git.modified' },
+      { t: '❯ ', r: 'ui.accent_alt' },
+      { t: 'cat theme.lua', r: 'ui.fg' },
+    ],
+    [{ t: '-- the sodium lamp that turns the whole city this colour', r: 'syntax.comment' }],
+    [
+      { t: 'local ', r: 'syntax.keyword' },
+      { t: 'palette ', r: 'syntax.variable' },
+      { t: '= ', r: 'syntax.operator' },
+      { t: 'require', r: 'syntax.keyword' },
+      { t: '(', r: 'syntax.punctuation' },
+      { t: '"sp_night.palette"', r: 'syntax.string' },
+      { t: ')', r: 'syntax.punctuation' },
+    ],
+    [],
+    [
+      { t: 'function ', r: 'syntax.keyword' },
+      { t: 'M', r: 'syntax.function' },
+      { t: '.', r: 'syntax.punctuation' },
+      { t: 'setup', r: 'syntax.method' },
+      { t: '(', r: 'syntax.punctuation' },
+      { t: 'opts', r: 'syntax.parameter' },
+      { t: ')', r: 'syntax.punctuation' },
+    ],
+    [
+      { t: '  if ', r: 'syntax.keyword' },
+      { t: 'vim', r: 'syntax.builtin' },
+      { t: '.o.background ', r: 'syntax.variable' },
+      { t: '~= ', r: 'syntax.operator' },
+      { t: '"dark" ', r: 'syntax.string' },
+      { t: 'then return ', r: 'syntax.keyword' },
+      { t: 'nil', r: 'syntax.constant' },
+      { t: ', ', r: 'syntax.punctuation' },
+      { t: '"dark only, by decision" ', r: 'syntax.string' },
+      { t: 'end', r: 'syntax.keyword' },
+    ],
+    [{ t: 'end', r: 'syntax.keyword' }],
+    [],
+    [
+      { t: '~/sp-night ', r: 'ui.accent' },
+      { t: '❯ ', r: 'ui.accent_alt' },
+      { t: 'spn check', r: 'ui.fg' },
+    ],
+    [
+      { t: '✓ ', r: 'diagnostic.ok' },
+      { t: 'contrast   ', r: 'ui.fg' },
+      { t: 'every pairing measured, AA on every surface', r: 'ui.fg_dim' },
+    ],
+    [
+      { t: '✓ ', r: 'diagnostic.ok' },
+      { t: 'accents    ', r: 'ui.fg' },
+      { t: 'separation ΔE ≥ 0.10 or ΔL ≥ 0.04', r: 'ui.fg_dim' },
+    ],
+  ],
 };

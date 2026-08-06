@@ -1,0 +1,33 @@
+{
+  "org": "sp-night",
+  "stars": 1,
+  "repos": 7,
+  "contributors": [
+    {
+      "login": "rogeriojunior31",
+      "id": 71011799,
+      "url": "https://github.com/rogeriojunior31",
+      "contributions": 106,
+      "repos": [
+        ".github",
+        "eza",
+        "ghostty",
+        "kitty",
+        "sp-night",
+        "sp-night.github.io"
+      ]
+    },
+    {
+      "login": "rodbove",
+      "id": 41601403,
+      "url": "https://github.com/rodbove",
+      "contributions": 12,
+      "repos": [
+        ".github",
+        "alacritty",
+        "sp-night",
+        "sp-night.github.io"
+      ]
+    }
+  ]
+}

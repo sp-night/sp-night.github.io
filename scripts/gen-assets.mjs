@@ -7,7 +7,7 @@
  * Outputs into public/: og-<flavor>.png (1200x630), favicon-<flavor>.svg,
  * logo-<flavor>.svg, palette-<flavor>.svg, the touch/PWA icons with
  * site.webmanifest, and the hex + ports tables kept between markers in
- * README.md. Re-run whenever the palette or resources/ports.yml changes.
+ * README.md. Re-run whenever the palette or src/data/ports.yml changes.
  * Every colour below is read from src/data/palette.json — no hex is written
  * by hand.
  */
@@ -20,10 +20,17 @@ import { parse as parseYaml } from 'yaml';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const palette = JSON.parse(readFileSync(join(root, 'src/data/palette.json'), 'utf8'));
 
-const SURFACES = ['vao', 'laje', 'concreto', 'vidro', 'fiacao'];
-const TEXT = ['fg', 'fg_dim', 'fg_muted'];
-const ACCENTS = ['brasa', 'sodio', 'taxi', 'ibira', 'estaiada', 'sereno', 'marginal', 'temporal'];
-const VIVO = ['brasa_vivo', 'taxi_vivo', 'ibira_vivo', 'sereno_vivo', 'marginal_vivo', 'temporal_vivo'];
+/* The bands come from the contract, the same way src/data/palette.ts reads
+   them. They used to be four hand-written lists here, and when `fg_vivo` was
+   added to the text band every image this script draws — the palette strips,
+   the OG cards — and the README's hex table dropped it without a word. A
+   generator that has its own idea of what the palette contains is a second
+   source of truth wearing a script's clothes. */
+const band = (id) => palette.groups[id].keys;
+const SURFACES = band('surfaces');
+const TEXT = band('text');
+const ACCENTS = band('accents');
+const VIVO = band('vivo');
 
 /** Fixed-seed PRNG — the OG skyline must be identical on every run. */
 function mulberry32(seed) {
@@ -110,6 +117,56 @@ function ogSvg(flavor) {
   ${swatches}
 </svg>`;
 }
+
+/**
+ * The social card for one port page.
+ *
+ * Same scene as the site card, so a shared port link is recognisably the same
+ * project — the headline is the only thing that changes. One card per port in
+ * the default flavour, because a page emits exactly one og:image and three
+ * would be two dead files each.
+ */
+function portOgSvg(flavorId, flavor, port) {
+  const c = flavor.colors;
+  const install = port.install.replaceAll('{flavor}', flavorId);
+  const swatches = ACCENTS.map(
+    (k, i) => `<rect x="${72 + i * 52}" y="470" width="40" height="40" rx="8" fill="${c[k]}"/>`,
+  ).join('');
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${c.vao}"/>
+      <stop offset="0.72" stop-color="${c.vao}"/>
+      <stop offset="1" stop-color="${c.laje}"/>
+    </linearGradient>
+    <radialGradient id="lamp" cx="0.5" cy="0.1" r="0.75">
+      <stop offset="0" stop-color="${c.sodio}" stop-opacity="0.26"/>
+      <stop offset="0.55" stop-color="${c.sodio}" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="${c.sodio}" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#sky)"/>
+  <rect width="1200" height="630" fill="url(#lamp)"/>
+  <g opacity="0.5">${skyline(c)}</g>
+  <rect x="0" y="626" width="1200" height="4" fill="${c.vao}"/>
+
+  <g transform="translate(72 76) scale(0.72)">${markInline(flavor)}</g>
+  <text x="132" y="114" font-family="ui-monospace, monospace" font-size="30" font-weight="700" fill="${c.fg}">SP Night</text>
+
+  <text x="72" y="268" font-family="ui-sans-serif, system-ui, sans-serif" font-size="76" font-weight="640" fill="${c.fg}">SP Night for</text>
+  <text x="72" y="352" font-family="ui-sans-serif, system-ui, sans-serif" font-size="76" font-weight="640" fill="${c.sodio}">${esc(port.name)}</text>
+
+  <text x="72" y="414" font-family="ui-monospace, monospace" font-size="26" fill="${c.fg_dim}">${esc(install)}</text>
+
+  ${swatches}
+</svg>`;
+}
+
+/** SVG text is XML: a port name or path with an ampersand would break the card. */
+const esc = (s) =>
+  s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 
 /**
  * The mark: Pico do Jaraguá at dusk. Jaraguá (1,135 m) and Pico do Papagaio
@@ -277,7 +334,12 @@ replaceReadmeBlock(
   ].join('\n'),
 );
 
-const registry = parseYaml(readFileSync(join(root, 'resources/ports.yml'), 'utf8'));
+/* A second parse of the catalogue, independent of src/data/ports.ts. It cannot
+   import that module: the loader reads its YAML through Vite's `?raw`, which
+   plain Node does not resolve. Only four fields are read here, and the README
+   table this feeds is asserted against the catalogue by tests/readme.test.ts —
+   so the duplication cannot drift silently even though it is duplication. */
+const registry = parseYaml(readFileSync(join(root, 'src/data/ports.yml'), 'utf8'));
 
 /* Every port in the registry is published, so there is no status to report —
    the useful columns are where to get it and where the file goes. */
@@ -289,5 +351,14 @@ function portsTable() {
 }
 
 replaceReadmeBlock('ports-table', portsTable());
+
+/* One social card per port page. The default flavour only — a page emits one
+   og:image, so three would be two dead files each. */
+const DEFAULT_FLAVOR = 'noite';
+for (const p of registry.ports) {
+  const svg = portOgSvg(DEFAULT_FLAVOR, palette.flavors[DEFAULT_FLAVOR], p);
+  await sharp(Buffer.from(svg)).png().toFile(join(root, `public/og-port-${p.slug}.png`));
+}
+console.log(`og-port-*.png (${registry.ports.length})`);
 
 console.log(`\n${SURFACES.length} surfaces · ${ACCENTS.length} accents · ${Object.keys(palette.flavors).length} flavours`);

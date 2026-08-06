@@ -1,44 +1,77 @@
 ---
 /**
- * A synthetic terminal, coloured entirely through the semantic role layer.
- * Stands in for a real screenshot: it is always in sync with the palette and
- * retints with the flavour switcher.
+ * A synthetic terminal, drawn from a declarative preview and coloured entirely
+ * through the role layer. It stands in for a screenshot: it cannot fall out of
+ * sync with the palette, and it retints with the flavour switcher.
+ *
+ * The same shape the port catalogue declares, so this renders a port's preview
+ * and the port repository's own SVG from one description. Where a preview
+ * prints a hex as *text* — `{r:ui.bg}`, the mockup of a command that reports
+ * the colour it is painting with — the value is resolved per flavour into
+ * `data-f` spans. The colour of a span is always a custom property, never a
+ * resolved hex: a hex in an attribute would freeze the mock to one flavour and
+ * plant a literal where tests/no-raw-hex.test.ts would find it.
  */
-import { roleVar, COLOUR_COUNT, MEASURED_PAIRS } from '../data/palette';
+import type { Preview } from '../data/ports';
+import { isFlavored } from '../data/ports';
+import { previewText, spanColor } from '../data/preview';
+import { flavors, keyVar, roleVar } from '../data/palette';
 
 interface Props {
-  /** Label shown in the title bar. */
-  title?: string;
+  preview: Preview;
   compact?: boolean;
+  /** Thumbnail mode: show only the first N lines, faded out at the bottom. */
+  lines?: number;
+  /** For a decorative thumbnail whose card already carries the name and blurb. */
+  decorative?: boolean;
 }
-const { title = 'ghostty — sp_night', compact = false } = Astro.props;
 
-const s = (group: string, role: string) => `color: ${roleVar(group, role)}`;
+const { preview, compact = false, lines, decorative = false } = Astro.props;
+
+const body = lines ? preview.body.slice(0, lines) : preview.body;
+
+const swatchVars = (preview.swatches.roles ?? []).map((r) => {
+  const [g, role] = r.split('.');
+  return roleVar(g!, role!);
+});
+const swatches = swatchVars.length
+  ? swatchVars
+  : (preview.swatches.keys ?? []).map((k) => keyVar(k));
+
+const classes = ['term', compact && 'term--compact', lines && 'term--thumb']
+  .filter(Boolean)
+  .join(' ');
 ---
 
-<div class={`term${compact ? ' term--compact' : ''}`} role="img" aria-label={`A terminal window themed with SP Night, titled ${title}`}>
+<div
+  class={classes}
+  role={decorative ? undefined : 'img'}
+  aria-hidden={decorative ? 'true' : undefined}
+  aria-label={decorative ? undefined : `A terminal window themed with SP Night, titled ${preview.title}`}
+>
   <div class="term__bar">
     <span class="term__dots" aria-hidden="true"><i></i><i></i><i></i></span>
-    <span class="term__title mono">{title}</span>
+    <span class="term__title mono">{
+      isFlavored(preview.title)
+        ? flavors.map((f) => <span data-f={f.id}>{previewText(preview.title, f)}</span>)
+        : preview.title
+    }</span>
   </div>
 
-  <pre class="term__body mono"><span style={s('ui', 'accent')}>~/sp-night</span> <span style={s('git', 'modified')}>(main)</span> <span style={s('ui', 'accent_alt')}>❯</span> cat theme.lua
-<span style={s('syntax', 'comment')}>-- the sodium lamp that turns the whole city this colour</span>
-<span style={s('syntax', 'keyword')}>local</span> <span style={s('syntax', 'variable')}>palette</span> <span style={s('syntax', 'operator')}>=</span> <span style={s('syntax', 'keyword')}>require</span>(<span style={s('syntax', 'string')}>"sp_night.palette"</span>)
+  <pre class="term__body mono">{body.map((line, i) => (<>{i > 0 && '\n'}{line.map((s) => (
+    <span class={s.b ? 'b' : undefined} style={`color: ${spanColor(s)}`}>{
+      isFlavored(s.t)
+        ? flavors.map((f) => <span data-f={f.id}>{previewText(s.t, f)}</span>)
+        : s.t
+    }</span>
+  ))}</>))}</pre>
 
-<span style={s('syntax', 'keyword')}>function</span> <span style={s('syntax', 'function')}>M</span>.<span style={s('syntax', 'method')}>setup</span>(<span style={s('syntax', 'parameter')}>opts</span>)
-  <span style={s('syntax', 'variable')}>opts</span>.<span style={s('syntax', 'property')}>flavor</span> <span style={s('syntax', 'operator')}>=</span> <span style={s('syntax', 'variable')}>opts</span>.<span style={s('syntax', 'property')}>flavor</span> <span style={s('syntax', 'keyword')}>or</span> <span style={s('syntax', 'string')}>"noite"</span>
-  <span style={s('syntax', 'keyword')}>if</span> <span style={s('syntax', 'builtin')}>vim</span>.<span style={s('syntax', 'property')}>o</span>.<span style={s('syntax', 'property')}>background</span> <span style={s('syntax', 'operator')}>~=</span> <span style={s('syntax', 'string')}>"dark"</span> <span style={s('syntax', 'keyword')}>then</span>
-    <span style={s('syntax', 'keyword')}>return</span> <span style={s('syntax', 'constant')}>nil</span>, <span style={s('syntax', 'string')}>"dark only, by decision"</span>
-  <span style={s('syntax', 'keyword')}>end</span>
-  <span style={s('syntax', 'keyword')}>return</span> <span style={s('syntax', 'type')}>Theme</span>:<span style={s('syntax', 'constructor')}>new</span>(<span style={s('syntax', 'variable')}>palette</span>[<span style={s('syntax', 'variable')}>opts</span>.<span style={s('syntax', 'property')}>flavor</span>], <span style={s('syntax', 'number')}>{COLOUR_COUNT}</span>)
-<span style={s('syntax', 'keyword')}>end</span>
-
-<span style={s('ui', 'accent')}>~/sp-night</span> <span style={s('ui', 'accent_alt')}>❯</span> gen check
-<span style={s('diagnostic', 'ok')}>✓</span> 3 flavors · {COLOUR_COUNT} colours · 5 role groups
-<span style={s('diagnostic', 'ok')}>✓</span> contrast   <span style={s('ui', 'fg_dim')}>{MEASURED_PAIRS} pairs per flavor, AA on every surface</span>
-<span style={s('diagnostic', 'warn')}>!</span> fg_muted   <span style={s('ui', 'fg_dim')}>3.02:1 on vidro (warn-only by policy)</span>
-<span style={s('diagnostic', 'ok')}>✓</span> accents    <span style={s('ui', 'fg_dim')}>separation ΔE ≥ 0.10 or ΔL ≥ 0.04</span></pre>
+  <div class="term__strip">
+    <span class="term__strip-label mono">{preview.swatches.label}</span>
+    <div class="term__swatches" aria-hidden="true">
+      {swatches.map((v) => <span style={`background: ${v}`}></span>)}
+    </div>
+  </div>
 </div>
 
 <style>
@@ -98,8 +131,48 @@ const s = (group: string, role: string) => `color: ${roleVar(group, role)}`;
     tab-size: 2;
   }
 
+  .term__body .b {
+    font-weight: 700;
+  }
+
   .term--compact .term__body {
     font-size: 0.72rem;
     line-height: 1.6;
+  }
+
+  /* ------------------------------------------------------------ swatches */
+
+  .term__strip {
+    padding: 0 1.1rem 1rem;
+  }
+
+  .term__strip-label {
+    display: block;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    color: var(--sp-fg-muted);
+    margin-bottom: 0.4rem;
+  }
+
+  .term__swatches {
+    display: flex;
+    gap: 4px;
+  }
+
+  .term__swatches span {
+    flex: 1;
+    height: 12px;
+    border-radius: 3px;
+  }
+
+  /* --------------------------------------------------------- thumbnail */
+
+  /* The strip is the most recognisable part of the mock, so it survives the
+     crop: only the session fades. */
+  .term--thumb .term__body {
+    overflow: hidden;
+    padding-bottom: 0.4rem;
+    -webkit-mask-image: linear-gradient(to bottom, black 68%, transparent);
+    mask-image: linear-gradient(to bottom, black 68%, transparent);
   }
 </style>

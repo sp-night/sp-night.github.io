@@ -10,7 +10,8 @@
     "check": "astro check",
     "test": "vitest run",
     "test:watch": "vitest",
-    "assets": "node scripts/gen-assets.mjs"
+    "assets": "node scripts/gen-assets.mjs",
+    "contributors": "node scripts/gen-contributors.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.7",
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@astrojs/markdown-remark": "^6.3.11",
     "@types/node": "^26.1.2",
     "sharp": "^0.34.5",
     "typescript": "^5.9.3",

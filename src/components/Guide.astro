@@ -1,0 +1,35 @@
+---
+/**
+ * A port's install guide: prose from the catalogue, with every fenced block
+ * rendered as a CodeBlock so it carries the same copy button as every other
+ * snippet on the site.
+ *
+ * The `.guide` styles live in global.css, not here — Astro's scoped styles do
+ * not reach `set:html`, and a scoped rule for server-injected markup fails by
+ * looking unstyled rather than by failing.
+ */
+import CodeBlock from './CodeBlock.astro';
+import { renderMd, splitGuide } from '../data/guide';
+
+interface Props {
+  markdown: string;
+}
+
+const blocks = await Promise.all(
+  splitGuide(Astro.props.markdown).map(async (b) =>
+    b.kind === 'prose' ? { ...b, html: await renderMd(b.md) } : b,
+  ),
+);
+---
+
+<div class="guide">
+  {
+    blocks.map((b) =>
+      b.kind === 'code' ? (
+        <CodeBlock code={b.code} label={b.lang} />
+      ) : (
+        <div set:html={b.html} />
+      ),
+    )
+  }
+</div>

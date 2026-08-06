@@ -1,7 +1,11 @@
 ---
 import Base from '../layouts/Base.astro';
+import Contributors from '../components/Contributors.astro';
+import data from '../data/contributors.json';
 import { ports } from '../data/ports';
-import { flavors, keyVar } from '../data/palette';
+
+const { contributors } = data;
+import { flavors, keyVar, org } from '../data/palette';
 
 const steps = [
   {
@@ -131,6 +135,57 @@ const example = [
       Judgement calls are welcome too. The jaragua flavour was rebuilt because its surfaces read as
       dark green rather than black, and that started as somebody simply not enjoying looking at it.
     </p>
+
+    <div class="actions">
+      <a class="btn btn--primary" href={org.colourProblem}>Report a colour problem ↗</a>
+      <a class="btn" href={org.portProposal}>Propose a port ↗</a>
+      <a class="btn btn--ghost" href={org.contributing}>CONTRIBUTING.md ↗</a>
+    </div>
+  </section>
+
+  <section aria-labelledby="contributors">
+    <h2 id="contributors">Who has built it</h2>
+    <p>
+      {contributors.length === 1 ? 'One person has' : `${contributors.length} people have`} committed
+      to SP Night across {data.repos} repositories — the palette, the engine, the ports and this
+      site. Every name here is a person; nothing generated is credited.
+    </p>
+    <Contributors />
+  </section>
+
+  <section aria-labelledby="where">
+    <h2 id="where">Where the pieces live</h2>
+    <ul class="repos" role="list">
+      <li>
+        <a class="repos__name mono" href={org.engine}>sp-night/sp-night ↗</a>
+        <p>
+          The contract and the tool. The palette, the role layer, and the engine that turns a
+          port's mapping into finished files — and refuses to build when the contrast floors are
+          not met. A port is added to its catalogue; this site receives it by sync.
+        </p>
+      </li>
+      <li>
+        <a class="repos__name mono" href={org.site}>sp-night/sp-night.github.io ↗</a>
+        <p>
+          This website. It vendors the contract so <a href="/palette.json">/palette.json</a> and
+          <a href="/roles.json">/roles.json</a> can be served without depending on the engine at
+          build time.
+        </p>
+      </li>
+      {
+        ports.map((p) => (
+          <li>
+            <a class="repos__name mono" href={p.repo}>
+              sp-night/{p.slug} ↗
+            </a>
+            <p>
+              The {p.name} port — finished theme files, and the mapping that produced them.{' '}
+              <a href={`/ports/${p.slug}`}>How to install it</a>.
+            </p>
+          </li>
+        ))
+      }
+    </ul>
   </section>
 </Base>
 
@@ -240,5 +295,48 @@ const example = [
     line-height: 1.7;
     overflow-x: auto;
     white-space: pre;
+  }
+  /* ------------------------------------------------------------ actions */
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin-top: 1.6rem;
+  }
+
+  /* -------------------------------------------------------------- repos */
+
+  /* The only section that is a grid rather than prose — the measure would put
+     it in one column. */
+  section:has(.repos) {
+    max-width: none;
+  }
+
+  .repos {
+    list-style: none;
+    padding: 0;
+    margin: 1.2rem 0 0;
+    display: grid;
+    gap: 0.8rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 21rem), 1fr));
+  }
+
+  .repos li {
+    padding: 1rem 1.1rem;
+    background: var(--sp-laje);
+    border: var(--border);
+    border-radius: var(--radius);
+  }
+
+  .repos__name {
+    font-size: var(--step--1);
+    overflow-wrap: anywhere;
+  }
+
+  .repos p {
+    margin: 0.45rem 0 0;
+    font-size: var(--step--1);
+    color: var(--sp-fg-dim);
   }
 </style>

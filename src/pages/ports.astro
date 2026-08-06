@@ -1,9 +1,17 @@
 ---
 import Base from '../layouts/Base.astro';
+import TerminalMock from '../components/TerminalMock.astro';
 import { ports, portsByGroup } from '../data/ports';
+import { inlineMd } from '../data/guide';
 
 const names = ports.map((p) => p.name).join(' and ');
 const description = `SP Night for ${names} — every port a repository of its own, installable today.`;
+
+// Blurbs are markdown fragments in the catalogue; the card used to print the
+// backticks. The install path and the caveat moved to the port's own page.
+const blurbs = Object.fromEntries(
+  await Promise.all(ports.map(async (p) => [p.slug, await inlineMd(p.blurb)] as const)),
+);
 ---
 
 <Base title="Ports" description={description}>
@@ -24,27 +32,25 @@ const description = `SP Night for ${names} — every port a repository of its ow
         </h2>
         <ul role="list" class="ports">
           {items.map((p, i) => (
-            <li class:list={['port', 'reveal', { 'port--live': p.repo }]} style={`--d: ${i * 60}ms`}>
+            <li class="port reveal" style={`--d: ${i * 60}ms`}>
+              <div class="port__thumb">
+                <TerminalMock preview={p.preview} compact lines={7} decorative />
+              </div>
               <div class="port__head">
-                <a class="port__name" href={p.homepage}>{p.name}</a>
+                {/* Stretched: the whole card is the hit target, without nesting
+                    anchors or reaching for JavaScript. */}
+                <a class="port__name" href={`/ports/${p.slug}`}>{p.name}</a>
                 <a class="port__status port__status--live" href={p.repo}>
                   <span class="port__lamp" aria-hidden="true" /> repo ↗
                 </a>
               </div>
-              <p class="port__blurb">{p.blurb}</p>
+              <p class="port__blurb" set:html={blurbs[p.slug]} />
               <dl class="port__meta mono">
                 <div>
                   <dt>file</dt>
                   <dd>{p.install}</dd>
                 </div>
-                {p.activate && (
-                  <div>
-                    <dt>use</dt>
-                    <dd>{p.activate}</dd>
-                  </div>
-                )}
               </dl>
-              {p.note && <p class="port__note">{p.note}</p>}
             </li>
           ))}
         </ul>
@@ -95,17 +101,26 @@ const description = `SP Night for ${names} — every port a repository of its ow
     margin: 1.1rem 0 0;
     display: grid;
     gap: 0.9rem;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 24rem), 1fr));
   }
 
+  /* Every port carries the lamp: `repo` is required, so there is no unshipped
+     card to distinguish it from. */
   .port {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 0.55rem;
     padding: 1.05rem 1.15rem;
-    background: var(--sp-laje);
     border: var(--border);
+    border-color: color-mix(in oklab, var(--sp-sodio) 40%, var(--sp-fiacao));
     border-radius: var(--radius);
+    background: linear-gradient(
+        160deg,
+        color-mix(in oklab, var(--sp-sodio) 6%, transparent),
+        transparent 45%
+      ),
+      var(--sp-laje);
     transition: border-color 0.25s ease, transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1),
       box-shadow 0.25s ease, background-color 0.45s ease;
   }
@@ -116,15 +131,15 @@ const description = `SP Night for ${names} — every port a repository of its ow
     box-shadow: 0 14px 30px -18px color-mix(in oklab, var(--sp-sodio) 55%, transparent);
   }
 
-  /* the shipped port carries the lamp: warm border even at rest */
-  .port--live {
-    border-color: color-mix(in oklab, var(--sp-sodio) 40%, var(--sp-fiacao));
-    background: linear-gradient(
-        160deg,
-        color-mix(in oklab, var(--sp-sodio) 6%, transparent),
-        transparent 45%
-      ),
-      var(--sp-laje);
+  .port:focus-within {
+    border-color: var(--sp-sodio);
+  }
+
+  /* ---------------------------------------------------------- thumbnail */
+
+  .port__thumb {
+    margin: -0.15rem 0 0.35rem;
+    pointer-events: none;
   }
 
   .port__head {
@@ -143,6 +158,20 @@ const description = `SP Night for ${names} — every port a repository of its ow
 
   .port__name:hover {
     color: var(--sp-marginal-vivo);
+  }
+
+  /* The stretched hit target. The repo pill lifts above it so it stays
+     independently clickable. */
+  .port__name::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+  }
+
+  .port__status--live {
+    position: relative;
+    z-index: 1;
   }
 
   .port__status {

@@ -1,0 +1,66 @@
+name: refresh the contributor list
+
+# The wall of people on /contribute is a build-time snapshot, so it goes stale
+# the moment somebody's first pull request is merged.
+#
+# It opens a pull request rather than pushing to main. Same reasoning as the
+# contract sync in the engine: a file that changes without a diff anyone reads
+# is a file nobody trusts — and an empty diff means the list was already right,
+# which is the answer you want most weeks.
+#
+# Needs no secret. The GITHUB_TOKEN of the run is enough to read public data,
+# and it exists only to lift the 60-requests-an-hour anonymous limit.
+
+on:
+  schedule:
+    # Monday, early, and not on the hour: a queue nobody is competing for.
+    - cron: "23 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: collect the contributors
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run contributors
+
+      # The site's own suite is the gate, as it is for the contract: a list the
+      # page cannot render must not reach main even as a pull request.
+      - run: npm run check && npm test && npm run build
+
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          branch: chore/refresh-the-contributors
+          base: main
+          commit-message: |
+            chore(data): refresh the contributor list
+
+            Collected from every public repository in the organisation. People
+            only — bots and generated commits are filtered by
+            scripts/gen-contributors.mjs.
+          title: "chore(data): refresh the contributor list"
+          body: |
+            `src/data/contributors.json` no longer matched the organisation.
+
+            `npm run check && npm test && npm run build` passed against the new
+            list before this was opened.
+
+            An empty diff means it was already up to date.
+          labels: |
+            generated
+          delete-branch: true

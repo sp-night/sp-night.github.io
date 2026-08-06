@@ -1,17 +1,17 @@
 ---
 import Base from '../layouts/Base.astro';
 import ColorCard from '../components/ColorCard.astro';
-import { GROUPS, GROUP_IDS, flavors } from '../data/palette';
+import { COLOUR_COUNT, GROUPS, GROUP_IDS, flavors } from '../data/palette';
 
 const groupOrder = GROUP_IDS;
 ---
 
 <Base
   title="Palette"
-  description="Twenty-two colours across three dark flavours, each named after something in São Paulo — surfaces, text, accents and the terminal bright pairs."
+  description={`${COLOUR_COUNT} colours across three dark flavours, each named after something in São Paulo — surfaces, text, accents and the terminal bright pairs.`}
 >
   <p class="eyebrow">palette</p>
-  <h1>Twenty-two colours, three ways to look at the same city</h1>
+  <h1>{COLOUR_COUNT} colours, three ways to look at the same city</h1>
   <p class="lede">
     Every flavour is dark by decision, not by omission. They differ in hue and chroma, never in
     brightness — switch between them with the control in the header and the whole site follows.

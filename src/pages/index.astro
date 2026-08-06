@@ -4,8 +4,11 @@ import Skyline from '../components/Skyline.astro';
 import HeroClock from '../components/HeroClock.astro';
 import TerminalMock from '../components/TerminalMock.astro';
 import FlavorSwitcher from '../components/FlavorSwitcher.astro';
-import { flavors, GROUPS, GROUP_IDS } from '../data/palette';
+import GithubIcon from '../components/GithubIcon.astro';
+import Contributors from '../components/Contributors.astro';
+import { flavors, GROUPS, GROUP_IDS, COLOUR_COUNT, org } from '../data/palette';
 import { ports } from '../data/ports';
+import { HOME_PREVIEW } from '../data/content';
 
 /**
  * Derived, never asserted: the counts below come from the data this page
@@ -14,6 +17,10 @@ import { ports } from '../data/ports';
 const base = flavors[0]!;
 const surfaces = Object.keys(base.list[0]!.contrast).length;
 const pairs = base.list.length * surfaces;
+
+// The nouns are prose; the numbers are not. This sentence read "three levels
+// of text" for as long as it took the contract to grow a fourth.
+const bandSize = (id: string) => GROUPS[id]!.keys.length;
 
 const facts = [
   { n: String(flavors.length), label: 'flavours', sub: 'all dark, by decision' },
@@ -40,9 +47,14 @@ const facts = [
         eyeballed.
       </p>
 
+      {/* The first action is the one that ends with a theme installed. The
+          palette is the beautiful page, but it installs nothing. */}
       <div class="hero__actions rise" style="--d: 470ms">
-        <a class="btn btn--primary" href="/palette">See the palette</a>
-        <a class="btn" href="/spec">Read the spec</a>
+        <a class="btn btn--primary" href="/ports">Install a theme</a>
+        <a class="btn" href="/palette">See the palette</a>
+        <a class="btn btn--ghost" href={org.url}>
+          <GithubIcon size={16} /> GitHub
+        </a>
         <HeroClock />
       </div>
     </div>
@@ -64,7 +76,7 @@ const facts = [
     </ul>
   </section>
 
-  <section class="wrap section split reveal">
+  <section class="band"><div class="wrap section split reveal">
     <div>
       <p class="eyebrow">one palette, three cities</p>
       <h2>Same city, three ways of looking at it</h2>
@@ -84,15 +96,16 @@ const facts = [
         }
       </dl>
     </div>
-    <TerminalMock />
-  </section>
+    <TerminalMock preview={HOME_PREVIEW} />
+  </div></section>
 
   <section class="wrap section reveal">
     <p class="eyebrow">the palette</p>
-    <h2>Twenty-two colours, named after the city</h2>
+    <h2>{COLOUR_COUNT} colours, named after the city</h2>
     <p class="lede">
-      Five surfaces, three levels of text, eight accents and their bright pairs — each one carrying
-      the name of the thing in São Paulo it came from.
+      {bandSize('surfaces')} surfaces, {bandSize('text')} levels of text, {bandSize('accents')} accents
+      and their {bandSize('vivo')} bright pairs — each one carrying the name of the thing in São Paulo it
+      came from.
     </p>
 
     <div class="strip">
@@ -117,7 +130,7 @@ const facts = [
     <p><a href="/palette">Every colour, with its meaning and contrast →</a></p>
   </section>
 
-  <section class="wrap section reveal">
+  <section class="band"><div class="wrap section reveal">
     <p class="eyebrow">ports</p>
     <h2>Themes you can install today</h2>
     <p class="lede">
@@ -134,6 +147,18 @@ const facts = [
     <p>
       <a href="/ports">Where each file goes →</a>
     </p>
+  </div></section>
+
+  <section class="wrap section reveal">
+    <p class="eyebrow">contributors</p>
+    <h2>Built by people, in the open</h2>
+    <p class="lede">
+      The palette, the engine, every port and this site are public. Adding a port means mapping one
+      app's config keys onto roles that are already decided — and the list below is who has done it
+      so far.
+    </p>
+    <Contributors compact />
+    <p><a href="/contribute">How to build the next one →</a></p>
   </section>
 </Base>
 

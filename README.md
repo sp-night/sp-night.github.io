@@ -15,7 +15,7 @@
 <p align="center">
   <a href="https://github.com/sp-night/sp-night.github.io/actions/workflows/deploy.yml"><img src="https://github.com/sp-night/sp-night.github.io/actions/workflows/deploy.yml/badge.svg" alt="Deploy to GitHub Pages"></a>
   <img src="https://img.shields.io/badge/flavours-3-f2984a" alt="3 flavours">
-  <img src="https://img.shields.io/badge/colours-22-f2984a" alt="22 colours">
+  <img src="https://img.shields.io/badge/colours-23-f2984a" alt="23 colours">
   <img src="https://img.shields.io/badge/license-MIT-2e3040" alt="MIT license">
 </p>
 
@@ -58,25 +58,25 @@ nothing gets easier or harder to read when you switch.
 
 ## The palette
 
-Five surfaces · three levels of text · eight accents · six bright pairs — 22 colours,
+Five surfaces · four levels of text · eight accents · six bright pairs — 23 colours,
 each named after the thing in São Paulo it came from. Every pairing is measured before
 it ships, never eyeballed.
 
 **noite**
-<img src="public/palette-noite.svg" width="100%" alt="The 22 colours of noite, grouped: surfaces, text, accents, bright pairs">
+<img src="public/palette-noite.svg" width="100%" alt="The 23 colours of noite, grouped: surfaces, text, accents, bright pairs">
 
 **garoa**
-<img src="public/palette-garoa.svg" width="100%" alt="The 22 colours of garoa, grouped: surfaces, text, accents, bright pairs">
+<img src="public/palette-garoa.svg" width="100%" alt="The 23 colours of garoa, grouped: surfaces, text, accents, bright pairs">
 
 **jaragua**
-<img src="public/palette-jaragua.svg" width="100%" alt="The 22 colours of jaragua, grouped: surfaces, text, accents, bright pairs">
+<img src="public/palette-jaragua.svg" width="100%" alt="The 23 colours of jaragua, grouped: surfaces, text, accents, bright pairs">
 
 Full detail — glosses, OKLCH, WCAG ratios, the ANSI map — lives at
 [sp-night.github.io/palette](https://sp-night.github.io/palette).
 
 <!-- palette-table:start -->
 <details>
-<summary>The 22 hex values, all three flavours</summary>
+<summary>The 23 hex values, all three flavours</summary>
 
 | colour | `noite` | `garoa` | `jaragua` |
 | --- | --- | --- | --- |
@@ -85,6 +85,7 @@ Full detail — glosses, OKLCH, WCAG ratios, the ANSI map — lives at
 | `concreto` | `#1d1f2d` | `#26282a` | `#151a17` |
 | `vidro` | `#272937` | `#313436` | `#202622` |
 | `fiacao` | `#373943` | `#414346` | `#323733` |
+| `fg_vivo` | `#e7ebff` | `#dae1ea` | `#e7eee9` |
 | `fg` | `#d3d7eb` | `#c7cdd6` | `#d3dad5` |
 | `fg_dim` | `#868999` | `#8d949f` | `#868b87` |
 | `fg_muted` | `#707380` | `#767d88` | `#707471` |
@@ -110,14 +111,20 @@ Full detail — glosses, OKLCH, WCAG ratios, the ANSI map — lives at
 
 One repository per themed app, each holding finished theme files — plain text, no
 build step to use them. A port is listed only once it is published, so everything
-below can be installed today. The registry is
-[`resources/ports.yml`](resources/ports.yml) and the table is generated from it by
-`npm run assets`.
+below can be installed today, and each one has its own page with install
+instructions, the key-to-role table and a preview.
+
+The catalogue lives in [`sp-night/sp-night`](https://github.com/sp-night/sp-night)
+at `registry/ports.yml` and is vendored here as
+[`src/data/ports.yml`](src/data/ports.yml). The table below is generated from it
+by `npm run assets`, and `npm test` fails if it falls behind.
 
 <!-- ports-table:start -->
 | Port | Group | Installs to |
 | --- | --- | --- |
 | [Ghostty](https://github.com/sp-night/ghostty) | Terminals | `~/.config/ghostty/themes/sp_night_{flavor}` |
+| [kitty](https://github.com/sp-night/kitty) | Terminals | `~/.config/kitty/sp_night_{flavor}.conf` |
+| [Alacritty](https://github.com/sp-night/alacritty) | Terminals | `~/.config/alacritty/themes/sp_night_{flavor}.toml` |
 | [eza](https://github.com/sp-night/eza) | Shell & CLI | `~/.config/eza/theme.yml` |
 <!-- ports-table:end -->
 
@@ -155,18 +162,28 @@ GitHub Pages. Other branches and PRs run the same checks via `ci.yml` without de
 
 ## Updating the palette · adding ports
 
-- Palette or roles change → replace `src/data/palette.json` / `src/data/roles.json`,
-  run `npm test` (the contrast tests are the gate) and `npm run assets`.
-- New port, or a port ships as its own repo → edit
-  [`resources/ports.yml`](resources/ports.yml) (add the entry, or its `repo:` line)
-  and run `npm run assets` to refresh the table above. The site and
-  [sp-night.github.io/ports](https://sp-night.github.io/ports) read the same file
-  at build time.
+Everything in `src/data/` except `content.ts`, `palette.ts` and `ports.ts` is
+**vendored** from [`sp-night/sp-night`](https://github.com/sp-night/sp-night):
+the palette, the role layer, the audit summary and the port catalogue. Editing
+those copies here is a change that disappears at the next sync.
+
+- **Palette, roles or catalogue change** → make it in the engine. Its
+  `sync-ports.yml` copies the files across, redraws
+  [`public/previews/`](public/previews) and opens a pull request here, gated on
+  this repository's own `npm run check && npm test && npm run build`.
+- **A new port** → list it in the engine's `registry/ports.yml`. Merging the
+  sync pull request publishes `/ports/<slug>` — the page is generated from the
+  entry, so there is nothing to write here.
+- **Contributor list** → `npm run contributors`, or leave it to the weekly
+  workflow.
+
+`npm run assets` regenerates the images and the README tables, and is the one
+step still run by hand — `npm test` fails when its output is stale.
 
 Contributions are welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md) for how to
 propose a port or report a colour problem, and [`SITE.md`](SITE.md) for the full
 design plan and decision log.
 
 <p align="center">
-  <sub>SP Night — built by Rogerio Junior · MIT</sub>
+  <sub>SP Night — built by <a href="https://github.com/sp-night/sp-night.github.io/graphs/contributors">its contributors</a> · MIT</sub>
 </p>
