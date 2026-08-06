@@ -1,7 +1,7 @@
 /**
  * The palette, published as data at /palette.json.
  *
- * This is the contract the whole project rests on: 22 named colours per
+ * This is the contract the whole project rests on: 23 named colours per
  * flavour, and nothing else. Anything that wants to produce an SP Night theme
  * reads this file — so the theme survives any tool that writes it.
  *

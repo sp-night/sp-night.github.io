@@ -51,10 +51,10 @@ describe('vendored data shape', () => {
   });
 
   it.each(flavors.map((f) => [f.id, f] as const))(
-    '%s carries all 22 palette keys as valid hex',
+    '%s carries all 23 palette keys as valid hex',
     (_id, f) => {
       expect(f.list).toHaveLength(ORDER.length);
-      expect(ORDER).toHaveLength(22);
+      expect(ORDER).toHaveLength(23);
       for (const c of f.list) {
         expect(c.hex).toMatch(/^#[0-9a-f]{6}$/i);
       }
@@ -112,7 +112,7 @@ describe('CSS emission', () => {
     const block = cssVars(flavor('noite'));
     expect(block).toContain('--sp-vao:');
     expect(block).toContain('--sp-brasa-vivo:');
-    expect(block.match(/--sp-/g)).toHaveLength(22);
+    expect(block.match(/--sp-/g)).toHaveLength(23);
   });
 
   it('emits a :root block and a visibility rule per flavour', () => {

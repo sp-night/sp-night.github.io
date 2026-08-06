@@ -149,8 +149,10 @@ export const GROUPS: Record<ColorGroup, { label: string; blurb: string; keys: Co
   },
   text: {
     label: 'Text',
-    blurb: 'Three levels of foreground, each holding AA contrast on the surfaces it is used over.',
-    keys: ['fg', 'fg_dim', 'fg_muted'],
+    blurb:
+      'Four levels of foreground, each holding AA contrast on the surfaces it is used over. ' +
+      'fg_vivo is the bright end: bold default text, and the terminal’s bright white.',
+    keys: ['fg_vivo', 'fg', 'fg_dim', 'fg_muted'],
   },
   accents: {
     label: 'Accents',
@@ -264,7 +266,7 @@ export const theme = {
   author: raw.author,
   repoUrl: 'https://github.com/sp-night',
   description:
-    'A dark colour scheme with São Paulo as its reference: the sodium street lamp, exposed concrete, the free span of the MASP, the drizzle before the rain. Three flavours, 22 colours, 17 targets generated from a single file.',
+    'A dark colour scheme with São Paulo as its reference: the sodium street lamp, exposed concrete, the free span of the MASP, the drizzle before the rain. Three flavours, 23 colours, 17 targets generated from a single file.',
 };
 
 /** `var(--sp-…)` for a palette key. */

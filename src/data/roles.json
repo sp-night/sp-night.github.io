@@ -10,6 +10,7 @@
     "selection": "vidro",
     "border": "fiacao",
     "border_active": "sodio",
+    "fg_bright": "fg_vivo",
     "fg": "fg",
     "fg_dim": "fg_dim",
     "fg_muted": "fg_muted",
@@ -86,6 +87,6 @@
     "bright_blue": "marginal_vivo",
     "bright_magenta": "temporal_vivo",
     "bright_cyan": "sereno_vivo",
-    "bright_white": "fg"
+    "bright_white": "fg_vivo"
   }
 }

@@ -99,7 +99,7 @@ const glossary = [
       <li>
         <strong class="mono">1 · palette</strong>
         <span>
-          22 named colours per flavour, in a single JSON file. This is the only place a hex value is
+          23 named colours per flavour, in a single JSON file. This is the only place a hex value is
           ever written down.
         </span>
       </li>
@@ -213,6 +213,20 @@ const glossary = [
       <code class="mono">estaiada</code>. The sixteen slots already have owners, and these two are
       identity colours rather than text colours.
     </p>
+    <p>
+      The text ramp gets the same lift, for the same reason. <code class="mono">fg_vivo</code> is
+      <code class="mono">fg</code> 0.06 lighter, and it is what a target reaches for when it
+      separates default text from <strong>bold</strong> default text — Alacritty's
+      <code class="mono">bright_foreground</code>, kitty's bold font colour.
+      <code class="mono">ui.fg_bright</code> names it and
+      <code class="mono">ansi.bright_white</code> resolves to it, so bold text in a terminal is
+      genuinely brighter instead of the same hex twice.
+      <code class="mono">ansi.white</code> stays <code class="mono">fg_dim</code>: the ANSI table
+      keeps the two ends of the ramp, and <code class="mono">fg</code> remains the terminal's plain
+      foreground. Here 0.06 is also the ceiling — <code class="mono">fg</code> in
+      <code class="mono">noite</code> already sits at OKLCH lightness 0.88, and asking for more
+      starts draining its chroma.
+    </p>
   </section>
 
   <section aria-labelledby="accent">
@@ -285,7 +299,7 @@ const glossary = [
   <section aria-labelledby="contrast">
     <h2 id="contrast">Contrast policy</h2>
     <p>
-      Every foreground is measured against every surface it can legally appear on: 70 pairs per
+      Every foreground is measured against every surface it can legally appear on: 74 pairs per
       flavour. A <span class="tag tag--gate">gate</span> that fails stops the build; a
       <span class="tag tag--warn">warn</span> is reported and looked at.
     </p>

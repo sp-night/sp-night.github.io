@@ -10,6 +10,7 @@
     "concreto": "painéis, cartões, barras — concreto aparente",
     "vidro": "seleção e elevação — vidro refletindo a rua",
     "fiacao": "bordas e divisórias — fiação aérea cortando o céu",
+    "fg_vivo": "texto aceso — bright white do terminal, texto bold",
     "fg": "texto principal",
     "fg_dim": "texto secundário e comentários",
     "fg_muted": "texto desativado, ornamentos",
@@ -40,6 +41,7 @@
         "vidro": "#272937",
         "fiacao": "#373943",
 
+        "fg_vivo": "#e7ebff",
         "fg": "#d3d7eb",
         "fg_dim": "#868999",
         "fg_muted": "#707380",
@@ -72,6 +74,7 @@
         "vidro": "#313436",
         "fiacao": "#414346",
 
+        "fg_vivo": "#dae1ea",
         "fg": "#c7cdd6",
         "fg_dim": "#8d949f",
         "fg_muted": "#767d88",
@@ -104,6 +107,7 @@
         "vidro": "#202622",
         "fiacao": "#323733",
 
+        "fg_vivo": "#e7eee9",
         "fg": "#d3dad5",
         "fg_dim": "#868b87",
         "fg_muted": "#707471",
