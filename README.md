@@ -15,7 +15,7 @@
 <p align="center">
   <a href="https://github.com/sp-night/sp-night.github.io/actions/workflows/deploy.yml"><img src="https://github.com/sp-night/sp-night.github.io/actions/workflows/deploy.yml/badge.svg" alt="Deploy to GitHub Pages"></a>
   <img src="https://img.shields.io/badge/flavours-3-f2984a" alt="3 flavours">
-  <img src="https://img.shields.io/badge/colours-22-f2984a" alt="22 colours">
+  <img src="https://img.shields.io/badge/colours-23-f2984a" alt="23 colours">
   <img src="https://img.shields.io/badge/license-MIT-2e3040" alt="MIT license">
 </p>
 
@@ -58,25 +58,25 @@ nothing gets easier or harder to read when you switch.
 
 ## The palette
 
-Five surfaces · three levels of text · eight accents · six bright pairs — 22 colours,
+Five surfaces · four levels of text · eight accents · six bright pairs — 23 colours,
 each named after the thing in São Paulo it came from. Every pairing is measured before
 it ships, never eyeballed.
 
 **noite**
-<img src="public/palette-noite.svg" width="100%" alt="The 22 colours of noite, grouped: surfaces, text, accents, bright pairs">
+<img src="public/palette-noite.svg" width="100%" alt="The 23 colours of noite, grouped: surfaces, text, accents, bright pairs">
 
 **garoa**
-<img src="public/palette-garoa.svg" width="100%" alt="The 22 colours of garoa, grouped: surfaces, text, accents, bright pairs">
+<img src="public/palette-garoa.svg" width="100%" alt="The 23 colours of garoa, grouped: surfaces, text, accents, bright pairs">
 
 **jaragua**
-<img src="public/palette-jaragua.svg" width="100%" alt="The 22 colours of jaragua, grouped: surfaces, text, accents, bright pairs">
+<img src="public/palette-jaragua.svg" width="100%" alt="The 23 colours of jaragua, grouped: surfaces, text, accents, bright pairs">
 
 Full detail — glosses, OKLCH, WCAG ratios, the ANSI map — lives at
 [sp-night.github.io/palette](https://sp-night.github.io/palette).
 
 <!-- palette-table:start -->
 <details>
-<summary>The 22 hex values, all three flavours</summary>
+<summary>The 23 hex values, all three flavours</summary>
 
 | colour | `noite` | `garoa` | `jaragua` |
 | --- | --- | --- | --- |
@@ -85,6 +85,7 @@ Full detail — glosses, OKLCH, WCAG ratios, the ANSI map — lives at
 | `concreto` | `#1d1f2d` | `#26282a` | `#151a17` |
 | `vidro` | `#272937` | `#313436` | `#202622` |
 | `fiacao` | `#373943` | `#414346` | `#323733` |
+| `fg_vivo` | `#e7ebff` | `#dae1ea` | `#e7eee9` |
 | `fg` | `#d3d7eb` | `#c7cdd6` | `#d3dad5` |
 | `fg_dim` | `#868999` | `#8d949f` | `#868b87` |
 | `fg_muted` | `#707380` | `#767d88` | `#707471` |
@@ -118,6 +119,8 @@ below can be installed today. The registry is
 | Port | Group | Installs to |
 | --- | --- | --- |
 | [Ghostty](https://github.com/sp-night/ghostty) | Terminals | `~/.config/ghostty/themes/sp_night_{flavor}` |
+| [kitty](https://github.com/sp-night/kitty) | Terminals | `~/.config/kitty/sp_night_{flavor}.conf` |
+| [Alacritty](https://github.com/sp-night/alacritty) | Terminals | `~/.config/alacritty/themes/sp_night_{flavor}.toml` |
 | [eza](https://github.com/sp-night/eza) | Shell & CLI | `~/.config/eza/theme.yml` |
 <!-- ports-table:end -->
 

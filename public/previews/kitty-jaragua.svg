@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="462" viewBox="0 0 840 462" role="img" aria-label="kitty themed with SP Night Pico do Jaraguá">
+  <style>.mono { font: 15px ui-monospace, 'JetBrains Mono', 'Fira Code', Menlo, monospace; }</style>
+  <rect width="840" height="462" rx="12" fill="#0c100d"/>
+  <rect x="0.5" y="0.5" width="839" height="461" rx="11.5" fill="none" stroke="#323733"/>
+  <path d="M0 12a12 12 0 0 1 12-12h816a12 12 0 0 1 12 12v30H0z" fill="#151a17"/>
+  <line x1="0" y1="42.5" x2="840" y2="42.5" stroke="#323733"/>
+  <circle cx="24" cy="21" r="5.5" fill="#ea5d5d"/>
+  <circle cx="42" cy="21" r="5.5" fill="#f5c66b"/>
+  <circle cx="60" cy="21" r="5.5" fill="#79d488"/>
+  <text x="420" y="26" text-anchor="middle" class="mono" fill="#707471">kitty — sp_night_jaragua</text>
+  <text x="26" y="82" xml:space="preserve" class="mono"><tspan fill="#f2984a">~/sp-night </tspan><tspan fill="#f5c66b">(main) </tspan><tspan fill="#6e92de">❯ </tspan><tspan fill="#d3dad5">kitty @ get-colors | head -4</tspan></text>
+  <text x="26" y="108" xml:space="preserve" class="mono"><tspan fill="#f5c66b">background</tspan><tspan fill="#707471">            </tspan><tspan fill="#d3dad5">#0c100d</tspan></text>
+  <text x="26" y="134" xml:space="preserve" class="mono"><tspan fill="#f5c66b">foreground</tspan><tspan fill="#707471">            </tspan><tspan fill="#d3dad5">#d3dad5</tspan></text>
+  <text x="26" y="160" xml:space="preserve" class="mono"><tspan fill="#f5c66b">cursor</tspan><tspan fill="#707471">                </tspan><tspan fill="#d3dad5">#f2984a</tspan></text>
+  <text x="26" y="212" xml:space="preserve" class="mono"><tspan fill="#f2984a">~/sp-night </tspan><tspan fill="#6e92de">❯ </tspan><tspan fill="#d3dad5">grep -c '^color' ~/.config/kitty/sp_night_jaragua.conf</tspan></text>
+  <text x="26" y="238" xml:space="preserve" class="mono"><tspan fill="#f2984a">16</tspan></text>
+  <text x="26" y="290" xml:space="preserve" class="mono"><tspan fill="#f2984a">~/sp-night </tspan><tspan fill="#6e92de">❯ </tspan><tspan fill="#d3dad5">spn check</tspan></text>
+  <text x="26" y="316" xml:space="preserve" class="mono"><tspan fill="#79d488">✓ </tspan><tspan fill="#d3dad5">contrast   </tspan><tspan fill="#868b87">70 pairs per flavour, AA on every surface</tspan></text>
+  <text x="26" y="342" xml:space="preserve" class="mono"><tspan fill="#79d488">✓ </tspan><tspan fill="#d3dad5">accents    </tspan><tspan fill="#868b87">separation ΔE ≥ 0.10 or ΔL ≥ 0.04</tspan></text>
+  <text x="26" y="384" class="mono" fill="#707471" font-size="12">color0–15</text>
+  <rect x="26.0" y="396" width="43.6" height="26" rx="4" fill="#050806"/>
+  <rect x="75.6" y="396" width="43.6" height="26" rx="4" fill="#ea5d5d"/>
+  <rect x="125.3" y="396" width="43.6" height="26" rx="4" fill="#79d488"/>
+  <rect x="174.9" y="396" width="43.6" height="26" rx="4" fill="#f5c66b"/>
+  <rect x="224.5" y="396" width="43.6" height="26" rx="4" fill="#6e92de"/>
+  <rect x="274.1" y="396" width="43.6" height="26" rx="4" fill="#b094e2"/>
+  <rect x="323.8" y="396" width="43.6" height="26" rx="4" fill="#60bfb8"/>
+  <rect x="373.4" y="396" width="43.6" height="26" rx="4" fill="#868b87"/>
+  <rect x="423.0" y="396" width="43.6" height="26" rx="4" fill="#707471"/>
+  <rect x="472.6" y="396" width="43.6" height="26" rx="4" fill="#ff716f"/>
+  <rect x="522.3" y="396" width="43.6" height="26" rx="4" fill="#8ce99b"/>
+  <rect x="571.9" y="396" width="43.6" height="26" rx="4" fill="#ffdc9c"/>
+  <rect x="621.5" y="396" width="43.6" height="26" rx="4" fill="#80a5f2"/>
+  <rect x="671.1" y="396" width="43.6" height="26" rx="4" fill="#c3a7f6"/>
+  <rect x="720.8" y="396" width="43.6" height="26" rx="4" fill="#73d2cb"/>
+  <rect x="770.4" y="396" width="43.6" height="26" rx="4" fill="#d3dad5"/>
+</svg>

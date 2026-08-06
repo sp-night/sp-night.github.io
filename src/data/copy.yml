@@ -1,0 +1,57 @@
+# The English prose every port README shares.
+#
+# It lives here for one reason: it was duplicated by hand across the ports, and
+# duplicated prose is prose that diverges. The tagline in the Ghostty README and
+# the tagline in the eza README have to be the same sentence, or the project
+# reads like two projects.
+#
+# Docs are English by decision; colour and flavour names stay Portuguese,
+# because they are the identity.
+#
+# {slug}, {app}, {homepage} and {repo} are substituted from the registry entry.
+
+logo_alt: >-
+  SP Night — the Pico do Jaraguá at dusk, aviation beacon lit, the city's lights
+  at the foot of the range
+
+tagline_strong: The sodium lamp turns the whole city this colour.
+
+tagline: |-
+  A dark colour scheme with São Paulo as its reference — the sodium street lamp,
+  exposed concrete, the free span of the MASP, the drizzle before the rain.
+
+flavours_intro: |-
+  All three are dark, by decision. The previews below are synthetic — drawn from the
+  palette itself, so they can never drift from what you install.
+
+# One English blurb per flavour. The palette's own descriptions are Portuguese
+# and stay that way; these are the translations the READMEs already carried.
+flavours:
+  noite: The city at 3am. Blue-violet dark, the sodium lamp burning warm on top.
+  garoa: |-
+    The same window, seen through the drizzle. Flat grey — the garoa does not cool
+    the city down, it washes it out.
+  jaragua: |-
+    The same night, seen from the city's highest point. Near-black surfaces, with
+    the forest left to the accents — and the red-and-white tower lit at the summit.
+
+# The paragraph that closes the "What gets themed" table. This is the project's
+# central claim, so it is stated identically everywhere.
+provenance: |-
+  No hex in this repo was picked by hand. Every value comes from the
+  [SP Night palette](https://sp-night.github.io/palette) through its role layer,
+  both published as data:
+  [`palette.json`](https://sp-night.github.io/palette.json) and
+  [`roles.json`](https://sp-night.github.io/roles.json). The contrast floors those
+  colours have to clear are [written down in the spec](https://sp-night.github.io/spec)
+  and enforced in CI.
+
+# The "The mapping" section. {template} and {app} are substituted.
+mapping_section: |-
+  [`{template}`]({template}) is the full record of which {keylabel} means which
+  role — the table above in complete form{scope}. The files in
+  [`themes/`](themes) are what it resolves to, one per flavour.
+
+  You never need it to use the theme: the shipped files are plain text and final.
+  It is here so the mapping survives, and so a retuned palette can be rolled
+  through this port without anyone re-deciding {closer}.

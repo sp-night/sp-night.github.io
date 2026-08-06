@@ -4,7 +4,7 @@ import Skyline from '../components/Skyline.astro';
 import HeroClock from '../components/HeroClock.astro';
 import TerminalMock from '../components/TerminalMock.astro';
 import FlavorSwitcher from '../components/FlavorSwitcher.astro';
-import { flavors, GROUPS, GROUP_IDS } from '../data/palette';
+import { flavors, GROUPS, GROUP_IDS, COLOUR_COUNT } from '../data/palette';
 import { ports } from '../data/ports';
 
 /**
@@ -14,6 +14,10 @@ import { ports } from '../data/ports';
 const base = flavors[0]!;
 const surfaces = Object.keys(base.list[0]!.contrast).length;
 const pairs = base.list.length * surfaces;
+
+// The nouns are prose; the numbers are not. This sentence read "three levels
+// of text" for as long as it took the contract to grow a fourth.
+const band = (id: string) => GROUPS[id]!.keys.length;
 
 const facts = [
   { n: String(flavors.length), label: 'flavours', sub: 'all dark, by decision' },
@@ -89,10 +93,11 @@ const facts = [
 
   <section class="wrap section reveal">
     <p class="eyebrow">the palette</p>
-    <h2>Twenty-two colours, named after the city</h2>
+    <h2>{COLOUR_COUNT} colours, named after the city</h2>
     <p class="lede">
-      Five surfaces, three levels of text, eight accents and their bright pairs — each one carrying
-      the name of the thing in São Paulo it came from.
+      {band('surfaces')} surfaces, {band('text')} levels of text, {band('accents')} accents and
+      their {band('vivo')} bright pairs — each one carrying the name of the thing in São Paulo it
+      came from.
     </p>
 
     <div class="strip">

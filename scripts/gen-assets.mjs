@@ -7,7 +7,7 @@
  * Outputs into public/: og-<flavor>.png (1200x630), favicon-<flavor>.svg,
  * logo-<flavor>.svg, palette-<flavor>.svg, the touch/PWA icons with
  * site.webmanifest, and the hex + ports tables kept between markers in
- * README.md. Re-run whenever the palette or resources/ports.yml changes.
+ * README.md. Re-run whenever the palette or src/data/ports.yml changes.
  * Every colour below is read from src/data/palette.json — no hex is written
  * by hand.
  */
@@ -20,10 +20,17 @@ import { parse as parseYaml } from 'yaml';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const palette = JSON.parse(readFileSync(join(root, 'src/data/palette.json'), 'utf8'));
 
-const SURFACES = ['vao', 'laje', 'concreto', 'vidro', 'fiacao'];
-const TEXT = ['fg', 'fg_dim', 'fg_muted'];
-const ACCENTS = ['brasa', 'sodio', 'taxi', 'ibira', 'estaiada', 'sereno', 'marginal', 'temporal'];
-const VIVO = ['brasa_vivo', 'taxi_vivo', 'ibira_vivo', 'sereno_vivo', 'marginal_vivo', 'temporal_vivo'];
+/* The bands come from the contract, the same way src/data/palette.ts reads
+   them. They used to be four hand-written lists here, and when `fg_vivo` was
+   added to the text band every image this script draws — the palette strips,
+   the OG cards — and the README's hex table dropped it without a word. A
+   generator that has its own idea of what the palette contains is a second
+   source of truth wearing a script's clothes. */
+const band = (id) => palette.groups[id].keys;
+const SURFACES = band('surfaces');
+const TEXT = band('text');
+const ACCENTS = band('accents');
+const VIVO = band('vivo');
 
 /** Fixed-seed PRNG — the OG skyline must be identical on every run. */
 function mulberry32(seed) {
@@ -277,7 +284,12 @@ replaceReadmeBlock(
   ].join('\n'),
 );
 
-const registry = parseYaml(readFileSync(join(root, 'resources/ports.yml'), 'utf8'));
+/* A second parse of the catalogue, independent of src/data/ports.ts. It cannot
+   import that module: the loader reads its YAML through Vite's `?raw`, which
+   plain Node does not resolve. Only four fields are read here, and the README
+   table this feeds is asserted against the catalogue by tests/readme.test.ts —
+   so the duplication cannot drift silently even though it is duplication. */
+const registry = parseYaml(readFileSync(join(root, 'src/data/ports.yml'), 'utf8'));
 
 /* Every port in the registry is published, so there is no status to report —
    the useful columns are where to get it and where the file goes. */
