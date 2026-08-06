@@ -700,3 +700,19 @@ td {
 .callout[data-kind='caution']::before {
   color: var(--sp-brasa);
 }
+
+/* ----------------------------------------------------------------- bands */
+
+/* Every section on the home page sat on the same surface, so a long scroll had
+   no anchors in it — one wall of text with headings in it. Alternate sections
+   step up to `laje`.
+
+   Full-bleed without `100vw`, which overflows by the width of the scrollbar:
+   the shadow paints outward and the clip keeps it from adding scroll of its
+   own. The vertical inset is 0, so nothing inside can bleed past the band. */
+.band {
+  background: var(--sp-laje);
+  box-shadow: 0 0 0 100vmax var(--sp-laje);
+  clip-path: inset(0 -100vmax);
+  transition: background-color 0.45s ease, box-shadow 0.45s ease;
+}

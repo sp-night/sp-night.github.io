@@ -20,7 +20,7 @@ const pairs = base.list.length * surfaces;
 
 // The nouns are prose; the numbers are not. This sentence read "three levels
 // of text" for as long as it took the contract to grow a fourth.
-const band = (id: string) => GROUPS[id]!.keys.length;
+const bandSize = (id: string) => GROUPS[id]!.keys.length;
 
 const facts = [
   { n: String(flavors.length), label: 'flavours', sub: 'all dark, by decision' },
@@ -76,7 +76,7 @@ const facts = [
     </ul>
   </section>
 
-  <section class="wrap section split reveal">
+  <section class="band"><div class="wrap section split reveal">
     <div>
       <p class="eyebrow">one palette, three cities</p>
       <h2>Same city, three ways of looking at it</h2>
@@ -97,14 +97,14 @@ const facts = [
       </dl>
     </div>
     <TerminalMock preview={HOME_PREVIEW} />
-  </section>
+  </div></section>
 
   <section class="wrap section reveal">
     <p class="eyebrow">the palette</p>
     <h2>{COLOUR_COUNT} colours, named after the city</h2>
     <p class="lede">
-      {band('surfaces')} surfaces, {band('text')} levels of text, {band('accents')} accents and
-      their {band('vivo')} bright pairs — each one carrying the name of the thing in São Paulo it
+      {bandSize('surfaces')} surfaces, {bandSize('text')} levels of text, {bandSize('accents')} accents
+      and their {bandSize('vivo')} bright pairs — each one carrying the name of the thing in São Paulo it
       came from.
     </p>
 
@@ -130,7 +130,7 @@ const facts = [
     <p><a href="/palette">Every colour, with its meaning and contrast →</a></p>
   </section>
 
-  <section class="wrap section reveal">
+  <section class="band"><div class="wrap section reveal">
     <p class="eyebrow">ports</p>
     <h2>Themes you can install today</h2>
     <p class="lede">
@@ -147,7 +147,7 @@ const facts = [
     <p>
       <a href="/ports">Where each file goes →</a>
     </p>
-  </section>
+  </div></section>
 
   <section class="wrap section reveal">
     <p class="eyebrow">contributors</p>
