@@ -178,6 +178,19 @@ const GROUP_BLURB: Record<string, string> = {
   vivo: 'The terminal bright set: same hue and chroma, lifted 0.06 in OKLCH lightness.',
 };
 
+/**
+ * The heading each band gets on this site. Copy, like the blurbs: the contract
+ * calls the bright band "Bright ANSI" because that is what it is for, and this
+ * site has always called it "Bright pairs" because that is what a reader is
+ * looking at. Membership and order are not ours to choose; wording is.
+ *
+ * A band the contract adds and this list has not caught up with falls back to
+ * the contract's own label, so a new band gets a heading rather than a blank.
+ */
+const GROUP_LABEL: Record<string, string> = {
+  vivo: 'Bright pairs',
+};
+
 /** Band ids in the order the contract declares them. */
 export const GROUP_IDS: ColorGroup[] = Object.keys(raw.groups);
 
@@ -185,7 +198,11 @@ export const GROUPS: Record<ColorGroup, { label: string; blurb: string; keys: Co
   Object.fromEntries(
     GROUP_IDS.map((id) => [
       id,
-      { label: raw.groups[id]!.label, blurb: GROUP_BLURB[id] ?? '', keys: raw.groups[id]!.keys },
+      {
+        label: GROUP_LABEL[id] ?? raw.groups[id]!.label,
+        blurb: GROUP_BLURB[id] ?? '',
+        keys: raw.groups[id]!.keys,
+      },
     ]),
   );
 

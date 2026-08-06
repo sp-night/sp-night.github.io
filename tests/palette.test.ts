@@ -84,11 +84,14 @@ describe('vendored data shape', () => {
     expect([...seen.keys()].sort()).toEqual([...ORDER].sort());
   });
 
-  it('takes its band labels and order from the contract, not from this repo', () => {
+  // Membership and order come from the contract; the heading is this site's
+  // copy. What must never happen is a band with no heading at all, which is what
+  // a contract-side addition would produce if the fallback were dropped.
+  it('takes its bands and their order from the contract', () => {
     expect(GROUP_IDS).toEqual(Object.keys(paletteJson.groups));
     for (const id of GROUP_IDS) {
-      expect(GROUPS[id]!.label).toBe(paletteJson.groups[id as 'text'].label);
       expect(GROUPS[id]!.keys).toEqual(paletteJson.groups[id as 'text'].keys);
+      expect(GROUPS[id]!.label, `${id} has no heading`).toBeTruthy();
     }
   });
 
