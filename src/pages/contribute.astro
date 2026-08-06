@@ -1,6 +1,10 @@
 ---
 import Base from '../layouts/Base.astro';
+import Contributors from '../components/Contributors.astro';
+import data from '../data/contributors.json';
 import { ports } from '../data/ports';
+
+const { contributors } = data;
 import { flavors, keyVar, org } from '../data/palette';
 
 const steps = [
@@ -137,6 +141,16 @@ const example = [
       <a class="btn" href={org.portProposal}>Propose a port ↗</a>
       <a class="btn btn--ghost" href={org.contributing}>CONTRIBUTING.md ↗</a>
     </div>
+  </section>
+
+  <section aria-labelledby="contributors">
+    <h2 id="contributors">Who has built it</h2>
+    <p>
+      {contributors.length === 1 ? 'One person has' : `${contributors.length} people have`} committed
+      to SP Night across {data.repos} repositories — the palette, the engine, the ports and this
+      site. Every name here is a person; nothing generated is credited.
+    </p>
+    <Contributors />
   </section>
 
   <section aria-labelledby="where">

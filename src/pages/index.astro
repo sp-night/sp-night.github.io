@@ -5,6 +5,7 @@ import HeroClock from '../components/HeroClock.astro';
 import TerminalMock from '../components/TerminalMock.astro';
 import FlavorSwitcher from '../components/FlavorSwitcher.astro';
 import GithubIcon from '../components/GithubIcon.astro';
+import Contributors from '../components/Contributors.astro';
 import { flavors, GROUPS, GROUP_IDS, COLOUR_COUNT, org } from '../data/palette';
 import { ports } from '../data/ports';
 import { HOME_PREVIEW } from '../data/content';
@@ -146,6 +147,18 @@ const facts = [
     <p>
       <a href="/ports">Where each file goes →</a>
     </p>
+  </section>
+
+  <section class="wrap section reveal">
+    <p class="eyebrow">contributors</p>
+    <h2>Built by people, in the open</h2>
+    <p class="lede">
+      The palette, the engine, every port and this site are public. Adding a port means mapping one
+      app's config keys onto roles that are already decided — and the list below is who has done it
+      so far.
+    </p>
+    <Contributors compact />
+    <p><a href="/contribute">How to build the next one →</a></p>
   </section>
 </Base>
 

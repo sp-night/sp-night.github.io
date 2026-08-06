@@ -1,0 +1,93 @@
+---
+/**
+ * The people behind the project.
+ *
+ * Data comes from scripts/gen-contributors.mjs, aggregated across every
+ * repository in the organisation — most of the work is in the ports and the
+ * engine, so a list built from this repository alone would credit the website
+ * and call it the project.
+ *
+ * Avatars are hotlinked by numeric id rather than by login: an id survives
+ * someone changing their handle, and vendoring twelve portraits into the
+ * repository to avoid one request to github.com is not a trade worth making.
+ */
+import data from '../data/contributors.json';
+
+interface Props {
+  /** Heading level, so this fits under an h1 or an h2. */
+  compact?: boolean;
+}
+const { compact = false } = Astro.props;
+const { contributors } = data;
+---
+
+<div class:list={['contributors', { 'contributors--compact': compact }]}>
+  <ul role="list">
+    {
+      contributors.map((p) => (
+        <li>
+          <a href={p.url}>
+            <img
+              src={`https://avatars.githubusercontent.com/u/${p.id}?s=96`}
+              width="48"
+              height="48"
+              loading="lazy"
+              referrerpolicy="no-referrer"
+              alt=""
+            />
+            <span class="contributors__login mono">{p.login}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .contributors ul {
+    list-style: none;
+    margin: 1.2rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+  }
+
+  .contributors a {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.4rem 0.9rem 0.4rem 0.4rem;
+    background: var(--sp-laje);
+    border: var(--border);
+    border-radius: 999px;
+    color: var(--sp-fg-dim);
+    text-decoration: none;
+    transition: border-color 0.25s ease, color 0.25s ease;
+  }
+
+  .contributors a:hover {
+    border-color: var(--sp-sodio);
+    color: var(--sp-fg);
+  }
+
+  .contributors img {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--sp-concreto);
+  }
+
+  .contributors__login {
+    font-size: var(--step--1);
+  }
+
+  .contributors--compact img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .contributors--compact a {
+    padding: 0.3rem 0.75rem 0.3rem 0.3rem;
+  }
+</style>
