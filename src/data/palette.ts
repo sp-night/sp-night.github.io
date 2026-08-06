@@ -16,7 +16,12 @@ import { colorMeaningEn, flavorCopy } from './content';
 
 export type ColorKey = string;
 export type FlavorId = string;
-export type ColorGroup = 'surfaces' | 'text' | 'accents' | 'vivo';
+
+/**
+ * A band id, as declared in the contract's `groups` block. Not a union of
+ * literals on purpose: this site does not get to decide what the bands are.
+ */
+export type ColorGroup = string;
 
 export interface RGB {
   r: number;
@@ -139,49 +144,6 @@ function round(n: number, places: number): number {
   return Math.round(n * f) / f;
 }
 
-/* --------------------------------------------------------------- taxonomy */
-
-export const GROUPS: Record<ColorGroup, { label: string; blurb: string; keys: ColorKey[] }> = {
-  surfaces: {
-    label: 'Surfaces',
-    blurb: 'Five stacked planes, from the deepest recess to the wiring that divides it.',
-    keys: ['vao', 'laje', 'concreto', 'vidro', 'fiacao'],
-  },
-  text: {
-    label: 'Text',
-    blurb:
-      'Four levels of foreground, each holding AA contrast on the surfaces it is used over. ' +
-      'fg_vivo is the bright end: bold default text, and the terminal’s bright white.',
-    keys: ['fg_vivo', 'fg', 'fg_dim', 'fg_muted'],
-  },
-  accents: {
-    label: 'Accents',
-    blurb: 'Eight signature colours. Hue and chroma carry the identity — never brightness.',
-    keys: ['brasa', 'sodio', 'taxi', 'ibira', 'estaiada', 'sereno', 'marginal', 'temporal'],
-  },
-  vivo: {
-    label: 'Bright pairs',
-    blurb: 'The terminal bright set: same hue and chroma, lifted 0.06 in OKLCH lightness.',
-    keys: [
-      'brasa_vivo',
-      'taxi_vivo',
-      'ibira_vivo',
-      'sereno_vivo',
-      'marginal_vivo',
-      'temporal_vivo',
-    ],
-  },
-};
-
-const VIVO_PAIRS: Record<ColorKey, ColorKey> = {
-  brasa: 'brasa_vivo',
-  taxi: 'taxi_vivo',
-  ibira: 'ibira_vivo',
-  sereno: 'sereno_vivo',
-  marginal: 'marginal_vivo',
-  temporal: 'temporal_vivo',
-};
-
 /* ------------------------------------------------------------------ build */
 
 const raw = paletteJson as unknown as {
@@ -191,16 +153,81 @@ const raw = paletteJson as unknown as {
   author: string;
   url: string;
   meaning: Record<string, string>;
+  groups: Record<string, { label: string; keys: ColorKey[] }>;
   flavors: Record<string, { label: string; description: string; colors: Record<string, string> }>;
 };
 
-/** Palette order: the groups, in the order they are presented. */
-export const ORDER: ColorKey[] = (Object.keys(GROUPS) as ColorGroup[]).flatMap(
-  (g) => GROUPS[g].keys,
+/* --------------------------------------------------------------- taxonomy */
+
+/**
+ * The English gloss for each band, keyed by its id in the contract.
+ *
+ * Only the prose lives here. The bands themselves — which ids exist, what they
+ * are called, which colours are in them, in what order — come from the
+ * contract's `groups` block, because this site used to re-declare all of that
+ * and a colour the contract added but this list did not know about vanished
+ * from the published palette with nothing failing. Same split as
+ * `colorMeaningEn`: the contract's prose is Portuguese, the site's is English.
+ */
+const GROUP_BLURB: Record<string, string> = {
+  surfaces: 'Five stacked planes, from the deepest recess to the wiring that divides it.',
+  text:
+    'Four levels of foreground, each holding AA contrast on the surfaces it is used over. ' +
+    'fg_vivo is the bright end: bold default text, and the terminal’s bright white.',
+  accents: 'Eight signature colours. Hue and chroma carry the identity — never brightness.',
+  vivo: 'The terminal bright set: same hue and chroma, lifted 0.06 in OKLCH lightness.',
+};
+
+/** Band ids in the order the contract declares them. */
+export const GROUP_IDS: ColorGroup[] = Object.keys(raw.groups);
+
+export const GROUPS: Record<ColorGroup, { label: string; blurb: string; keys: ColorKey[] }> =
+  Object.fromEntries(
+    GROUP_IDS.map((id) => [
+      id,
+      { label: raw.groups[id]!.label, blurb: GROUP_BLURB[id] ?? '', keys: raw.groups[id]!.keys },
+    ]),
+  );
+
+/** Palette order: the bands, in the order they are presented. */
+export const ORDER: ColorKey[] = GROUP_IDS.flatMap((g) => GROUPS[g]!.keys);
+
+/** How many colours the contract declares. Rendered, never typed into prose. */
+export const COLOUR_COUNT = ORDER.length;
+
+/**
+ * How many text/surface pairs the engine measures per flavour.
+ *
+ * The policy is the engine's (`internal/audit`) and is mirrored here: every
+ * text and accent colour against the four backgrounds, plus the border colour
+ * against the two it is actually drawn on. What is *not* mirrored is the
+ * membership — that comes from the bands, so adding a colour moves this number
+ * on its own instead of leaving a stale figure in a sentence.
+ */
+const BACKGROUNDS = ['vao', 'laje', 'concreto', 'vidro'];
+const BORDER_BACKGROUNDS = ['vao', 'laje'];
+export const MEASURED_PAIRS =
+  BACKGROUNDS.length *
+    (GROUPS.text!.keys.length + GROUPS.accents!.keys.length + GROUPS.vivo!.keys.length) +
+  BORDER_BACKGROUNDS.length;
+
+/**
+ * base -> its bright twin, read off the naming rule rather than listed. A
+ * `<base>_vivo` is the contract's word for "this colour, lifted".
+ */
+const VIVO_SUFFIX = '_vivo';
+const baseOf = (key: ColorKey): ColorKey | undefined =>
+  key.endsWith(VIVO_SUFFIX) ? key.slice(0, -VIVO_SUFFIX.length) : undefined;
+
+const VIVO_PAIRS: Record<ColorKey, ColorKey> = Object.fromEntries(
+  ORDER.flatMap((k) => {
+    const base = baseOf(k);
+    return base ? [[base, k] as const] : [];
+  }),
 );
 
 const groupOf = (key: ColorKey): ColorGroup =>
-  (Object.keys(GROUPS) as ColorGroup[]).find((g) => GROUPS[g].keys.includes(key)) ?? 'accents';
+  GROUP_IDS.find((g) => GROUPS[g]!.keys.includes(key)) ?? GROUP_IDS[0]!;
 
 function buildColor(key: ColorKey, hex: string, colors: Record<string, string>): Color {
   const rgb = parseHex(hex);
@@ -214,7 +241,7 @@ function buildColor(key: ColorKey, hex: string, colors: Record<string, string>):
     group,
     meaning: { pt: raw.meaning[key] ?? '', en: colorMeaningEn[key] ?? '' },
     isAccent: group === 'accents',
-    vivoOf: group === 'vivo' ? key.replace('_vivo', '') : undefined,
+    vivoOf: baseOf(key),
     vivo: VIVO_PAIRS[key],
     contrast: {
       vao: contrast(hex, colors.vao!),
@@ -266,7 +293,7 @@ export const theme = {
   author: raw.author,
   repoUrl: 'https://github.com/sp-night',
   description:
-    'A dark colour scheme with São Paulo as its reference: the sodium street lamp, exposed concrete, the free span of the MASP, the drizzle before the rain. Three flavours, 23 colours, 17 targets generated from a single file.',
+    `A dark colour scheme with São Paulo as its reference: the sodium street lamp, exposed concrete, the free span of the MASP, the drizzle before the rain. Three flavours, ${COLOUR_COUNT} colours, 17 targets generated from a single file.`,
 };
 
 /** `var(--sp-…)` for a palette key. */

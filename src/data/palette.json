@@ -29,6 +29,24 @@
     "marginal_vivo": "placa acesa — bright blue do terminal",
     "temporal_vivo": "relâmpago — bright magenta do terminal"
   },
+  "groups": {
+    "surfaces": {
+      "label": "Surfaces",
+      "keys": ["vao", "laje", "concreto", "vidro", "fiacao"]
+    },
+    "text": {
+      "label": "Text",
+      "keys": ["fg_vivo", "fg", "fg_dim", "fg_muted"]
+    },
+    "accents": {
+      "label": "Accents",
+      "keys": ["brasa", "sodio", "taxi", "ibira", "estaiada", "sereno", "marginal", "temporal"]
+    },
+    "vivo": {
+      "label": "Bright ANSI",
+      "keys": ["brasa_vivo", "taxi_vivo", "ibira_vivo", "sereno_vivo", "marginal_vivo", "temporal_vivo"]
+    }
+  },
   "flavors": {
     "noite": {
       "label": "Noite Paulista",

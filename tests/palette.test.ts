@@ -6,8 +6,11 @@
  * palette drop breaks any of these, the build should fail before deploy.
  */
 import { describe, expect, it } from 'vitest';
+import paletteJson from '../src/data/palette.json';
 import {
+  COLOUR_COUNT,
   GROUPS,
+  GROUP_IDS,
   ORDER,
   contrast,
   cssVars,
@@ -50,16 +53,44 @@ describe('vendored data shape', () => {
     expect(flavor('nope').id).toBe('noite');
   });
 
+  // The invariant, not a number. A literal count is a guard that tells you
+  // something changed; this one tells you what is wrong — and it is the check
+  // that was missing when fg_vivo was added to the contract and this site's
+  // hand-written band list did not know about it. ORDER is what every page and
+  // /palette.json walk, so a key outside it is a key the public never sees.
   it.each(flavors.map((f) => [f.id, f] as const))(
-    '%s carries all 23 palette keys as valid hex',
+    '%s publishes exactly the keys the vendored contract declares',
     (_id, f) => {
-      expect(f.list).toHaveLength(ORDER.length);
-      expect(ORDER).toHaveLength(23);
+      const declared = Object.keys(paletteJson.flavors[f.id as 'noite'].colors).sort();
+      expect([...ORDER].sort()).toEqual(declared);
+      expect(f.list.map((c) => c.key)).toEqual(ORDER);
       for (const c of f.list) {
         expect(c.hex).toMatch(/^#[0-9a-f]{6}$/i);
       }
     },
   );
+
+  // The bands partition the palette: every colour in exactly one, none left
+  // over. The engine validates the same thing on its side; this is the assertion
+  // from the consumer's end, where the silent loss actually happened.
+  it('partitions every colour into exactly one band', () => {
+    const seen = new Map<string, string>();
+    for (const id of GROUP_IDS) {
+      for (const key of GROUPS[id]!.keys) {
+        expect(seen.has(key), `${key} is in both ${seen.get(key)} and ${id}`).toBe(false);
+        seen.set(key, id);
+      }
+    }
+    expect([...seen.keys()].sort()).toEqual([...ORDER].sort());
+  });
+
+  it('takes its band labels and order from the contract, not from this repo', () => {
+    expect(GROUP_IDS).toEqual(Object.keys(paletteJson.groups));
+    for (const id of GROUP_IDS) {
+      expect(GROUPS[id]!.label).toBe(paletteJson.groups[id as 'text'].label);
+      expect(GROUPS[id]!.keys).toEqual(paletteJson.groups[id as 'text'].keys);
+    }
+  });
 
   it('links every bright pair to its base accent', () => {
     for (const f of flavors) {
@@ -112,7 +143,7 @@ describe('CSS emission', () => {
     const block = cssVars(flavor('noite'));
     expect(block).toContain('--sp-vao:');
     expect(block).toContain('--sp-brasa-vivo:');
-    expect(block.match(/--sp-/g)).toHaveLength(23);
+    expect(block.match(/--sp-/g)).toHaveLength(COLOUR_COUNT);
   });
 
   it('emits a :root block and a visibility rule per flavour', () => {
