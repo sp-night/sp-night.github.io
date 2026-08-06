@@ -1,19 +1,43 @@
 ---
 import Base from '../layouts/Base.astro';
-import { flavors, GROUPS, GROUP_IDS, COLOUR_COUNT, MEASURED_PAIRS, keyVar, type ColorKey } from '../data/palette';
+import {
+  flavors,
+  GROUPS,
+  GROUP_IDS,
+  COLOUR_COUNT,
+  MEASURED_PAIRS,
+  CONTRAST_POLICY,
+  keyVar,
+  type ColorKey,
+} from '../data/palette';
 
 const base = flavors[0]!;
 const roles = base.roles;
 
-/** The contrast floors every flavour has to clear, enforced in tests/palette.test.ts. */
-const policy = [
-  { surface: 'vao', min: '4.5:1', kind: 'gate', why: 'the deepest background — floats, popups, the terminal' },
-  { surface: 'laje', min: '4.5:1', kind: 'gate', why: 'the default surface; everything readable sits here' },
-  { surface: 'concreto', min: '4.5:1', kind: 'gate', why: 'panels, cards and bars' },
-  { surface: 'vidro', min: '3.0:1', kind: 'gate', why: 'selection and elevation — short-lived, never body text' },
-  { surface: 'fg_muted', min: '3.0:1', kind: 'warn', why: 'ornaments and disabled text: reported, not blocking' },
-  { surface: 'fiacao', min: '1.5:1', kind: 'warn', why: 'borders are structure, not text' },
-];
+/**
+ * Why each floor is what it is. Copy — the floors themselves, their severity and
+ * their order come from CONTRAST_POLICY, which is the audit's own output. This
+ * table used to be written by hand and had drifted: it claimed fg_dim was held to
+ * the surface's floor everywhere, when the tool holds it to AA on laje and 3:1 on
+ * the rest.
+ */
+const policyWhy: Record<string, string> = {
+  vao: 'the deepest background — floats, popups, the terminal',
+  laje: 'the default surface; everything readable sits here',
+  concreto: 'panels, cards and bars',
+  vidro: 'selection and elevation — short-lived, never body text',
+  fg_dim: 'comments and secondary text: comfortable where you read, legible elsewhere',
+  fg_muted: 'ornaments and disabled text: reported, not blocking',
+  fiacao: 'borders are structure, not text',
+};
+
+const policy = CONTRAST_POLICY.map((r) => ({
+  surface: r.subject,
+  scope: r.kind === 'foreground' ? `on ${r.surfaces?.join(', ')}` : 'text and accents',
+  min: `${r.floor.toFixed(1)}:1`,
+  kind: r.gate ? 'gate' : 'warn',
+  why: policyWhy[r.subject] ?? '',
+}));
 
 const syntaxRows: Array<[string, ColorKey]> = [
   ['keyword, conditional, repeat', 'marginal'],
@@ -308,6 +332,7 @@ const glossary = [
         <thead>
           <tr>
             <th scope="col">against</th>
+            <th scope="col">applies to</th>
             <th scope="col">minimum</th>
             <th scope="col"><span class="visually-hidden">severity</span></th>
             <th scope="col">why</th>
@@ -318,6 +343,7 @@ const glossary = [
             policy.map((p) => (
               <tr>
                 <th scope="row" class="mono">{p.surface}</th>
+                <td class="mono">{p.scope}</td>
                 <td class="mono">{p.min}</td>
                 <td>
                   <span class={`tag tag--${p.kind}`}>{p.kind}</span>
@@ -330,8 +356,9 @@ const glossary = [
       </table>
     </div>
     <p>
-      <code class="mono">fg_dim</code> carries comments and secondary text, so it holds full AA on
-      <code class="mono">laje</code> — a comment you cannot read is a comment you delete.
+      <code class="mono">fg_dim</code> is the delicate one, and it is why the table has two rows for
+      it: a comment you cannot read is a comment you delete, so it holds full AA on
+      <code class="mono">laje</code> where you actually read, and only has to stay legible elsewhere.
     </p>
   </section>
 

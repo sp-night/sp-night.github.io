@@ -12,6 +12,7 @@
  */
 import paletteJson from './palette.json';
 import rolesJson from './roles.json';
+import contrastJson from './contrast.json';
 import { colorMeaningEn, flavorCopy } from './content';
 
 export type ColorKey = string;
@@ -213,20 +214,34 @@ export const ORDER: ColorKey[] = GROUP_IDS.flatMap((g) => GROUPS[g]!.keys);
 export const COLOUR_COUNT = ORDER.length;
 
 /**
- * How many text/surface pairs the engine measures per flavour.
+ * The contrast policy, straight from the audit that enforces it.
  *
- * The policy is the engine's (`internal/audit`) and is mirrored here: every
- * text and accent colour against the four backgrounds, plus the border colour
- * against the two it is actually drawn on. What is *not* mirrored is the
- * membership — that comes from the bands, so adding a colour moves this number
- * on its own instead of leaving a stale figure in a sentence.
+ * `contrast.json` is `spn check --json`, vendored by the same sync that brings
+ * the palette. It is not part of the contract — it is what the tool says about
+ * itself — but it is published here, and a published policy that was typed by
+ * hand is a policy that can be wrong where everyone can read it. This site used
+ * to hold both the pair count and the floors table as prose, and the table
+ * contradicted the tool on `fg_dim`.
  */
-const BACKGROUNDS = ['vao', 'laje', 'concreto', 'vidro'];
-const BORDER_BACKGROUNDS = ['vao', 'laje'];
-export const MEASURED_PAIRS =
-  BACKGROUNDS.length *
-    (GROUPS.text!.keys.length + GROUPS.accents!.keys.length + GROUPS.vivo!.keys.length) +
-  BORDER_BACKGROUNDS.length;
+export interface ContrastRule {
+  subject: string;
+  kind: 'surface' | 'foreground';
+  surfaces?: string[];
+  floor: number;
+  gate: boolean;
+}
+
+const audit = contrastJson as unknown as {
+  pairs_per_flavor: number;
+  flavors: string[];
+  policy: ContrastRule[];
+};
+
+/** How many text/surface pairs the audit measures per flavour. */
+export const MEASURED_PAIRS = audit.pairs_per_flavor;
+
+/** The floors, in the order the audit publishes them. */
+export const CONTRAST_POLICY: ContrastRule[] = audit.policy;
 
 /**
  * base -> its bright twin, read off the naming rule rather than listed. A

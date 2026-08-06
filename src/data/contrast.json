@@ -1,0 +1,76 @@
+{
+  "pairs_per_flavor": 74,
+  "flavors": [
+    "noite",
+    "garoa",
+    "jaragua"
+  ],
+  "policy": [
+    {
+      "subject": "vao",
+      "kind": "surface",
+      "floor": 4.5,
+      "gate": true
+    },
+    {
+      "subject": "laje",
+      "kind": "surface",
+      "floor": 4.5,
+      "gate": true
+    },
+    {
+      "subject": "concreto",
+      "kind": "surface",
+      "floor": 4.5,
+      "gate": true
+    },
+    {
+      "subject": "vidro",
+      "kind": "surface",
+      "floor": 3,
+      "gate": true
+    },
+    {
+      "subject": "fg_dim",
+      "kind": "foreground",
+      "surfaces": [
+        "laje"
+      ],
+      "floor": 4.5,
+      "gate": true
+    },
+    {
+      "subject": "fg_dim",
+      "kind": "foreground",
+      "surfaces": [
+        "vao",
+        "concreto",
+        "vidro"
+      ],
+      "floor": 3,
+      "gate": true
+    },
+    {
+      "subject": "fg_muted",
+      "kind": "foreground",
+      "surfaces": [
+        "vao",
+        "laje",
+        "concreto",
+        "vidro"
+      ],
+      "floor": 3,
+      "gate": false
+    },
+    {
+      "subject": "fiacao",
+      "kind": "foreground",
+      "surfaces": [
+        "vao",
+        "laje"
+      ],
+      "floor": 1.5,
+      "gate": false
+    }
+  ]
+}

@@ -9,8 +9,10 @@ import { describe, expect, it } from 'vitest';
 import paletteJson from '../src/data/palette.json';
 import {
   COLOUR_COUNT,
+  CONTRAST_POLICY,
   GROUPS,
   GROUP_IDS,
+  MEASURED_PAIRS,
   ORDER,
   contrast,
   cssVars,
@@ -125,6 +127,39 @@ describe('contrast policy', () => {
   // body text is AAA on every surface, dim text AA, muted text AA-large,
   // and every accent holds AA against the deepest background.
   const SURFACES = ['vao', 'laje', 'concreto'] as const;
+
+  // The published policy comes from `spn check --json` rather than from a table
+  // typed here, so what this site claims and what the engine enforces cannot
+  // disagree. The floors are still checked against the real colours below; this
+  // asserts the claim itself is the tool's.
+  it('publishes the floors the audit reports, and holds every colour to them', () => {
+    expect(MEASURED_PAIRS).toBeGreaterThan(0);
+    expect(CONTRAST_POLICY.length).toBeGreaterThan(0);
+
+    for (const rule of CONTRAST_POLICY) {
+      expect(rule.floor).toBeGreaterThan(1);
+      expect(['surface', 'foreground']).toContain(rule.kind);
+      if (rule.kind === 'foreground') {
+        expect(rule.surfaces?.length, `${rule.subject} names no surfaces`).toBeGreaterThan(0);
+      }
+    }
+
+    // Every foreground rule is a promise about real colours: check it.
+    for (const f of flavors) {
+      for (const rule of CONTRAST_POLICY) {
+        if (rule.kind !== 'foreground') continue;
+        const fg = f.colors[rule.subject];
+        if (!fg) continue;
+        for (const surface of rule.surfaces ?? []) {
+          const bg = f.colors[surface]!;
+          expect(
+            contrast(fg.hex, bg.hex),
+            `${f.id}: ${rule.subject} on ${surface}`,
+          ).toBeGreaterThanOrEqual(rule.floor);
+        }
+      }
+    }
+  });
 
   it.each(flavors.map((f) => [f.id, f] as const))('%s keeps text readable', (_id, f) => {
     for (const s of SURFACES) {
