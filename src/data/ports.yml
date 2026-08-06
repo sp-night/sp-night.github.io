@@ -31,6 +31,7 @@
 
 groups:
   terminal: Terminals
+  editor: Editors
   shell: Shell & CLI
 
 ports:
@@ -631,3 +632,158 @@ ports:
           - {t: "current", r: syntax.operator}
           - {t: " -> ", r: ui.fg_muted}
           - {t: "sp_night_{flavor}.yml", r: syntax.function}
+
+  - slug: helix
+    name: Helix
+    group: editor
+    blurb: The whole syntax scope tree, the three editing modes, diagnostics, diffs, the picker and the inlay hints.
+    homepage: https://helix-editor.com/
+    repo: https://github.com/sp-night/helix
+    install: ~/.config/helix/themes/sp_night_{flavor}.toml
+    activate: theme = "sp_night_{flavor}"
+    note: >-
+      The mode indicator changes hue rather than brightness — *sódio* in normal,
+      *ibira* in insert, *marginal* in select — so the mode is legible without
+      reading the word.
+    template: helix.toml.tmpl
+    mapping_closer: what a mode colour means
+
+    install_guide: |-
+      Helix resolves `theme = "<name>"` against `~/.config/helix/themes/` by file
+      name, so the file goes there and the name in your config is the file's stem.
+
+      Grab the flavour you want (or all three):
+
+      ```sh
+      mkdir -p ~/.config/helix/themes
+      curl -Lo ~/.config/helix/themes/sp_night_noite.toml \
+        https://raw.githubusercontent.com/sp-night/helix/main/themes/sp_night_noite.toml
+      ```
+
+      Then set it in `~/.config/helix/config.toml`:
+
+      ```toml
+      theme = "sp_night_noite"
+      ```
+
+      Reload with `:config-reload`, or try one without committing to it using
+      `:theme sp_night_noite`.
+
+      > [!NOTE]
+      > `default` and `base16_default` are names Helix reserves, which is why
+      > every flavour here is prefixed `sp_night_`.
+
+      Prefer a checkout? Clone and copy — the files are plain text, there is no build:
+
+      ```sh
+      git clone https://github.com/sp-night/helix.git
+      cp helix/themes/*.toml ~/.config/helix/themes/
+      ```
+
+    mapping:
+      - key: "`ui.background` / `ui.text`"
+        role: "`ui.bg` / `ui.fg`"
+        meaning: "*laje* under the main text"
+      - key: "`ui.cursor.primary` / `ui.cursor`"
+        role: "`ui.cursor` / `ui.fg_dim`"
+        meaning: the *sódio* cursor, and every secondary one dimmed so the primary is findable
+      - key: "`ui.cursor.normal` / `.insert` / `.select`"
+        role: "`ui.cursor` / `diagnostic.ok` / `ui.accent_alt`"
+        meaning: the mode changes hue, not brightness — the one thing a modal editor must never leave ambiguous
+      - key: "`ui.statusline` / `.inactive`"
+        role: "`ui.panel` / `ui.bg_deep`"
+        meaning: the focused bar on exposed concrete, the rest receding into the *vão*
+      - key: "`ui.selection` / `.primary`"
+        role: "`ui.selection`"
+        meaning: "*vidro*, glass reflecting the street"
+      - key: "`ui.linenr` / `.selected`"
+        role: "`ui.fg_muted` / `ui.fg`"
+        meaning: the gutter recedes, the line you are on does not
+      - key: "`ui.virtual.indent-guide` / `.ruler` / `.whitespace`"
+        role: "`ui.border` / `ui.line` / `ui.fg_muted`"
+        meaning: "*fiação*, overhead wiring — structure you see past, not at"
+      - key: "`ui.virtual.inlay-hint`"
+        role: "`ui.fg_muted`"
+        meaning: the editor's own annotations stay quieter than anything you typed
+      - key: "`keyword` / `function` / `type` / `string`"
+        role: "`syntax.*`"
+        meaning: the same accents every SP Night port gives these
+      - key: "`diagnostic.error` / `.warning` / `.info` / `.hint`"
+        role: "`diagnostic.*`"
+        meaning: undercurled in *brasa*, *táxi*, *marginal*, *sereno*
+      - key: "`diff.plus` / `.minus` / `.delta`"
+        role: "`git.added` / `git.removed` / `git.modified`"
+        meaning: the gutter reads like the rest of the toolchain does
+      - key: "`markup.heading.1…6` / `markup.link.url`"
+        role: "`ui.accent` / `ui.link`"
+        meaning: Markdown headings in *sódio*, links in *marginal* — the expressway sign
+
+    preview:
+      title: helix — sp_night_{flavor}
+      swatches:
+        label: the roles behind the scopes
+        roles:
+          - ui.selection
+          - ui.fg_dim
+          - ui.fg
+          - syntax.keyword
+          - syntax.function
+          - syntax.type
+          - syntax.string
+          - syntax.constant
+          - syntax.number
+          - syntax.macro
+          - syntax.namespace
+          - syntax.comment
+          - ui.accent
+          - diagnostic.error
+          - diagnostic.warn
+          - git.added
+      body:
+        - - {t: "  1 ", r: ui.fg_muted}
+          - {t: "│ ", r: ui.border}
+          - {t: "use ", r: syntax.keyword}
+          - {t: "std", r: syntax.namespace}
+          - {t: "::", r: syntax.punctuation}
+          - {t: "collections", r: syntax.namespace}
+          - {t: "::", r: syntax.punctuation}
+          - {t: "HashMap", r: syntax.type}
+          - {t: ";", r: syntax.punctuation}
+        - - {t: "  2 ", r: ui.fg_muted}
+          - {t: "│", r: ui.border}
+        - - {t: "  3 ", r: ui.fg_muted}
+          - {t: "│ ", r: ui.border}
+          - {t: "/// the sodium lamp that turns the whole city this colour", r: syntax.comment}
+        - - {t: "  4 ", r: ui.fg_muted}
+          - {t: "│ ", r: ui.border}
+          - {t: "pub fn ", r: syntax.keyword}
+          - {t: "flavours", r: syntax.function}
+          - {t: "() ", r: syntax.punctuation}
+          - {t: "-> ", r: syntax.operator}
+          - {t: "Vec", r: syntax.type}
+          - {t: "<&", r: syntax.punctuation}
+          - {t: "'static ", r: syntax.keyword}
+          - {t: "str", r: syntax.type}
+          - {t: "> {", r: syntax.punctuation}
+        - - {t: "  5 ", r: ui.fg_muted}
+          - {t: "│     ", r: ui.border}
+          - {t: "vec!", r: syntax.macro}
+          - {t: "[", r: syntax.punctuation}
+          - {t: "\"noite\"", r: syntax.string}
+          - {t: ", ", r: syntax.punctuation}
+          - {t: "\"garoa\"", r: syntax.string}
+          - {t: ", ", r: syntax.punctuation}
+          - {t: "\"jaragua\"", r: syntax.string}
+          - {t: "]", r: syntax.punctuation}
+        - - {t: "  6 ", r: ui.fg_muted}
+          - {t: "│ ", r: ui.border}
+          - {t: "}", r: syntax.punctuation}
+        - []
+        - - {t: "    ", r: ui.fg_muted}
+          - {t: "● ", r: diagnostic.error}
+          - {t: "expected `;`, found `}`", r: ui.fg_dim}
+        - []
+        - - {t: " NOR ", r: ui.accent, b: true}
+          - {t: "  sp_night.rs ", r: ui.fg}
+          - {t: "  6:2 ", r: ui.fg_dim}
+          - {t: "  rust", r: ui.fg_muted}

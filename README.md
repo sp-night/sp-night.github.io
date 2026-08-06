@@ -126,6 +126,7 @@ by `npm run assets`, and `npm test` fails if it falls behind.
 | [kitty](https://github.com/sp-night/kitty) | Terminals | `~/.config/kitty/sp_night_{flavor}.conf` |
 | [Alacritty](https://github.com/sp-night/alacritty) | Terminals | `~/.config/alacritty/themes/sp_night_{flavor}.toml` |
 | [eza](https://github.com/sp-night/eza) | Shell & CLI | `~/.config/eza/theme.yml` |
+| [Helix](https://github.com/sp-night/helix) | Editors | `~/.config/helix/themes/sp_night_{flavor}.toml` |
 <!-- ports-table:end -->
 
 Theming another app? See [CONTRIBUTING.md](CONTRIBUTING.md). The palette and the

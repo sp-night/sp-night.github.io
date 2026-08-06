@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="462" viewBox="0 0 840 462" role="img" aria-label="Helix themed with SP Night Garoa">
+  <style>.mono { font: 15px ui-monospace, 'JetBrains Mono', 'Fira Code', Menlo, monospace; }</style>
+  <rect width="840" height="462" rx="12" fill="#1c1e20"/>
+  <rect x="0.5" y="0.5" width="839" height="461" rx="11.5" fill="none" stroke="#414346"/>
+  <path d="M0 12a12 12 0 0 1 12-12h816a12 12 0 0 1 12 12v30H0z" fill="#26282a"/>
+  <line x1="0" y1="42.5" x2="840" y2="42.5" stroke="#414346"/>
+  <circle cx="24" cy="21" r="5.5" fill="#d87676"/>
+  <circle cx="42" cy="21" r="5.5" fill="#e7cb8a"/>
+  <circle cx="60" cy="21" r="5.5" fill="#9acaa2"/>
+  <text x="420" y="26" text-anchor="middle" class="mono" fill="#767d88">helix — sp_night_garoa</text>
+  <text x="26" y="82" xml:space="preserve" class="mono"><tspan fill="#767d88">  1 </tspan><tspan fill="#414346">│ </tspan><tspan fill="#7993cb">use </tspan><tspan fill="#af97d3">std</tspan><tspan fill="#8d949f">::</tspan><tspan fill="#af97d3">collections</tspan><tspan fill="#8d949f">::</tspan><tspan fill="#af97d3">HashMap</tspan><tspan fill="#8d949f">;</tspan></text>
+  <text x="26" y="108" xml:space="preserve" class="mono"><tspan fill="#767d88">  2 </tspan><tspan fill="#414346">│</tspan></text>
+  <text x="26" y="134" xml:space="preserve" class="mono"><tspan fill="#767d88">  3 </tspan><tspan fill="#414346">│ </tspan><tspan fill="#8d949f">/// the sodium lamp that turns the whole city this colour</tspan></text>
+  <text x="26" y="160" xml:space="preserve" class="mono"><tspan fill="#767d88">  4 </tspan><tspan fill="#414346">│ </tspan><tspan fill="#7993cb">pub fn </tspan><tspan fill="#77babf">flavours</tspan><tspan fill="#8d949f">() </tspan><tspan fill="#77babf">-&gt; </tspan><tspan fill="#af97d3">Vec</tspan><tspan fill="#8d949f">&lt;&amp;</tspan><tspan fill="#7993cb">'static </tspan><tspan fill="#af97d3">str</tspan><tspan fill="#8d949f">&gt; {</tspan></text>
+  <text x="26" y="186" xml:space="preserve" class="mono"><tspan fill="#767d88">  5 </tspan><tspan fill="#414346">│     </tspan><tspan fill="#56b19f">vec!</tspan><tspan fill="#8d949f">[</tspan><tspan fill="#9acaa2">"noite"</tspan><tspan fill="#8d949f">, </tspan><tspan fill="#9acaa2">"garoa"</tspan><tspan fill="#8d949f">, </tspan><tspan fill="#9acaa2">"jaragua"</tspan><tspan fill="#8d949f">]</tspan></text>
+  <text x="26" y="212" xml:space="preserve" class="mono"><tspan fill="#767d88">  6 </tspan><tspan fill="#414346">│ </tspan><tspan fill="#8d949f">}</tspan></text>
+  <text x="26" y="264" xml:space="preserve" class="mono"><tspan fill="#767d88">    </tspan><tspan fill="#d87676">● </tspan><tspan fill="#8d949f">expected `;`, found `}`</tspan></text>
+  <text x="26" y="316" xml:space="preserve" class="mono"><tspan fill="#e3a068" font-weight="bold"> NOR </tspan><tspan fill="#c7cdd6">  sp_night.rs </tspan><tspan fill="#8d949f">  6:2 </tspan><tspan fill="#767d88">  rust</tspan></text>
+  <text x="26" y="384" class="mono" fill="#767d88" font-size="12">the roles behind the scopes</text>
+  <rect x="26.0" y="396" width="43.6" height="26" rx="4" fill="#313436"/>
+  <rect x="75.6" y="396" width="43.6" height="26" rx="4" fill="#8d949f"/>
+  <rect x="125.3" y="396" width="43.6" height="26" rx="4" fill="#c7cdd6"/>
+  <rect x="174.9" y="396" width="43.6" height="26" rx="4" fill="#7993cb"/>
+  <rect x="224.5" y="396" width="43.6" height="26" rx="4" fill="#77babf"/>
+  <rect x="274.1" y="396" width="43.6" height="26" rx="4" fill="#af97d3"/>
+  <rect x="323.8" y="396" width="43.6" height="26" rx="4" fill="#9acaa2"/>
+  <rect x="373.4" y="396" width="43.6" height="26" rx="4" fill="#e3a068"/>
+  <rect x="423.0" y="396" width="43.6" height="26" rx="4" fill="#e3a068"/>
+  <rect x="472.6" y="396" width="43.6" height="26" rx="4" fill="#56b19f"/>
+  <rect x="522.3" y="396" width="43.6" height="26" rx="4" fill="#af97d3"/>
+  <rect x="571.9" y="396" width="43.6" height="26" rx="4" fill="#8d949f"/>
+  <rect x="621.5" y="396" width="43.6" height="26" rx="4" fill="#e3a068"/>
+  <rect x="671.1" y="396" width="43.6" height="26" rx="4" fill="#d87676"/>
+  <rect x="720.8" y="396" width="43.6" height="26" rx="4" fill="#e7cb8a"/>
+  <rect x="770.4" y="396" width="43.6" height="26" rx="4" fill="#9acaa2"/>
+</svg>
