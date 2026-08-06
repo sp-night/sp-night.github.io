@@ -51,3 +51,12 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
+        with:
+          # The action's default is 10 minutes, and on expiry it *cancels* the
+          # deployment rather than leaving it to finish. That turns a slow Pages
+          # queue into two failures instead of one: the run fails, and every
+          # retry against the same commit sha is then refused instantly, so the
+          # only way out is a fresh commit on main — a manual step, on the one
+          # workflow whose job is to not need them. Waiting is cheaper than being
+          # rescued: the job is idle either way.
+          timeout: 1800000
