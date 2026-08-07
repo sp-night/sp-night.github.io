@@ -1,6 +1,5 @@
 ---
 import Base from '../layouts/Base.astro';
-import TerminalMock from '../components/TerminalMock.astro';
 import { ports, portsByGroup } from '../data/ports';
 import { inlineMd } from '../data/guide';
 
@@ -12,6 +11,20 @@ const description = `SP Night for ${names} — every port a repository of its ow
 const blurbs = Object.fromEntries(
   await Promise.all(ports.map(async (p) => [p.slug, await inlineMd(p.blurb)] as const)),
 );
+
+// The filter is one generated rule per group, which is what keeps it free of
+// JavaScript: CSS cannot compare a checked radio's value against a section's
+// group, but it can be told about each group by name. The list comes from the
+// catalogue, so a new group filters itself.
+//
+// With "All" checked no rule matches and everything shows — which is also what
+// happens if `:has()` is unavailable. The page degrades to the way it was.
+const filterCss = portsByGroup
+  .map(
+    ({ group }) =>
+      `.ports-page:has(#f-${group}:checked) .group:not([data-group="${group}"]){display:none}`,
+  )
+  .join('');
 ---
 
 <Base title="Ports" description={description}>
@@ -23,40 +36,61 @@ const blurbs = Object.fromEntries(
     app is themed, it appears here the same way.
   </p>
 
-  {
-    portsByGroup.map(({ label, items }) => (
-      <section class="group">
-        <h2 class="group__label mono">
-          {label}
-          <span class="group__count">{items.length}</span>
-        </h2>
-        <ul role="list" class="ports">
-          {items.map((p, i) => (
-            <li class="port reveal" style={`--d: ${i * 60}ms`}>
-              <div class="port__thumb">
-                <TerminalMock preview={p.preview} compact lines={7} decorative />
-              </div>
-              <div class="port__head">
-                {/* Stretched: the whole card is the hit target, without nesting
-                    anchors or reaching for JavaScript. */}
-                <a class="port__name" href={`/ports/${p.slug}`}>{p.name}</a>
-                <a class="port__status port__status--live" href={p.repo}>
-                  <span class="port__lamp" aria-hidden="true" /> repo ↗
-                </a>
-              </div>
-              <p class="port__blurb" set:html={blurbs[p.slug]} />
-              <dl class="port__meta mono">
-                <div>
-                  <dt>file</dt>
-                  <dd>{p.install}</dd>
-                </div>
-              </dl>
-            </li>
+  <div class="ports-page">
+    <style is:inline set:html={filterCss} />
+
+    {
+      portsByGroup.length > 1 && (
+        <fieldset class="filter">
+          <legend class="visually-hidden">Filter by group</legend>
+          <input type="radio" name="group" id="f-all" checked />
+          <label class="mono" for="f-all">
+            All <span class="filter__n">{ports.length}</span>
+          </label>
+          {portsByGroup.map(({ group, label, items }) => (
+            <>
+              <input type="radio" name="group" id={`f-${group}`} />
+              <label class="mono" for={`f-${group}`}>
+                {label} <span class="filter__n">{items.length}</span>
+              </label>
+            </>
           ))}
-        </ul>
-      </section>
-    ))
-  }
+        </fieldset>
+      )
+    }
+
+    {
+      portsByGroup.map(({ group, label, items }) => (
+        <section class="group" data-group={group}>
+          <h2 class="group__label mono">
+            {label}
+            <span class="group__count">{items.length}</span>
+          </h2>
+          <ul role="list" class="ports">
+            {items.map((p, i) => (
+              <li class="port reveal" style={`--d: ${i * 40}ms`}>
+                <div class="port__head">
+                  {/* Stretched: the whole card is the hit target, without nesting
+                      anchors or reaching for JavaScript. */}
+                  <a class="port__name" href={`/ports/${p.slug}`}>{p.name}</a>
+                  <a class="port__status port__status--live" href={p.repo}>
+                    <span class="port__lamp" aria-hidden="true" /> repo ↗
+                  </a>
+                </div>
+                <p class="port__blurb" set:html={blurbs[p.slug]} />
+                <dl class="port__meta mono">
+                  <div>
+                    <dt>file</dt>
+                    <dd>{p.install}</dd>
+                  </div>
+                </dl>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </div>
 
   <section class="cta">
     <h2>Theming another app</h2>
@@ -70,10 +104,70 @@ const blurbs = Object.fromEntries(
 </Base>
 
 <style>
+  /* ------------------------------------------------------------------ filter */
+
+  .filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    border: 0;
+    padding: 0;
+    margin: 2rem 0 0;
+  }
+
+  /* Off-screen rather than display:none — a hidden input is not focusable, and
+     the label is the only way to reach these by keyboard. */
+  .filter input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .filter label {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    font-size: 0.74rem;
+    letter-spacing: 0.06em;
+    color: var(--sp-fg-dim);
+    background: var(--sp-concreto);
+    border: var(--border);
+    border-radius: 999px;
+    padding: 0.3rem 0.75rem;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+  }
+
+  .filter label:hover {
+    color: var(--sp-fg);
+    border-color: color-mix(in oklab, var(--sp-sodio) 40%, var(--sp-fiacao));
+  }
+
+  .filter input:checked + label {
+    color: var(--sp-sodio);
+    border-color: color-mix(in oklab, var(--sp-sodio) 55%, var(--sp-fiacao));
+    background: color-mix(in oklab, var(--sp-sodio) 10%, var(--sp-concreto));
+  }
+
+  .filter input:focus-visible + label {
+    outline: 2px solid var(--sp-sodio);
+    outline-offset: 2px;
+  }
+
+  .filter__n {
+    color: var(--sp-fg-muted);
+  }
+
+  .filter input:checked + label .filter__n {
+    color: inherit;
+  }
+
   /* ------------------------------------------------------------------ groups */
 
   .group {
-    margin-block: 3rem;
+    margin-block: 2.25rem;
   }
 
   .group__label {
@@ -95,13 +189,17 @@ const blurbs = Object.fromEntries(
 
   /* ------------------------------------------------------------------- cards */
 
+  /* Narrower tracks than the cards used to need: with the preview gone the card
+     is four short lines, so more of them fit a row and a long list stops being a
+     scroll. The preview lives on the port's own page, one click away, at the
+     size it was drawn for. */
   .ports {
     list-style: none;
     padding: 0;
-    margin: 1.1rem 0 0;
+    margin: 0.9rem 0 0;
     display: grid;
-    gap: 0.9rem;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 24rem), 1fr));
+    gap: 0.7rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
   }
 
   /* Every port carries the lamp: `repo` is required, so there is no unshipped
@@ -110,8 +208,8 @@ const blurbs = Object.fromEntries(
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 0.55rem;
-    padding: 1.05rem 1.15rem;
+    gap: 0.4rem;
+    padding: 0.85rem 1rem;
     border: var(--border);
     border-color: color-mix(in oklab, var(--sp-sodio) 40%, var(--sp-fiacao));
     border-radius: var(--radius);
@@ -133,13 +231,6 @@ const blurbs = Object.fromEntries(
 
   .port:focus-within {
     border-color: var(--sp-sodio);
-  }
-
-  /* ---------------------------------------------------------- thumbnail */
-
-  .port__thumb {
-    margin: -0.15rem 0 0.35rem;
-    pointer-events: none;
   }
 
   .port__head {
@@ -228,7 +319,7 @@ const blurbs = Object.fromEntries(
 
   .port__meta {
     margin: auto 0 0;
-    padding-top: 0.65rem;
+    padding-top: 0.5rem;
     border-top: 1px solid color-mix(in oklab, var(--sp-fiacao) 60%, transparent);
     display: grid;
     gap: 0.3rem;
