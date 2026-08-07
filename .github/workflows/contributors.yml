@@ -43,7 +43,7 @@ jobs:
       # page cannot render must not reach main even as a pull request.
       - run: npm run check && npm test && npm run build
 
-      - uses: peter-evans/create-pull-request@v7
+      - uses: peter-evans/create-pull-request@v8
         with:
           branch: chore/refresh-the-contributors
           base: main
