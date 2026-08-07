@@ -31,6 +31,7 @@
 
 groups:
   terminal: Terminals
+  multiplexer: Multiplexers
   editor: Editors
   shell: Shell & CLI
 
@@ -788,3 +789,140 @@ ports:
           - {t: "  sp_night.rs ", r: ui.fg}
           - {t: "  6:2 ", r: ui.fg_dim}
           - {t: "  rust", r: ui.fg_muted}
+
+  - slug: herdr
+    name: herdr
+    group: multiplexer
+    blurb: The agent sidebar, panes, tabs and toasts — including the four colours that say what each agent is doing.
+    homepage: https://herdr.dev/
+    repo: https://github.com/sp-night/herdr
+    install: ~/.config/herdr/config.toml
+    note: >-
+      herdr has no theme file and no include: a custom theme is a
+      `[theme.custom]` block inside your own `config.toml`. So this port is
+      merged into that file rather than installed over it — never `curl` onto
+      it, or you lose every other setting you have.
+    template: herdr.toml.tmpl
+    key_label: "`theme.custom` token"
+    mapping_closer: what the four agent-state colours mean
+
+    install_guide: |-
+      herdr keeps everything in one file, `~/.config/herdr/config.toml`, and a
+      custom theme is a `[theme.custom]` table inside it. There is no theme file
+      to drop in and no `include` to point at one.
+
+      > [!WARNING]
+      > That means this port is **merged into** your config, not installed over
+      > it. Do not `curl -o ~/.config/herdr/config.toml` — that file holds the
+      > rest of your settings.
+
+      Open the flavour you want and paste its `[theme.custom]` block at the end
+      of your config:
+
+      ```sh
+      curl -L https://raw.githubusercontent.com/sp-night/herdr/main/themes/sp_night_noite.toml
+      ```
+
+      Then apply it without restarting anything:
+
+      ```sh
+      herdr server reload-config
+      ```
+
+      > [!NOTE]
+      > The block sets all seventeen tokens herdr exposes, which is every field
+      > of its internal palette — so whatever `theme.name` you have stays
+      > irrelevant and no colour leaks through from the base theme.
+
+    mapping:
+      - key: "`text` / `subtext0`"
+        role: "`ui.fg` / `ui.fg_dim`"
+        meaning: primary and secondary labels
+      - key: "`overlay1` / `overlay0`"
+        role: "`ui.fg_dim` / `ui.fg_muted`"
+        meaning: the two quiet steps — `overlay0` also marks an agent whose state is unknown
+      - key: "`sidebar_bg`"
+        role: "`ui.panel`"
+        meaning: the sidebar is permanent furniture, so it sits on exposed concrete
+      - key: "`panel_bg`"
+        role: "`ui.float`"
+        meaning: modals and overlays drop to the *vão*, separating by depth rather than by a border
+      - key: "`surface0` / `surface1`"
+        role: "`ui.selection` / `ui.line`"
+        meaning: the selected row in *vidro*, the merely active one a step below
+      - key: "`surface_dim`"
+        role: "`ui.border`"
+        meaning: "*fiação*, the wiring between panes"
+      - key: "`accent`"
+        role: "`ui.accent`"
+        meaning: the focused border, in *sódio* — the lamp this whole palette is named for
+      - key: "`red` / `yellow`"
+        role: "`diagnostic.error` / `diagnostic.warn`"
+        meaning: an agent Blocked, an agent Working — the two you look for first
+      - key: "`teal` / `green`"
+        role: "`diagnostic.hint` / `diagnostic.ok`"
+        meaning: >-
+          finished and not yet seen, then finished and acknowledged. herdr
+          distinguishes the two, so the theme does
+      - key: "`blue`"
+        role: "`diagnostic.info`"
+        meaning: the toast that says a run finished
+      - key: "`mauve`"
+        role: "`syntax.type`"
+        meaning: branch names and the special labels beside them
+      - key: "`peach`"
+        role: "`ui.accent`"
+        meaning: >-
+          set for completeness. herdr defines it in every built-in theme and
+          accepts an override, but nothing in the interface paints with it today
+
+    preview:
+      title: herdr — sp_night_{flavor}
+      swatches:
+        label: the roles behind the tokens
+        roles:
+          - ui.bg
+          - ui.panel
+          - ui.float
+          - ui.selection
+          - ui.border
+          - ui.fg_muted
+          - ui.fg_dim
+          - ui.fg
+          - ui.accent
+          - diagnostic.error
+          - diagnostic.warn
+          - diagnostic.hint
+          - diagnostic.ok
+          - diagnostic.info
+          - syntax.type
+          - ui.accent_alt
+      body:
+        - - {t: " herdr ", r: ui.accent, b: true}
+          - {t: " ~/sp-night ", r: ui.fg}
+          - {t: "  main", r: syntax.type}
+          - {t: "                          4 agents", r: ui.fg_muted}
+        - - {t: " ─────────────────────────────────────────────────────", r: ui.border}
+        - - {t: " ● ", r: diagnostic.warn}
+          - {t: "claude    ", r: ui.fg}
+          - {t: "working   ", r: diagnostic.warn}
+          - {t: "internal/render/lint.go", r: ui.fg_dim}
+        - - {t: " ● ", r: diagnostic.error}
+          - {t: "codex     ", r: ui.fg}
+          - {t: "blocked   ", r: diagnostic.error}
+          - {t: "waiting for input", r: ui.fg_dim}
+        - - {t: " ● ", r: diagnostic.hint}
+          - {t: "copilot   ", r: ui.fg}
+          - {t: "done      ", r: diagnostic.hint}
+          - {t: "12 files changed", r: ui.fg_dim}
+        - - {t: " ● ", r: diagnostic.ok}
+          - {t: "cursor    ", r: ui.fg}
+          - {t: "idle      ", r: diagnostic.ok}
+          - {t: "seen", r: ui.fg_dim}
+        - - {t: " ─────────────────────────────────────────────────────", r: ui.border}
+        - []
+        - - {t: " ", r: ui.fg}
+          - {t: "✓ ", r: diagnostic.info}
+          - {t: "run finished", r: ui.fg}
+          - {t: "  ·  ", r: ui.fg_muted}
+          - {t: "spn check: 70 pairs per flavour, AA on every surface", r: ui.fg_dim}
