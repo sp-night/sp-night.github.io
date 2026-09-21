@@ -1,17 +1,20 @@
 {
   "org": "sp-night",
-  "stars": 1,
-  "repos": 7,
+  "stars": 2,
+  "repos": 9,
   "contributors": [
     {
       "login": "rogeriojunior31",
       "id": 71011799,
       "url": "https://github.com/rogeriojunior31",
-      "contributions": 106,
+      "contributions": 204,
       "repos": [
         ".github",
+        "alacritty",
         "eza",
         "ghostty",
+        "helix",
+        "herdr",
         "kitty",
         "sp-night",
         "sp-night.github.io"
