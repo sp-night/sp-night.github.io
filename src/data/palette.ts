@@ -13,7 +13,7 @@
 import paletteJson from './palette.json';
 import rolesJson from './roles.json';
 import contrastJson from './contrast.json';
-import { colorMeaningEn, flavorCopy } from './content';
+import { colorMeaningEn, flavorCopy, sceneAccent } from './content';
 
 export type ColorKey = string;
 export type FlavorId = string;
@@ -385,8 +385,14 @@ export function cssVars(f: Flavor): string {
 
 /** `:root[data-flavor="…"]` blocks for every flavour, emitted once in the layout. */
 export function flavorStylesheet(): string {
+  // --sp-glow is the scene's accent (content.ts). A flavour with no entry
+  // there keeps the :root default in global.css, which is sodio.
   const vars = flavors
-    .map((f) => `:root[data-flavor="${f.id}"] {\n    ${cssVars(f)}\n  }`)
+    .map((f) => {
+      const glow = (sceneAccent as Record<string, string | undefined>)[f.id];
+      const glowVar = glow && f.colors[glow] ? `\n    --sp-glow: ${keyVar(glow)};` : '';
+      return `:root[data-flavor="${f.id}"] {\n    ${cssVars(f)}${glowVar}\n  }`;
+    })
     .join('\n  ');
 
   // Per-flavour text (hex values, ratios) is rendered for every flavour and

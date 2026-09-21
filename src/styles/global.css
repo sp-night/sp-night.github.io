@@ -58,15 +58,9 @@
        the forest green on the peak. The hero's lit line is the same idea.
      Labels, numbers and ornaments are text colours. When everything was
      orange, nothing was. */
+  /* The default only: each flavour's value comes from sceneAccent in
+     content.ts, emitted with its colours by flavorStylesheet(). */
   --sp-glow: var(--sp-sodio);
-}
-
-:root[data-flavor='garoa'] {
-  --sp-glow: var(--sp-sereno);
-}
-
-:root[data-flavor='jaragua'] {
-  --sp-glow: var(--sp-ibira);
 }
 
 html.is-swapping {
@@ -760,6 +754,34 @@ hr {
   transform: none;
 }
 
+/* Where the browser can tie an animation to scroll, the reveal is driven by
+   the element's own entry into the viewport and needs no observer. The range
+   is in pixels, not percent: a percentage of the entry phase scales with the
+   element, and on a section taller than the screen that kept half-read text
+   faded. Anything already on screen at load has completed its entry, so it
+   is simply visible. */
+@supports (animation-timeline: view()) {
+  .js .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    animation: reveal-in linear both;
+    animation-timeline: view();
+    animation-range: entry 0px entry 180px;
+  }
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* The hero scene, paused while it is off screen (src/scripts/motion.ts). */
 .is-scene-off [data-scene],
 .is-scene-off [data-scene] *,
@@ -829,6 +851,7 @@ hr {
   .js .reveal {
     opacity: 1;
     transform: none;
+    animation: none;
   }
 
   ::view-transition-old(root),

@@ -48,6 +48,19 @@ export interface FlavorCopy {
 }
 
 /**
+ * The accent that names each flavour's scene: the sodium lamp over the city at
+ * night, the drizzle's blue-grey, the forest on the peak. It is --sp-glow on
+ * the site (state, and the hero's lit line), the second half of each dot in
+ * the flavour switcher, and the lit line on the social cards — one decision,
+ * read in three places.
+ */
+export const sceneAccent: Record<FlavorId, string> = {
+  noite: 'sodio',
+  garoa: 'sereno',
+  jaragua: 'ibira',
+};
+
+/**
  * The headline on the home page, three lines with the middle one lit. One
  * per flavour, because the sentence describes the scene behind it: the
  * sodium lamp is the noite line, and it stops being true in the drizzle.

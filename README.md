@@ -183,8 +183,8 @@ those copies here is a change that disappears at the next sync.
 step still run by hand — `npm test` fails when its output is stale.
 
 Contributions are welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md) for how to
-propose a port or report a colour problem, and [`SITE.md`](SITE.md) for the full
-design plan and decision log.
+propose a port or report a colour problem, and [`SITE.md`](SITE.md) for how the
+site is built and the rules it keeps.
 
 <p align="center">
   <sub>SP Night — built by <a href="https://github.com/sp-night/sp-night.github.io/graphs/contributors">its contributors</a> · MIT</sub>

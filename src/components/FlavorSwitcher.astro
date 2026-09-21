@@ -1,11 +1,12 @@
 ---
 import { flavors, defaultFlavor } from '../data/palette';
+import { sceneAccent } from '../data/content';
 
 /* Each dot is its flavour's sky: the dark surface on one side, the accent that
    names the scene on the other. Sodium for the city at night, the drizzle's
    blue-grey for garoa, the forest green for the peak. Falls back to sodio for
    any flavour the contract adds later. */
-const SIGNATURE: Record<string, string> = { noite: 'sodio', garoa: 'sereno', jaragua: 'ibira' };
+const SIGNATURE = sceneAccent as Record<string, string | undefined>;
 
 const dot = (f: (typeof flavors)[number]) => {
   const accent = f.colors[SIGNATURE[f.id] ?? 'sodio']?.hex ?? f.colors.sodio?.hex;

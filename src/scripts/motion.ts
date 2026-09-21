@@ -110,7 +110,12 @@ if (toc && 'IntersectionObserver' in window) {
   pairs.forEach((p) => spy.observe(p.area));
 }
 
-const targets = document.querySelectorAll<HTMLElement>('.reveal');
+/* Where CSS drives the reveal from scroll (global.css), the observer is only
+   needed for what CSS cannot do — the counters. */
+const scrollDriven = CSS.supports('animation-timeline: view()');
+const targets = Array.from(document.querySelectorAll<HTMLElement>('.reveal')).filter(
+  (el) => !scrollDriven || el.querySelector('[data-count]') !== null,
+);
 
 if (targets.length) {
   if (calm.matches || !('IntersectionObserver' in window)) {
