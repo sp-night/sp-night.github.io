@@ -14,11 +14,21 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import sharp from 'sharp';
 import { markSvg } from '../src/lib/mark.mjs';
 import { parse as parseYaml } from 'yaml';
+import { useProjectFonts } from './fonts.mjs';
+// The headline and the scene accent are the site's own, read from the module
+// the home page renders — not retyped here. Node strips the types.
+import { heroLines, sceneAccent } from '../src/data/content.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+
+// Before sharp loads: the cards are set in the site's faces (scripts/fonts.mjs).
+await useProjectFonts(root);
+const { default: sharp } = await import('sharp');
+
+const DISPLAY = 'SP Display';
+const MONO = 'SP Mono';
 const palette = JSON.parse(readFileSync(join(root, 'src/data/palette.json'), 'utf8'));
 
 /* The bands come from the contract, the same way src/data/palette.ts reads
@@ -82,8 +92,15 @@ function markInline(flavor) {
     .replace(/url\(#beacon\)/, 'url(#mark-beacon)');
 }
 
-function ogSvg(flavor) {
+/** The scene's accent for a flavour — the hero's lit line, and its lamp. */
+const litFor = (id, c) => c[sceneAccent[id]] ?? c.sodio;
+
+function ogSvg(id, flavor) {
   const c = flavor.colors;
+  const lit = litFor(id, c);
+  // Same three lines as the hero of the home page, for the same flavour.
+  const lines = heroLines[id];
+  if (!lines) throw new Error(`no hero headline for flavour "${id}" in src/data/content.ts`);
   const swatches = ACCENTS.map(
     (k, i) => `<rect x="${72 + i * 52}" y="470" width="40" height="40" rx="8" fill="${c[k]}"/>`,
   ).join('');
@@ -96,9 +113,9 @@ function ogSvg(flavor) {
       <stop offset="1" stop-color="${c.laje}"/>
     </linearGradient>
     <radialGradient id="lamp" cx="0.5" cy="0.1" r="0.75">
-      <stop offset="0" stop-color="${c.sodio}" stop-opacity="0.26"/>
-      <stop offset="0.55" stop-color="${c.sodio}" stop-opacity="0.05"/>
-      <stop offset="1" stop-color="${c.sodio}" stop-opacity="0"/>
+      <stop offset="0" stop-color="${lit}" stop-opacity="0.26"/>
+      <stop offset="0.55" stop-color="${lit}" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="${lit}" stop-opacity="0"/>
     </radialGradient>
   </defs>
 
@@ -108,12 +125,16 @@ function ogSvg(flavor) {
   <rect x="0" y="626" width="1200" height="4" fill="${c.vao}"/>
 
   <g transform="translate(72 76) scale(0.72)">${markInline(flavor)}</g>
-  <text x="132" y="114" font-family="ui-monospace, monospace" font-size="30" font-weight="700" fill="${c.fg}">SP Night</text>
+  <text x="132" y="114" font-family="${MONO}" font-size="30" font-weight="700" fill="${c.fg}">SP Night</text>
 
-  <text x="72" y="252" font-family="ui-sans-serif, system-ui, sans-serif" font-size="76" font-weight="640" fill="${c.fg}">The sodium lamp turns</text>
-  <text x="72" y="336" font-family="ui-sans-serif, system-ui, sans-serif" font-size="76" font-weight="640" fill="${c.sodio}">the whole city this colour.</text>
+  ${lines
+    .map(
+      (line, i) =>
+        `<text x="72" y="${214 + i * 74}" font-family="${DISPLAY}" font-size="70" font-weight="700" letter-spacing="-2" fill="${i === 1 ? lit : c.fg}">${esc(line)}</text>`,
+    )
+    .join('\n  ')}
 
-  <text x="72" y="404" font-family="ui-sans-serif, system-ui, sans-serif" font-size="30" fill="${c.fg_dim}">A dark theme with São Paulo as its reference — ${flavor.label}</text>
+  <text x="72" y="424" font-family="${DISPLAY}" font-size="28" fill="${c.fg_dim}">A dark theme with São Paulo as its reference — ${esc(flavor.label)}</text>
 
   ${swatches}
 </svg>`;
@@ -129,6 +150,7 @@ function ogSvg(flavor) {
  */
 function portOgSvg(flavorId, flavor, port) {
   const c = flavor.colors;
+  const lit = litFor(flavorId, c);
   const install = port.install.replaceAll('{flavor}', flavorId);
   const swatches = ACCENTS.map(
     (k, i) => `<rect x="${72 + i * 52}" y="470" width="40" height="40" rx="8" fill="${c[k]}"/>`,
@@ -142,9 +164,9 @@ function portOgSvg(flavorId, flavor, port) {
       <stop offset="1" stop-color="${c.laje}"/>
     </linearGradient>
     <radialGradient id="lamp" cx="0.5" cy="0.1" r="0.75">
-      <stop offset="0" stop-color="${c.sodio}" stop-opacity="0.26"/>
-      <stop offset="0.55" stop-color="${c.sodio}" stop-opacity="0.05"/>
-      <stop offset="1" stop-color="${c.sodio}" stop-opacity="0"/>
+      <stop offset="0" stop-color="${lit}" stop-opacity="0.26"/>
+      <stop offset="0.55" stop-color="${lit}" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="${lit}" stop-opacity="0"/>
     </radialGradient>
   </defs>
 
@@ -154,12 +176,12 @@ function portOgSvg(flavorId, flavor, port) {
   <rect x="0" y="626" width="1200" height="4" fill="${c.vao}"/>
 
   <g transform="translate(72 76) scale(0.72)">${markInline(flavor)}</g>
-  <text x="132" y="114" font-family="ui-monospace, monospace" font-size="30" font-weight="700" fill="${c.fg}">SP Night</text>
+  <text x="132" y="114" font-family="${MONO}" font-size="30" font-weight="700" fill="${c.fg}">SP Night</text>
 
-  <text x="72" y="268" font-family="ui-sans-serif, system-ui, sans-serif" font-size="76" font-weight="640" fill="${c.fg}">SP Night for</text>
-  <text x="72" y="352" font-family="ui-sans-serif, system-ui, sans-serif" font-size="76" font-weight="640" fill="${c.sodio}">${esc(port.name)}</text>
+  <text x="72" y="268" font-family="${DISPLAY}" font-size="76" font-weight="700" letter-spacing="-2" fill="${c.fg}">SP Night for</text>
+  <text x="72" y="352" font-family="${DISPLAY}" font-size="76" font-weight="700" letter-spacing="-2" fill="${lit}">${esc(port.name)}</text>
 
-  <text x="72" y="414" font-family="ui-monospace, monospace" font-size="26" fill="${c.fg_dim}">${esc(install)}</text>
+  <text x="72" y="414" font-family="${MONO}" font-size="26" fill="${c.fg_dim}">${esc(install)}</text>
 
   ${swatches}
 </svg>`;
@@ -196,7 +218,7 @@ function stripSvg(flavor) {
 }
 
 for (const [id, flavor] of Object.entries(palette.flavors)) {
-  const svg = ogSvg(flavor);
+  const svg = ogSvg(id, flavor);
   await sharp(Buffer.from(svg)).png().toFile(join(root, `public/og-${id}.png`));
   writeFileSync(join(root, `public/favicon-${id}.svg`), markSvg(flavor, 64, true));
   writeFileSync(join(root, `public/logo-${id}.svg`), markSvg(flavor, 256));
