@@ -14,13 +14,16 @@
 import { existsSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
+  FRAMES,
   GROUP_LABELS,
   copy,
   expand,
+  frameOf,
   isFlavored,
   keyLabel,
   ports,
   portsByGroup,
+  previewSpans,
 } from '../src/data/ports';
 import { flavors } from '../src/data/palette';
 import { HOME_PREVIEW } from '../src/data/content';
@@ -109,9 +112,17 @@ describe('what a port page needs', () => {
     }
   });
 
+  it('draws every preview in a frame the engine knows', () => {
+    for (const p of ports) {
+      expect(FRAMES, `${p.slug}`).toContain(frameOf(p.preview));
+      if (p.preview.bar) expect(['editor', 'app'], `${p.slug} has a bar`).toContain(frameOf(p.preview));
+      if (p.preview.cursor_line) expect(frameOf(p.preview), `${p.slug} has a cursor line`).toBe('editor');
+    }
+  });
+
   it('gives every preview span exactly one source of colour', () => {
     for (const p of ports) {
-      for (const line of p.preview.body) {
+      for (const line of previewSpans(p.preview)) {
         for (const s of line) {
           expect(Boolean(s.r) !== Boolean(s.c), `${p.slug}: "${s.t}"`).toBe(true);
         }
@@ -123,7 +134,7 @@ describe('what a port page needs', () => {
 describe('the catalogue agrees with the vendored palette', () => {
   it('resolves every role and key a preview paints with', () => {
     for (const p of ports) {
-      for (const line of p.preview.body) {
+      for (const line of previewSpans(p.preview)) {
         for (const s of line) {
           expect(() => spanColor(s), `${p.slug}: "${s.t}"`).not.toThrow();
         }
@@ -140,7 +151,7 @@ describe('the catalogue agrees with the vendored palette', () => {
   it('resolves every hex a preview prints as text', () => {
     for (const p of ports) {
       for (const f of flavors) {
-        for (const line of p.preview.body) {
+        for (const line of previewSpans(p.preview)) {
           for (const s of line) {
             expect(() => previewText(s.t, f), `${p.slug}/${f.id}: "${s.t}"`).not.toThrow();
           }
@@ -156,7 +167,7 @@ describe('the catalogue agrees with the vendored palette', () => {
           expand(p.install, f.id, f.label),
           expand(p.activate ?? '', f.id, f.label),
           previewText(p.preview.title, f),
-          ...p.preview.body.flat().map((s) => previewText(s.t, f)),
+          ...previewSpans(p.preview).flat().map((s) => previewText(s.t, f)),
         ];
         for (const text of rendered) {
           expect(isFlavored(text), `${p.slug}/${f.id}: "${text}"`).toBe(false);

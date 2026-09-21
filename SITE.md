@@ -42,6 +42,9 @@ tests/           guardas do contrato, dos ports, do README e do próprio site
   (`tests/no-raw-hex.test.ts` cobra).
 - Nada é afirmado se pode ser derivado: contagens, pisos de contraste e tabelas saem dos dados.
 - O site lista só ports publicados; cada página de port é gerada do catálogo.
+- O preview de cada port é o SVG que o motor desenha (`public/previews/`), numa moldura por
+  tipo de app (`preview.frame`: terminal, editor, app, pane). O `TerminalMock` do site só
+  desenha a moldura `terminal`, que é a única que a home usa.
 
 **Flavors**
 - `data-flavor` no `<html>` escolhe o bloco de variáveis. Texto que muda por flavor é
@@ -84,6 +87,7 @@ tests/           guardas do contrato, dos ports, do README e do próprio site
 | 8 | 2026-09-21 | tipografia própria; o hero vira uma vista, com manchete por flavor |
 | 9 | 2026-09-21 | paleta como galeria, duas colunas, fiação, consistência de cor/hover/raio, testes |
 | 10 | 2026-09-21 | cards OG com as fontes e manchetes do site; reveal por scroll só com CSS |
+| 11 | 2026-09-21 | previews com moldura por tipo de app: editor, app e pane além do terminal |
 
 ## Pendências
 

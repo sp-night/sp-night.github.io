@@ -41,13 +41,41 @@ export interface Swatches {
   keys?: string[];
 }
 
+/** The chrome a preview is drawn in. Mirrors the `Frame*` constants in the engine. */
+export const FRAMES = ['terminal', 'editor', 'app', 'pane'] as const;
+export type Frame = (typeof FRAMES)[number];
+
+/** The bottom bar of the editor and app frames: runs at the left edge, runs at the right. */
+export interface Bar {
+  left?: Span[];
+  right?: Span[];
+}
+
 /** The declarative screenshot. The port repo renders it to SVG; so do we. */
 export interface Preview {
   title: string;
+  /** Defaults to `terminal`. Only the engine draws the other three; the site's mock is a terminal. */
+  frame?: Frame;
   /** One array per line. An empty array is a vertical gap, not a blank row. */
   body: Span[][];
+  /** Editor and app frames only. */
+  bar?: Bar;
+  /** Editor frame only: the 1-based body line it highlights. */
+  cursor_line?: number;
   swatches: Swatches;
 }
+
+/** How many body lines a frame fits above its colour strip. Mirrors `MaxBodyLines`. */
+export const maxBodyLines = (frame: Frame): number => (frame === 'pane' ? 13 : 11);
+
+/** The frame with the default applied. */
+export const frameOf = (p: Preview): Frame => p.frame ?? 'terminal';
+
+/** Every run of text a preview paints: the body, and the bar if it has one. */
+export const previewSpans = (p: Preview): Span[][] => [
+  ...p.body,
+  ...(p.bar ? [p.bar.left ?? [], p.bar.right ?? []] : []),
+];
 
 /** A row of the "What gets themed" table. All three are markdown fragments. */
 export interface MappingRow {
@@ -154,10 +182,30 @@ for (const p of registry.ports) {
 
   const pv = p.preview;
   if (!pv?.title) throw new Error(`${where} has no preview title`);
+  const frame = frameOf(pv);
+  if (!FRAMES.includes(frame)) {
+    throw new Error(`${where} has preview frame "${frame}", not one of ${FRAMES.join(', ')}`);
+  }
   if (!Array.isArray(pv.body) || pv.body.length === 0) {
     throw new Error(`${where} has an empty preview body`);
   }
-  for (const line of pv.body) {
+  if (pv.body.length > maxBodyLines(frame)) {
+    throw new Error(`${where} has ${pv.body.length} preview lines; the ${frame} frame fits ${maxBodyLines(frame)}`);
+  }
+  const hasBar = frame === 'editor' || frame === 'app';
+  if (pv.bar) {
+    if (!hasBar) throw new Error(`${where} has a preview bar, which the ${frame} frame does not draw`);
+    if (!pv.bar.left?.length && !pv.bar.right?.length) {
+      throw new Error(`${where} has a preview bar with neither left nor right`);
+    }
+  }
+  if (pv.cursor_line) {
+    if (frame !== 'editor') throw new Error(`${where} has a cursor_line, which the ${frame} frame does not draw`);
+    if (pv.cursor_line < 1 || pv.cursor_line > pv.body.length) {
+      throw new Error(`${where} has cursor_line ${pv.cursor_line}, outside its ${pv.body.length} lines`);
+    }
+  }
+  for (const line of previewSpans(pv)) {
     for (const s of line) {
       // Exactly one source of colour. Both set is ambiguous, neither is invisible.
       if (!!s.r === !!s.c) {
