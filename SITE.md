@@ -423,3 +423,52 @@ do poste acendendo acompanha.
 Verificado em Firefox headless nos três flavors, 1280 px e 390 px, mais `/spec`, `/palette` e
 uma página de port com a fonte nova. Pendência conhecida: no mobile a linha acesa quebra em
 duas por causa do tamanho novo.
+
+**Rodada 9 — o plano de ajustes, e uma passada de consistência** (2026-09-21)
+
+Execução do plano que saiu da revisão da Rodada 8: primeiro os ajustes (bugs de layout, motivos
+da cidade, as duas páginas grandes), depois uma passada de design feita contra um inventário.
+
+**Ajustes.**
+
+| entrega | nota |
+|---|---|
+| header numa linha entre 50 e 66 rem | o switcher usa os ids curtos nessa faixa; a segunda linha começa em 50 rem, não 44 |
+| manchete sem quebra no celular | piso do `clamp` do título calculado pela linha acesa mais longa |
+| `--measure` 68ch → 52ch | o zero da Bricolage é largo; 68ch dava 84 caracteres por linha |
+| faixa de swatches nos cards de port | a do próprio preview, na altura de um fio; `swatchColors()` em `preview.ts`, compartilhada com o `TerminalMock` e com a mesma validação do `spanColor` |
+| a cena pausa fora da tela | `data-scene` no hero, `html.is-scene-off` pausa todas as animações dele |
+| farol da marca, contagem dos fatos, poste no 404, preload das fontes | o preload importa os woff2 por `?url` dos mesmos arquivos do CSS: um asset só |
+| `Wire.astro` — a fiação como divisor | três cabos com barriga assimétrica, `non-scaling-stroke`; nas bordas das faixas da home e sobre o rodapé |
+| grão de concreto nas faixas `laje` | `feTurbulence` num tile de 200 px, branco a poucos % de alfa |
+| `/palette` como galeria | swatch grande com o nome sobre ele (tinta decidida por flavor em build), os três hexes lado a lado, barras de contraste por superfície com o piso da política marcado (`floorFor()` lê o `contrast.json`), a laje contínua das superfícies |
+| `/spec` e `/contribute` em duas colunas | texto até 40 rem, índice sticky na borda, seção atual acesa por um observer |
+
+**A passada de consistência**, feita contra `/kit` — uma rota que só existe em `astro dev`
+(`getStaticPaths` vazio em produção) e mostra cada primitivo uma vez:
+
+- **Sódio tem dois trabalhos: ação e foco.** Estava em mais de 40 lugares. Estado ("você está
+  aqui": nav, filtro, seção, flavor ativo, relógio) passou para `--sp-glow`, a cor da cena.
+  Callouts informativos e caixas do contrato usam `marginal`; rótulos e números voltaram a ser
+  cores de texto.
+- **Uma linguagem de hover:** 2 px para cima e a borda de `fiacao` para `fg-muted`. Só o botão
+  primário projeta luz.
+- **Quatro raios** (`--r-xs/s/m/pill`) no lugar de nove valores; padding de card em token.
+- **Tipo:** corpo em peso 430; h3/h4 com entrelinha e tracking próprios.
+- O inventário achou um bug: o nome sobre o swatch tirava a tinta de uma regra da `/palette` e
+  a perdia em qualquer outra página. Agora o card resolve sozinho, e o hex aceso usa um
+  `data-lit` novo na folha gerada dos flavors, irmão do `data-f`.
+- As barras de rolagem passaram a usar a paleta (`scrollbar-color` na raiz).
+
+**Verificação:** Firefox headless, as 7 rotas × 3 flavors × 1280 px e 390 px, revisadas em
+painéis; `astro check` 0/0/0; 56 testes verdes; build limpo, sem `/kit` no `dist` nem no sitemap.
+
+**O que ficou de fora, e por quê:**
+- **Assets sociais com a fonte nova (B6):** `scripts/gen-assets.mjs`, `Logo.astro`,
+  `src/lib/mark.mjs` e os logos/favicons de `public/` têm um retrabalho da marca não commitado,
+  de outra sessão. O card OG embute a marca, então regerá-lo agora misturaria os dois trabalhos.
+- **`reveal` por `animation-timeline: view()`:** nenhum navegador desta máquina suporta a
+  propriedade, então não havia como verificar.
+- **Lighthouse e teclado:** não há Chrome nem ferramenta de automação de navegador aqui. O
+  código mantém os caminhos de teclado (setas no switcher, labels dos filtros, cards de cor como
+  `<button>`), mas isso não foi exercitado num navegador.
