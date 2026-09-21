@@ -58,15 +58,9 @@
        the forest green on the peak. The hero's lit line is the same idea.
      Labels, numbers and ornaments are text colours. When everything was
      orange, nothing was. */
+  /* The default only: each flavour's value comes from sceneAccent in
+     content.ts, emitted with its colours by flavorStylesheet(). */
   --sp-glow: var(--sp-sodio);
-}
-
-:root[data-flavor='garoa'] {
-  --sp-glow: var(--sp-sereno);
-}
-
-:root[data-flavor='jaragua'] {
-  --sp-glow: var(--sp-ibira);
 }
 
 html.is-swapping {
