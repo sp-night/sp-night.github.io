@@ -1,9 +1,10 @@
 /**
- * Two small motion helpers, both no-ops when the visitor asks for less motion.
+ * Small motion helpers, all no-ops when the visitor asks for less motion.
  *
  *  1. `--sp-scroll` on <html>, updated on a rAF tick — used for the hero
  *     parallax without a scroll handler doing layout work.
  *  2. Reveal-on-scroll for anything tagged `.reveal`.
+ *  3. The hero scene stops animating once it is off screen.
  */
 const calm = matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -28,6 +29,23 @@ if (!calm.matches) {
     { passive: true },
   );
   update();
+}
+
+/*
+ * The skyline runs a few dozen infinite animations — beacons, rain, the wheel,
+ * the plane — and they kept running while the reader was down in the footer.
+ * `html.is-scene-off` pauses them all (global.css) from the moment the hero
+ * leaves the viewport until it comes back.
+ */
+const scene = document.querySelector<HTMLElement>('[data-scene]');
+
+if (scene && !calm.matches && 'IntersectionObserver' in window) {
+  new IntersectionObserver(
+    ([entry]) => {
+      document.documentElement.classList.toggle('is-scene-off', !entry!.isIntersecting);
+    },
+    { rootMargin: '80px 0px' },
+  ).observe(scene);
 }
 
 const targets = document.querySelectorAll<HTMLElement>('.reveal');

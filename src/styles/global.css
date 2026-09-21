@@ -692,6 +692,14 @@ hr {
   transform: none;
 }
 
+/* The hero scene, paused while it is off screen (src/scripts/motion.ts). */
+.is-scene-off [data-scene],
+.is-scene-off [data-scene] *,
+.is-scene-off [data-scene] *::before,
+.is-scene-off [data-scene] *::after {
+  animation-play-state: paused !important;
+}
+
 /* Flavour switch as a view transition: the new page opens out of the button
    that was pressed, like a lamp coming on. The old snapshot just sits there;
    the new one is clipped to a growing circle. `--sp-wipe-*` are set on <html>
