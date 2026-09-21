@@ -123,7 +123,7 @@ describe('vendored data shape', () => {
 });
 
 describe('contrast policy', () => {
-  // The floors the palette promises, per SITE.md and verified against the data:
+  // The floors the palette promises, verified against the data:
   // body text is AAA on every surface, dim text AA, muted text AA-large,
   // and every accent holds AA against the deepest background.
   const SURFACES = ['vao', 'laje', 'concreto'] as const;
