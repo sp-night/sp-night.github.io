@@ -15,6 +15,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import sharp from 'sharp';
+import { markSvg } from '../src/lib/mark.mjs';
 import { parse as parseYaml } from 'yaml';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -168,50 +169,6 @@ function portOgSvg(flavorId, flavor, port) {
 const esc = (s) =>
   s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 
-/**
- * The mark: Pico do Jaraguá at dusk. Jaraguá (1,135 m) and Pico do Papagaio
- * (1,127 m) are almost the same height and split by a saddle, so the massif
- * reads as rounded domes — eroded Atlantic-forest mountain, not alpine rock.
- * The landmark is the tower: a very tall, slender lattice mast banded red and
- * white, taller than the visible hill, with the aviation beacon on top and
- * São Paulo's lights at the foot of the range. Kept in sync with src/components/Logo.astro, which draws the same
- * shape with CSS custom properties instead of baked hexes.
- */
-function markSvg(flavor, size = 64) {
-  const c = flavor.colors;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="${size}" height="${size}">
-  <defs>
-    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="${c.vao}"/>
-      <stop offset="0.26" stop-color="${c.vao}"/>
-      <stop offset="0.52" stop-color="${c.temporal}" stop-opacity="0.44"/>
-      <stop offset="0.78" stop-color="${c.sodio}" stop-opacity="0.72"/>
-      <stop offset="1" stop-color="${c.taxi}" stop-opacity="0.9"/>
-    </linearGradient>
-    <radialGradient id="beacon">
-      <stop offset="0" stop-color="${c.brasa}" stop-opacity="0.62"/>
-      <stop offset="1" stop-color="${c.brasa}" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <rect width="64" height="64" rx="13" fill="url(#sky)"/>
-  <path d="M-2 64 C4 59 9 53 15 49 C20 46 24 45 28 47 C32 49 35 53 39 53 C44 53 49 47 55 45 C59 43 63 47 66 51 L66 64 Z" fill="${c.concreto}" opacity="0.6"/>
-  <path d="M-2 64 C7 60 13 55 19 50 C24 45 27 33 32 33 C37 33 41 43 46 47 C50 50 54 46 58 46 C61 46 64 50 66 53 L66 64 Z" fill="${c.vao}"/>
-  <g fill="${c.sodio}" opacity="0.9">
-    <rect x="5" y="60.4" width="1.4" height="1.4"/><rect x="9.5" y="61.6" width="1.4" height="1.4"/>
-    <rect x="14" y="60.6" width="1.4" height="1.4"/><rect x="51" y="61" width="1.4" height="1.4"/>
-    <rect x="55.5" y="61.8" width="1.4" height="1.4"/><rect x="59.5" y="60.4" width="1.4" height="1.4"/>
-  </g>
-  <line x1="58" y1="46" x2="58" y2="39" stroke="${c.fg_muted}" stroke-width="0.8" opacity="0.8"/>
-  <path d="M29.4 33 L31.32 6 L32.68 6 L34.6 33 Z" fill="${c.fg}"/>
-  <path d="M31.32 6 L32.68 6 L32.95 9.86 L31.05 9.86 Z" fill="${c.brasa}"/>
-  <path d="M30.77 13.71 L33.23 13.71 L33.5 17.57 L30.5 17.57 Z" fill="${c.brasa}"/>
-  <path d="M30.22 21.43 L33.78 21.43 L34.05 25.29 L29.95 25.29 Z" fill="${c.brasa}"/>
-  <path d="M29.67 29.14 L34.33 29.14 L34.6 33 L29.4 33 Z" fill="${c.brasa}"/>
-  <circle cx="32" cy="4.6" r="5.5" fill="url(#beacon)"/>
-  <circle cx="32" cy="4.6" r="1.7" fill="${c.brasa}"/>
-</svg>`;
-}
-
 /** All 22 colours in palette order as one group-spaced strip — the README's
     palette preview. Swatches sit on the flavour's own background. */
 function stripSvg(flavor) {
@@ -241,22 +198,22 @@ function stripSvg(flavor) {
 for (const [id, flavor] of Object.entries(palette.flavors)) {
   const svg = ogSvg(flavor);
   await sharp(Buffer.from(svg)).png().toFile(join(root, `public/og-${id}.png`));
-  writeFileSync(join(root, `public/favicon-${id}.svg`), markSvg(flavor));
+  writeFileSync(join(root, `public/favicon-${id}.svg`), markSvg(flavor, 64, true));
   writeFileSync(join(root, `public/logo-${id}.svg`), markSvg(flavor, 256));
   writeFileSync(join(root, `public/palette-${id}.svg`), stripSvg(flavor));
   console.log(`og-${id}.png + favicon-${id}.svg + logo-${id}.svg + palette-${id}.svg`);
 }
 
 // The default favicon mirrors the default flavour.
-writeFileSync(join(root, 'public/favicon.svg'), markSvg(palette.flavors.noite));
+writeFileSync(join(root, 'public/favicon.svg'), markSvg(palette.flavors.noite, 64, true));
 console.log('favicon.svg (noite)');
 
 /* Touch and PWA icons mirror the default flavour, flattened onto vao — the
    platforms mask their own corners, so no transparency survives anyway. */
 function flatIconSvg(flavor, size) {
   return markSvg(flavor, size).replace(
-    '<rect width="64" height="64" rx="13"',
-    `<rect width="64" height="64" fill="${flavor.colors.vao}"/><rect width="64" height="64" rx="13"`,
+    '<defs>',
+    `<rect width="64" height="64" fill="${flavor.colors.vao}"/><defs>`,
   );
 }
 
