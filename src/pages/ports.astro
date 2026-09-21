@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import { ports, portsByGroup } from '../data/ports';
 import { inlineMd } from '../data/guide';
+import { swatchColors } from '../data/preview';
 
 const names = ports.map((p) => p.name).join(' and ');
 const description = `SP Night for ${names} — every port a repository of its own, installable today.`;
@@ -77,6 +78,14 @@ const filterCss = portsByGroup
                     <span class="port__lamp" aria-hidden="true" /> repo ↗
                   </a>
                 </div>
+                {/* The preview's own swatch strip: the colours this port
+                    actually paints with, at the height of a rule rather than a
+                    mock — the card stays four lines. */}
+                <span class="port__strip" aria-hidden="true">
+                  {swatchColors(p.preview).map((c, k) => (
+                    <span class="retint-wave" style={`--i: ${i * 3 + k}; background: ${c}`} />
+                  ))}
+                </span>
                 <p class="port__blurb" set:html={blurbs[p.slug]} />
                 <dl class="port__meta mono">
                   <div>
@@ -297,6 +306,25 @@ const filterCss = portsByGroup
     border-radius: 50%;
     background: currentColor;
     box-shadow: 0 0 7px currentColor;
+  }
+
+  .port__strip {
+    display: flex;
+    gap: 3px;
+    height: 7px;
+    margin-block: 0.1rem 0.15rem;
+  }
+
+  .port__strip span {
+    flex: 1;
+    border-radius: 2px;
+    transform-origin: bottom;
+    transition: background-color var(--sp-retint) ease calc(var(--i, 0) * 20ms),
+      transform 0.3s var(--sp-ease);
+  }
+
+  .port:hover .port__strip span {
+    transform: scaleY(1.6);
   }
 
   .port__blurb {

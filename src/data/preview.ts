@@ -8,7 +8,7 @@
  * Mirrors `internal/port/preview.go` in the engine, so the synthetic terminal
  * this site draws and the SVG the port repository ships say the same thing.
  */
-import type { Span } from './ports';
+import type { Preview, Span } from './ports';
 import { type Flavor, flavors, keyVar, roleVar } from './palette';
 
 const resolve = (f: Flavor, kind: 'r' | 'c', name: string): string => {
@@ -36,6 +36,28 @@ export const previewText = (text: string, f: Flavor): string =>
     .replaceAll('{flavor}', f.id)
     .replaceAll('{label}', f.label)
     .replace(/\{([rc]):([^}]+)\}/g, (_, kind: 'r' | 'c', name: string) => resolve(f, kind, name));
+
+/**
+ * The swatch strip under a preview, as custom properties — shared by the
+ * terminal mock and the port cards, so both draw the same colours in the same
+ * order. Like `spanColor`, a name that does not resolve fails the build.
+ */
+export function swatchColors(preview: Preview): string[] {
+  const { roles, keys } = preview.swatches;
+  if (roles?.length) {
+    return roles.map((r) => {
+      const [group, role] = r.split('.');
+      if (!group || !role || !flavors[0]!.roles[group]?.[role]) {
+        throw new Error(`preview swatch "${r}" is not a role`);
+      }
+      return roleVar(group, role);
+    });
+  }
+  return (keys ?? []).map((k) => {
+    if (!flavors[0]!.colors[k]) throw new Error(`preview swatch "${k}" is not a palette key`);
+    return keyVar(k);
+  });
+}
 
 /**
  * The CSS colour for a span, always as a custom property so the mock retints

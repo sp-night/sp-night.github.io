@@ -14,8 +14,8 @@
  */
 import type { Preview } from '../data/ports';
 import { isFlavored } from '../data/ports';
-import { previewText, spanColor } from '../data/preview';
-import { flavors, keyVar, roleVar } from '../data/palette';
+import { previewText, spanColor, swatchColors } from '../data/preview';
+import { flavors } from '../data/palette';
 
 interface Props {
   preview: Preview;
@@ -30,13 +30,7 @@ const { preview, compact = false, lines, decorative = false } = Astro.props;
 
 const body = lines ? preview.body.slice(0, lines) : preview.body;
 
-const swatchVars = (preview.swatches.roles ?? []).map((r) => {
-  const [g, role] = r.split('.');
-  return roleVar(g!, role!);
-});
-const swatches = swatchVars.length
-  ? swatchVars
-  : (preview.swatches.keys ?? []).map((k) => keyVar(k));
+const swatches = swatchColors(preview);
 
 const classes = ['term', compact && 'term--compact', lines && 'term--thumb']
   .filter(Boolean)
