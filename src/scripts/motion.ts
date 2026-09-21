@@ -6,6 +6,7 @@
  *  2. Reveal-on-scroll for anything tagged `.reveal`.
  *  3. The hero scene stops animating once it is off screen.
  *  4. Numbers tagged `data-count` count up when they are revealed.
+ *  5. A page index tagged `data-toc` marks the section being read.
  */
 const calm = matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -68,6 +69,45 @@ function countUp(el: HTMLElement) {
   };
   el.textContent = '0';
   requestAnimationFrame(step);
+}
+
+/*
+ * The index marks the last section whose heading has passed the top third of
+ * the screen. Runs regardless of reduced motion: it moves nothing, it only
+ * says where you are.
+ */
+const toc = document.querySelector<HTMLElement>('[data-toc]');
+
+if (toc && 'IntersectionObserver' in window) {
+  // The ids sit on the headings; the section around each one is what is read.
+  const pairs = Array.from(toc.querySelectorAll<HTMLAnchorElement>('a[href^="#"]'))
+    .map((a) => {
+      const heading = document.getElementById(decodeURIComponent(a.hash.slice(1)));
+      return heading ? { a, area: (heading.closest('section') ?? heading) as Element } : null;
+    })
+    .filter((p): p is { a: HTMLAnchorElement; area: Element } => p !== null);
+  const visible = new Set<Element>();
+
+  const mark = () => {
+    const current = pairs.find((p) => visible.has(p.area));
+    if (!current) return; // between sections: keep the last one lit
+    for (const { a } of pairs) {
+      if (a === current.a) a.setAttribute('aria-current', 'location');
+      else a.removeAttribute('aria-current');
+    }
+  };
+
+  const spy = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) visible.add(e.target);
+        else visible.delete(e.target);
+      }
+      mark();
+    },
+    { rootMargin: '-20% 0px -60% 0px' },
+  );
+  pairs.forEach((p) => spy.observe(p.area));
 }
 
 const targets = document.querySelectorAll<HTMLElement>('.reveal');

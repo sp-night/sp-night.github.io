@@ -792,6 +792,143 @@ hr {
   }
 }
 
+/* ------------------------------------------------------- document pages */
+
+/* The long reference pages (/spec, /contribute) used half the screen: a
+   measure-wide column with nothing beside it. Above 62rem they become two
+   columns, the text and a sticky index of the page. The aside comes first in
+   the markup, so on a phone the index still sits above the text. */
+.doc {
+  display: grid;
+  gap: 2rem 3.5rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 62rem) {
+  /* The text column stops at 40rem — paragraphs keep the measure inside it,
+     tables and card grids get the rest — and the index sits at the far edge. */
+  .doc {
+    grid-template-columns: minmax(0, 40rem) 15.5rem;
+    justify-content: space-between;
+  }
+
+  .doc__aside {
+    grid-column: 2;
+    grid-row: 1;
+    position: sticky;
+    top: 5.5rem;
+    align-self: start;
+    max-height: calc(100svh - 7rem);
+    overflow-y: auto;
+  }
+}
+
+.doc__main {
+  min-width: 0;
+}
+
+/* Inside the column, blocks may use its full width; running text still
+   wraps at the measure. :where() keeps this at zero specificity, so a page's
+   own rule for a list or a table wins. */
+.doc__main :where(p, ul, ol, dl) {
+  max-width: var(--measure);
+}
+
+.doc__main > section:first-child {
+  margin-top: 0;
+}
+
+.doc__aside {
+  display: grid;
+  gap: 1rem;
+  font-size: var(--step--1);
+}
+
+.doc__box {
+  padding: 0.9rem 1rem;
+  background: var(--sp-laje);
+  border: var(--border);
+  border-radius: var(--radius);
+  transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease;
+}
+
+.doc__box h2 {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sp-fg-muted);
+  margin: 0 0 0.6rem;
+}
+
+.doc__box p {
+  margin: 0 0 0.6rem;
+  color: var(--sp-fg-dim);
+  line-height: 1.5;
+}
+
+.doc__box p:last-child {
+  margin-bottom: 0;
+}
+
+.doc__toc {
+  display: grid;
+  gap: 0.1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Wide screens: a vertical list with a rail. Phones keep the chips the spec
+   used to have, which wrap instead of making the index a screen tall. */
+.doc__toc a {
+  display: block;
+  padding: 0.28rem 0 0.28rem 0.75rem;
+  border-left: 2px solid var(--sp-fiacao);
+  color: var(--sp-fg-dim);
+  text-decoration: none;
+  transition: color 0.2s ease, border-color 0.2s ease, padding 0.25s var(--sp-ease);
+}
+
+.doc__toc a:hover {
+  color: var(--sp-fg);
+  border-left-color: var(--sp-fg-muted);
+}
+
+.doc__toc a[aria-current='location'] {
+  color: var(--sp-fg);
+  border-left-color: var(--sp-sodio);
+  padding-left: 1rem;
+}
+
+@media (max-width: 62rem) {
+  .doc__toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .doc__toc a,
+  .doc__toc a[aria-current='location'] {
+    padding: 0.15rem 0.6rem;
+    border: var(--border);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+  }
+}
+
+.doc__links {
+  display: grid;
+  gap: 0.3rem;
+  list-style: none;
+  margin: 0 0 0.7rem;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
 /* ---------------------------------------------------------------- tables */
 
 /* Lifted out of /spec when the port pages grew a mapping table of their own.

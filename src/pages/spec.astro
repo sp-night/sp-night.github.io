@@ -103,22 +103,36 @@ const glossary = [
     <a href="/contribute">contribute</a> instead — this page is the lookup table it points back to.
   </p>
 
-  <p class="muted">
-    The two files this page describes are published as data —
-    <a href="/palette.json">/palette.json</a> and <a href="/roles.json">/roles.json</a> — and kept,
-    with the tool that checks them, in <a href={org.engine}>sp-night/sp-night</a>. Anything that
-    reads them produces a theme that agrees with every port.
-  </p>
+  <div class="doc">
+  <aside class="doc__aside">
+    <nav class="doc__box" aria-label="On this page">
+      <h2>on this page</h2>
+      <ul class="doc__toc" role="list" data-toc>
+        <li><a href="#how">How it fits together</a></li>
+        <li><a href="#colors">The colours</a></li>
+        <li><a href="#accent">Two kinds of accent</a></li>
+        <li><a href="#syntax">Assignment rules</a></li>
+        <li><a href="#contrast">Contrast policy</a></li>
+        <li><a href="#separation">Accent separation</a></li>
+        <li><a href="#glossary">Glossary</a></li>
+      </ul>
+    </nav>
 
-  <nav class="toc mono" aria-label="On this page">
-    <a href="#how">How it fits together</a>
-    <a href="#colors">The colours</a>
-    <a href="#accent">Two kinds of accent</a>
-    <a href="#syntax">Assignment rules</a>
-    <a href="#contrast">Contrast policy</a>
-    <a href="#separation">Accent separation</a>
-    <a href="#glossary">Glossary</a>
-  </nav>
+    <div class="doc__box">
+      <h2>the contract</h2>
+      <p>
+        Published as data, and kept with the tool that checks them in
+        <a href={org.engine}>sp-night/sp-night</a>. Anything that reads them produces a theme that
+        agrees with every port.
+      </p>
+      <ul class="doc__links" role="list">
+        <li><a href="/palette.json">/palette.json</a></li>
+        <li><a href="/roles.json">/roles.json</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <div class="doc__main">
 
   <section aria-labelledby="how">
     <h2 id="how">How it fits together</h2>
@@ -401,12 +415,13 @@ const glossary = [
       }
     </dl>
   </section>
+  </div>
+  </div>
 </Base>
 
 <style>
   section {
     margin-block: 3.25rem;
-    max-width: var(--measure);
   }
 
   section h2 {
@@ -417,35 +432,6 @@ const glossary = [
     font-size: var(--step-0);
     margin-top: 1.75rem;
     color: var(--sp-fg);
-  }
-
-  .toc {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem 1rem;
-    padding: 0.9rem 1.1rem;
-    background: var(--sp-laje);
-    border: var(--border);
-    border-radius: var(--radius);
-    font-size: var(--step--1);
-    margin-block: 2rem;
-    max-width: var(--measure);
-  }
-
-  /* Chips rather than bare words — as a run of plain grey text this read as a
-     paragraph, not as navigation. */
-  .toc a {
-    color: var(--sp-fg-dim);
-    text-decoration: none;
-    padding: 0.15rem 0.6rem;
-    border: var(--border);
-    border-radius: 999px;
-    transition: color 0.2s, border-color 0.2s;
-  }
-
-  .toc a:hover {
-    color: var(--sp-fg);
-    border-color: var(--sp-sodio);
   }
 
   .layers {
