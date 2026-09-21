@@ -5,6 +5,7 @@
  *     parallax without a scroll handler doing layout work.
  *  2. Reveal-on-scroll for anything tagged `.reveal`.
  *  3. The hero scene stops animating once it is off screen.
+ *  4. Numbers tagged `data-count` count up when they are revealed.
  */
 const calm = matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -48,6 +49,27 @@ if (scene && !calm.matches && 'IntersectionObserver' in window) {
   ).observe(scene);
 }
 
+/*
+ * The markup carries the final number, so without JS — or under reduced
+ * motion, where this is never called — the fact is simply stated. The count
+ * only starts once the card is revealed, while it is still fading in, so the
+ * reset to zero is never seen.
+ */
+function countUp(el: HTMLElement) {
+  const target = Number(el.dataset.count);
+  if (!Number.isFinite(target) || target <= 0) return;
+  const duration = 700 + Math.min(target, 60) * 8;
+  const start = performance.now();
+  const step = (now: number) => {
+    const t = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = String(Math.round(target * eased));
+    if (t < 1) requestAnimationFrame(step);
+  };
+  el.textContent = '0';
+  requestAnimationFrame(step);
+}
+
 const targets = document.querySelectorAll<HTMLElement>('.reveal');
 
 if (targets.length) {
@@ -59,6 +81,7 @@ if (targets.length) {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
           entry.target.classList.add('is-in');
+          entry.target.querySelectorAll<HTMLElement>('[data-count]').forEach(countUp);
           io.unobserve(entry.target);
         }
       },

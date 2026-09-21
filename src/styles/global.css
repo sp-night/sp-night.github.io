@@ -230,6 +230,33 @@ hr {
   box-shadow: 0 0 0 1px color-mix(in oklab, var(--sp-fiacao) 70%, transparent);
 }
 
+/* The mark's aviation light keeps the tower's rhythm from the hero: a double
+   pulse, then a pause. Selected by fill so it holds for any drawing of the
+   mark that keeps the beacon in brasa with its halo gradient. */
+.brand svg circle[fill='var(--sp-brasa)'],
+.brand svg circle[fill$='-beacon)'] {
+  animation: mark-beacon 2s ease-out infinite;
+}
+
+@keyframes mark-beacon {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  8% {
+    opacity: 1;
+  }
+  22% {
+    opacity: 0.35;
+  }
+  30% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
 .nav {
   display: flex;
   gap: 1.1rem;

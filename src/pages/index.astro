@@ -72,7 +72,7 @@ const facts = [
       {
         facts.map((f, i) => (
           <li class="fact reveal" style={`--d: ${i * 80}ms`}>
-            <span class="fact__n mono">{f.n}</span>
+            <span class="fact__n mono" data-count={f.n}>{f.n}</span>
             <span class="fact__label">{f.label}</span>
             <span class="fact__sub muted">{f.sub}</span>
           </li>
