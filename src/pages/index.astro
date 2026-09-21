@@ -6,7 +6,6 @@ import TerminalMock from '../components/TerminalMock.astro';
 import FlavorSwitcher from '../components/FlavorSwitcher.astro';
 import GithubIcon from '../components/GithubIcon.astro';
 import Contributors from '../components/Contributors.astro';
-import Wire from '../components/Wire.astro';
 import { flavors, GROUPS, GROUP_IDS, COLOUR_COUNT, org } from '../data/palette';
 import { ports } from '../data/ports';
 import { HOME_PREVIEW, heroLines } from '../data/content';
@@ -82,7 +81,6 @@ const facts = [
     </ul>
   </section>
 
-  <Wire seed={1} />
   <section class="band"><div class="wrap section split reveal">
     <div>
       <p class="eyebrow">one palette, three cities</p>
@@ -137,7 +135,6 @@ const facts = [
     <p><a href="/palette">Every colour, with its meaning and contrast →</a></p>
   </section>
 
-  <Wire seed={2} />
   <section class="band"><div class="wrap section reveal">
     <p class="eyebrow">ports</p>
     <h2>Themes you can install today</h2>

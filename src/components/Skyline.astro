@@ -284,12 +284,15 @@ const fireflies = buildFireflies();
     aria-label="An illustration of the São Paulo skyline at night, drawn in the colours of the selected flavour"
   >
     <defs>
-      <!-- The top of the sky is open, so the hero's lamp shines through into it. -->
+      <!-- The sky is open all the way down to the rooftops, so the hero's lamp
+           shines through it the way a city's light does. An opaque band here
+           covered the glow inside the scene and left it lit beside it — a box,
+           once the scene stopped spanning the whole window. Only the ground
+           gets its own tone. -->
       <linearGradient id="g-ceu" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" style="stop-color:var(--sp-vao);stop-opacity:0"></stop>
-        <stop offset="0.4" style="stop-color:var(--sp-vao);stop-opacity:1"></stop>
-        <stop offset="0.82" style="stop-color:var(--sp-vao)"></stop>
-        <stop offset="1" style="stop-color:var(--sp-laje)"></stop>
+        <stop offset="0.8" style="stop-color:var(--sp-vao);stop-opacity:0"></stop>
+        <stop offset="1" style="stop-color:var(--sp-laje);stop-opacity:1"></stop>
       </linearGradient>
       <linearGradient id="g-brilho" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" style="stop-color:var(--sp-sodio);stop-opacity:0"></stop>
