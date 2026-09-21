@@ -3,15 +3,17 @@ import { flavors, type ColorKey } from '../data/palette';
 
 interface Props {
   colorKey: ColorKey;
+  /** Position in the page, for the wave the swatches make when the flavour changes. */
+  index?: number;
 }
-const { colorKey } = Astro.props;
+const { colorKey, index = 0 } = Astro.props;
 
 const perFlavor = flavors.map((f) => ({ flavor: f.id, color: f.colors[colorKey]! }));
 const sample = perFlavor[0]!.color;
 const cssVar = `--sp-${colorKey.replace(/_/g, '-')}`;
 ---
 
-<button class="color" type="button" data-copy-var={cssVar} aria-label={`Copy ${colorKey} hex value`}>
+<button class="color" type="button" data-copy-var={cssVar} aria-label={`Copy ${colorKey} hex value`} style={`--i: ${index}`}>
   <span class="color__swatch" style={`background: var(${cssVar})`} aria-hidden="true"></span>
 
   <span class="color__body">
@@ -62,12 +64,14 @@ const cssVar = `--sp-${colorKey.replace(/_/g, '-')}`;
     color: inherit;
     font: inherit;
     cursor: pointer;
-    transition: border-color 0.18s ease, transform 0.18s ease;
+    transition: border-color 0.18s ease, transform 0.18s var(--sp-ease), box-shadow 0.25s ease,
+      background-color var(--sp-retint) ease;
   }
 
   .color:hover {
     border-color: var(--sp-fg-muted);
     transform: translateY(-2px);
+    box-shadow: 0 16px 34px -24px var(--sp-vao);
   }
 
   .color:active {
@@ -80,8 +84,10 @@ const cssVar = `--sp-${colorKey.replace(/_/g, '-')}`;
     height: 2.6rem;
     border-radius: 8px;
     box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--sp-vao) 45%, transparent);
-    transition: background-color 0.45s ease, transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1),
-      box-shadow 0.25s ease;
+    /* The colour follows the switcher in a wave down the page, one card after
+       the next; the hover stays immediate. */
+    transition: background-color var(--sp-retint) ease calc(var(--i, 0) * 22ms),
+      transform 0.25s var(--sp-ease), box-shadow 0.25s ease;
   }
 
   .color:hover .color__swatch {
@@ -156,10 +162,16 @@ const cssVar = `--sp-${colorKey.replace(/_/g, '-')}`;
     font-size: 0.7rem;
     color: var(--sp-ibira);
     opacity: 0;
-    transition: opacity 0.15s ease;
+    transform: translateY(4px);
+    transition: opacity 0.15s ease, transform 0.25s var(--sp-ease);
   }
 
   .color.is-copied .color__copied {
     opacity: 1;
+    transform: none;
+  }
+
+  .color.is-copied {
+    border-color: color-mix(in oklab, var(--sp-ibira) 60%, var(--sp-fiacao));
   }
 </style>

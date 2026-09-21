@@ -352,3 +352,43 @@ nesses repos. No momento em que isso foi escrito a diferença era exatamente o `
 
 **Pendência:** revisão visual em navegador. O Firefox headless não roda no ambiente em que
 esta rodada foi feita, então as capturas nos 3 flavors em 1280px e 390px continuam devendo.
+
+**Rodada 7 — cada flavor ganha movimento próprio, e a troca vira uma cena** (2026-09-20)
+
+O site já tinha animação, mas quase toda de entrada (o `rise` do hero, o `reveal` no scroll). A
+troca de flavor era um `display: none` seco entre cenas, e as três cenas do skyline tinham pouco
+que as distinguisse em movimento além do que a Rodada 5 deu à Roda Rico.
+
+**A troca.** Onde o navegador tem View Transitions, o flavor novo abre num círculo a partir do
+botão que foi apertado (`--sp-wipe-x/y/r` em `<html>`, lidos por `::view-transition-new(root)`).
+Durante o wipe, `html.is-swapping` zera `--sp-retint` e `--sp-scene`, para que o círculo revele a
+página pronta, não uma que ainda está desbotando. Sem View Transitions (ou com
+`prefers-reduced-motion`), fica o caminho antigo: todas as cores seguem o switcher por transição
+CSS, agora com uma duração só (`--sp-retint`), e os swatches da `/palette` e os chips da home
+mudam em onda (`--i` por card, 20 ms de atraso entre um e outro).
+
+**O switcher.** A seleção é um pill que desliza entre as opções (`.flavors__thumb`, medido pelo
+script, com `ResizeObserver` para reflow). Cada bolinha passou a ser o céu do seu flavor — a
+superfície escura de um lado e o acento que dá nome à cena do outro: sódio para o noite, o
+azul-cinza da garoa, o verde da mata para o pico. Resolve de vez os "três pontos idênticos" da
+Rodada 3.
+
+**As cenas.** Trocam por crossfade (`transition: display allow-discrete`), a que chega sobe no
+lugar (`scene-in`), e a que sai só deixa de ser renderizada depois de sumir — então as animações
+de uma cena escondida não custam nada. O que cada uma ganhou:
+
+| flavor | movimento novo |
+|---|---|
+| noite | um avião na aproximação de Congonhas, cruzando baixo com luzes de navegação e strobe duplo; um meteoro a cada 19 s, visível por 0,6 s |
+| garoa | segunda camada de garoa, mais lenta e mais fina (paralaxe); névoa baixa deslizando pelo parque; luzes de perseguição no aro da Roda Rico (`stroke-dashoffset`, independente do giro); postes de sódio na Marginal com halo; o reflexo da roda no asfalto molhado |
+| jaragua | neblina no vale em duas camadas contrárias; segunda camada de nuvens, mais alta e no sentido oposto; vagalumes na mata (`fill-opacity` + deriva, cada um no seu relógio); o farol da torre passa a pulsar como luz de obstáculo aéreo — pulso duplo, pausa |
+
+O `hero__glow` também segue o flavor (`--sp-glow`): sódio, o azul da garoa dessaturado, o verde
+do pico. A nota do flavor ativo na `/palette` e a entrada dele na lista da home ficam acesas; o
+terminal sintético ganhou um cursor de bloco piscando.
+
+Tudo colapsa em `prefers-reduced-motion`: as cenas trocam sem transição, o avião e o meteoro
+ficam fora do quadro, os vagalumes ficam acesos e parados.
+
+Verificado em Firefox headless (1280 px e 390 px, três flavors, com e sem reduced-motion),
+`astro check` 0/0/0, testes verdes, build limpo.

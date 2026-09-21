@@ -88,7 +88,7 @@ const facts = [
       <dl class="flavor-list">
         {
           flavors.map((f) => (
-            <div>
+            <div data-flavor-item={f.id}>
               <dt class="mono">{f.label}</dt>
               <dd>{f.description}</dd>
             </div>
@@ -110,14 +110,14 @@ const facts = [
 
     <div class="strip">
       {
-        GROUP_IDS.map((g) => (
+        GROUP_IDS.map((g, gi) => (
           <div class="strip__group">
             <span class="strip__label mono muted">{GROUPS[g]!.label}</span>
             <div class="strip__row">
-              {GROUPS[g]!.keys.map((k) => (
+              {GROUPS[g]!.keys.map((k, ki) => (
                 <span
-                  class="strip__chip"
-                  style={`background: var(--sp-${k.replace(/_/g, '-')})`}
+                  class="strip__chip retint-wave"
+                  style={`--i: ${GROUP_IDS.slice(0, gi).reduce((n, id) => n + GROUPS[id]!.keys.length, 0) + ki}; background: var(--sp-${k.replace(/_/g, '-')})`}
                   title={k}
                 />
               ))}
@@ -183,11 +183,16 @@ const facts = [
     background:
       radial-gradient(
         circle at 50% 50%,
-        color-mix(in oklab, var(--sp-sodio) 26%, transparent) 0%,
-        color-mix(in oklab, var(--sp-sodio) 9%, transparent) 34%,
+        color-mix(in oklab, var(--sp-glow) 26%, transparent) 0%,
+        color-mix(in oklab, var(--sp-glow) 9%, transparent) 34%,
         transparent 62%
       );
     animation: lamp-wash 13s ease-in-out infinite;
+  }
+
+  /* The drizzle does not glow — it diffuses. The peak is lit from below. */
+  :global(html[data-flavor='garoa']) .hero__glow {
+    filter: saturate(0.5) brightness(0.8);
   }
 
   @keyframes lamp-wash {
@@ -308,6 +313,14 @@ const facts = [
     background: var(--sp-laje);
     border: var(--border);
     border-radius: var(--radius);
+    transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease,
+      transform 0.3s var(--sp-ease), box-shadow 0.3s ease;
+  }
+
+  .fact:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--sp-sodio) 45%, var(--sp-fiacao));
+    box-shadow: 0 14px 30px -20px var(--sp-sodio);
   }
 
   .fact__n {
@@ -344,7 +357,28 @@ const facts = [
   .flavor-list {
     margin: 0;
     display: grid;
-    gap: 0.9rem;
+    gap: 0.5rem;
+  }
+
+  /* The entry for the flavour on screen steps forward; the others wait. */
+  .flavor-list > div {
+    padding: 0.5rem 0.8rem;
+    border-left: 2px solid transparent;
+    border-radius: 0 6px 6px 0;
+    opacity: 0.6;
+  }
+
+  .flavor-list > div:hover {
+    opacity: 0.85;
+  }
+
+  :global(html[data-flavor='noite']) .flavor-list > [data-flavor-item='noite'],
+  :global(html[data-flavor='garoa']) .flavor-list > [data-flavor-item='garoa'],
+  :global(html[data-flavor='jaragua']) .flavor-list > [data-flavor-item='jaragua'] {
+    opacity: 1;
+    border-left-color: var(--sp-sodio);
+    background: color-mix(in oklab, var(--sp-sodio) 7%, transparent);
+    transform: translateX(4px);
   }
 
   .flavor-list dt {
@@ -382,8 +416,8 @@ const facts = [
     flex: 1 1 3rem;
     border-radius: 6px;
     box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--sp-vao) 40%, transparent);
-    transition: background-color 0.45s ease, transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1),
-      box-shadow 0.25s ease;
+    transition: background-color var(--sp-retint) ease calc(var(--i, 0) * 20ms),
+      transform 0.25s var(--sp-ease), box-shadow 0.25s ease, opacity 0.25s ease;
   }
 
   .strip__row:hover .strip__chip {
