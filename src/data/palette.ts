@@ -244,6 +244,19 @@ export const MEASURED_PAIRS = audit.pairs_per_flavor;
 export const CONTRAST_POLICY: ContrastRule[] = audit.policy;
 
 /**
+ * The floor a colour has to hold on one surface, read from the policy: a
+ * foreground rule naming this colour and this surface wins, otherwise the
+ * surface's own floor applies. Undefined where the policy says nothing.
+ */
+export function floorFor(key: ColorKey, surface: string): number | undefined {
+  const own = CONTRAST_POLICY.find(
+    (r) => r.kind === 'foreground' && r.subject === key && r.surfaces?.includes(surface),
+  );
+  if (own) return own.floor;
+  return CONTRAST_POLICY.find((r) => r.kind === 'surface' && r.subject === surface)?.floor;
+}
+
+/**
  * base -> its bright twin, read off the naming rule rather than listed. A
  * `<base>_vivo` is the contract's word for "this colour, lifted".
  */
