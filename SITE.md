@@ -392,3 +392,34 @@ ficam fora do quadro, os vagalumes ficam acesos e parados.
 
 Verificado em Firefox headless (1280 px e 390 px, três flavors, com e sem reduced-motion),
 `astro check` 0/0/0, testes verdes, build limpo.
+
+**Rodada 8 — a cara do site, e o hero como vista** (2026-09-21)
+
+Até aqui o site usava `system-ui` e `ui-monospace`: mudava de cara conforme a máquina de quem
+abria. Passa a ter duas fontes próprias, auto-hospedadas via fontsource, com subsets por
+`unicode-range` para uma página carregar só o latino (~84 KB somados):
+
+| papel | fonte | nota |
+|---|---|---|
+| títulos e texto | Bricolage Grotesque (variável, 200–800) | a grotesca com personalidade que combina com Copan e MASP; peso 700 nos headings, `text-wrap: balance` |
+| labels, código, nav, eyebrow | JetBrains Mono (variável) | a mesma mono em todo lugar, em vez da que cada sistema tiver |
+
+A escala de títulos subiu um degrau (`--step-3` até 4 rem, o h1 do hero até 5 rem).
+
+**O hero vira uma vista.** O `viewBox` do skyline cresceu 120 unidades para cima
+(`0 -120 1200 370`) e o topo do céu é transparente no gradiente, então o brilho do hero atravessa
+o céu e as estrelas, o avião e as nuvens altas ficam atrás do texto. O hero ocupa a primeira
+tela (`min-height: calc(100svh - 4rem)`), com o texto em cima e a cidade encostada embaixo; em
+tela baixa o céu sobe por trás dos botões (margem negativa no `hero__inner`). A garoa ganhou
+uma terceira cópia da chuva, porque com o céu mais alto o par de cópias deixava uma faixa seca
+no topo em parte do ciclo.
+
+**A manchete muda com o flavor.** "The sodium lamp turns the whole city this colour" é a frase
+do noite e deixa de ser verdade na garoa. Cada flavor tem a sua, em `content.ts` (`heroLines`),
+renderizadas as três e mostradas pela mesma regra `data-f` que troca os hexes. A linha acesa
+usa `--sp-glow`, a cor da cena: sódio, o azul-cinza da garoa, o verde da mata — e a animação
+do poste acendendo acompanha.
+
+Verificado em Firefox headless nos três flavors, 1280 px e 390 px, mais `/spec`, `/palette` e
+uma página de port com a fonte nova. Pendência conhecida: no mobile a linha acesa quebra em
+duas por causa do tamanho novo.

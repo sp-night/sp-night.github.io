@@ -129,12 +129,15 @@ function buildSkyline(): Shape[] {
   return out;
 }
 
+/** How far the sky extends above the old top edge, now that the hero sits in it. */
+const SKY = 120;
+
 /** Stars for the clear night, each breathing on its own clock. */
 function buildStars() {
   const rand = mulberry32(4407);
-  return Array.from({ length: 26 }, () => ({
+  return Array.from({ length: 44 }, () => ({
     cx: Number((rand() * 1200).toFixed(0)),
-    cy: Number((6 + rand() * 96).toFixed(0)),
+    cy: Number((-SKY + 6 + rand() * (SKY + 96)).toFixed(0)),
     r: Number((0.7 + rand() * 0.7).toFixed(1)),
     o: Number((0.18 + rand() * 0.3).toFixed(2)),
     style: `animation-delay: -${(rand() * 6).toFixed(1)}s; animation-duration: ${(3.5 + rand() * 4).toFixed(1)}s`,
@@ -274,16 +277,18 @@ const fireflies = buildFireflies();
 <div class="skyline-wrap">
   <svg
     id="skyline"
-    viewBox="0 0 1200 250"
+    viewBox={`0 -${SKY} 1200 ${250 + SKY}`}
     preserveAspectRatio="none"
     xmlns="http://www.w3.org/2000/svg"
     role="img"
     aria-label="An illustration of the São Paulo skyline at night, drawn in the colours of the selected flavour"
   >
     <defs>
+      <!-- The top of the sky is open, so the hero's lamp shines through into it. -->
       <linearGradient id="g-ceu" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" style="stop-color:var(--sp-vao)"></stop>
-        <stop offset="0.74" style="stop-color:var(--sp-vao)"></stop>
+        <stop offset="0" style="stop-color:var(--sp-vao);stop-opacity:0"></stop>
+        <stop offset="0.4" style="stop-color:var(--sp-vao);stop-opacity:1"></stop>
+        <stop offset="0.82" style="stop-color:var(--sp-vao)"></stop>
         <stop offset="1" style="stop-color:var(--sp-laje)"></stop>
       </linearGradient>
       <linearGradient id="g-brilho" x1="0" y1="0" x2="0" y2="1">
@@ -312,7 +317,7 @@ const fireflies = buildFireflies();
       </clipPath>
     </defs>
 
-    <rect x="0" y="0" width="1200" height="250" fill="url(#g-ceu)"></rect>
+    <rect x="0" y={-SKY} width="1200" height={250 + SKY} fill="url(#g-ceu)"></rect>
     <rect x="0" y="140" width="1200" height="110" fill="url(#g-brilho)" class="glow"></rect>
 
     <!-- clear night sky -->
@@ -343,7 +348,7 @@ const fireflies = buildFireflies();
     <g id="garoa-chuva" stroke="var(--sp-fg-dim)" stroke-width="1.1" opacity="0.1" stroke-linecap="round">
       <g class="rainfall rainfall--far" stroke-width="0.8" opacity="0.55">
         {
-          [0, -250].map((offset) => (
+          [0, -250, -500].map((offset) => (
             <g transform={`translate(0 ${offset})`}>
               {drizzleFar.map((d) => (
                 <line x1={d.x} y1={d.y} x2={d.x + 2} y2={d.y + d.len} />
@@ -354,7 +359,7 @@ const fireflies = buildFireflies();
       </g>
       <g class="rainfall">
         {
-          [0, -250].map((offset) => (
+          [0, -250, -500].map((offset) => (
             <g transform={`translate(0 ${offset})`}>
               {drizzle.map((d) => (
                 <line x1={d.x} y1={d.y} x2={d.x + 3} y2={d.y + d.len} />
@@ -607,10 +612,11 @@ const fireflies = buildFireflies();
     <g id="pico-jaragua">
       <!-- a higher, thinner layer of cloud, moving the other way -->
       <g fill="var(--sp-fg)" opacity="0.035" class="clouds clouds--far">
-        <ellipse cx="120" cy="24" rx="58" ry="6"></ellipse>
-        <ellipse cx="392" cy="18" rx="82" ry="7"></ellipse>
-        <ellipse cx="690" cy="28" rx="46" ry="5"></ellipse>
-        <ellipse cx="1010" cy="16" rx="70" ry="6"></ellipse>
+        <ellipse cx="120" cy="-62" rx="58" ry="6"></ellipse>
+        <ellipse cx="392" cy="-84" rx="82" ry="7"></ellipse>
+        <ellipse cx="690" cy="-48" rx="46" ry="5"></ellipse>
+        <ellipse cx="1010" cy="-70" rx="70" ry="6"></ellipse>
+        <ellipse cx="560" cy="6" rx="64" ry="6"></ellipse>
       </g>
       <g fill="var(--sp-fg)" opacity="0.06" class="clouds">
         <ellipse cx="200" cy="56" rx="76" ry="11"></ellipse>
@@ -761,7 +767,7 @@ const fireflies = buildFireflies();
      loses all its shape. It stretches instead — a taller city, not a thinner one. */
   @media (max-width: 40rem) {
     svg#skyline {
-      min-height: 160px;
+      min-height: 230px;
     }
   }
 
@@ -980,34 +986,34 @@ const fireflies = buildFireflies();
     0%,
     91% {
       opacity: 0;
-      transform: translate(760px, 62px);
+      transform: translate(720px, -30px);
     }
     91.5% {
       opacity: 0.9;
     }
     94% {
       opacity: 0;
-      transform: translate(900px, 20px);
+      transform: translate(860px, -74px);
     }
     100% {
       opacity: 0;
-      transform: translate(900px, 20px);
+      transform: translate(860px, -74px);
     }
   }
 
   .aviao {
     transform-box: view-box;
-    transform: translate(-80px, 40px);
+    transform: translate(-80px, -60px);
     animation: aviao 52s linear infinite;
     animation-delay: -14s;
   }
 
   @keyframes aviao {
     from {
-      transform: translate(-80px, 34px);
+      transform: translate(-80px, -64px);
     }
     to {
-      transform: translate(1280px, 72px);
+      transform: translate(1280px, 40px);
     }
   }
 

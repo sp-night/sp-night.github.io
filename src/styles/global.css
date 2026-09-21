@@ -4,14 +4,16 @@
  */
 
 :root {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Inter, sans-serif;
-  --font-mono: ui-monospace, 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+  --font-sans: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'JetBrains Mono', 'Fira Code', 'SF Mono',
+    Menlo, monospace;
 
   --step--1: clamp(0.78rem, 0.75rem + 0.15vw, 0.86rem);
   --step-0: clamp(0.95rem, 0.92rem + 0.2vw, 1.05rem);
   --step-1: clamp(1.2rem, 1.1rem + 0.5vw, 1.45rem);
-  --step-2: clamp(1.6rem, 1.4rem + 1vw, 2.1rem);
-  --step-3: clamp(2.2rem, 1.8rem + 2.2vw, 3.6rem);
+  --step-2: clamp(1.7rem, 1.4rem + 1.2vw, 2.3rem);
+  --step-3: clamp(2.4rem, 1.8rem + 2.6vw, 4rem);
 
   --gutter: clamp(1rem, 0.6rem + 2vw, 2.5rem);
   --measure: 68ch;
@@ -71,10 +73,11 @@ h1,
 h2,
 h3,
 h4 {
-  line-height: 1.15;
-  letter-spacing: -0.02em;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
   margin: 0 0 0.5em;
-  font-weight: 620;
+  font-weight: 700;
+  text-wrap: balance;
 }
 
 h1 {
@@ -111,7 +114,7 @@ kbd,
 pre,
 samp {
   font-family: var(--font-mono);
-  font-size: 0.92em;
+  font-size: 0.9em;
 }
 
 :where(p, li, td) > code {
