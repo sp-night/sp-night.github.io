@@ -532,11 +532,7 @@ hr {
 /* ---------------------------------------------------------------- footer */
 
 .site-footer {
-  border-top: var(--border);
   transition: border-color var(--sp-retint) ease, color var(--sp-retint) ease;
-  /* Sections already carry generous bottom padding; 4rem on top of that left a
-     dead band above the footer. */
-  margin-top: 1.5rem;
   padding-block: 2.5rem;
   color: var(--sp-fg-muted);
   font-size: var(--step--1);
@@ -929,7 +925,12 @@ td {
    the shadow paints outward and the clip keeps it from adding scroll of its
    own. The vertical inset is 0, so nothing inside can bleed past the band. */
 .band {
-  background: var(--sp-laje);
+  background-color: var(--sp-laje);
+  /* The grain of poured concrete: fractal noise, white at a few percent alpha,
+     so it lightens whatever laje the flavour sets without tinting it. One
+     200px tile, rasterised once. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
   box-shadow: 0 0 0 100vmax var(--sp-laje);
   clip-path: inset(0 -100vmax);
   transition: background-color var(--sp-retint) ease, box-shadow var(--sp-retint) ease;

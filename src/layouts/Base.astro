@@ -13,6 +13,7 @@ import '../styles/global.css';
 import FlavorSwitcher from '../components/FlavorSwitcher.astro';
 import Logo from '../components/Logo.astro';
 import GithubIcon from '../components/GithubIcon.astro';
+import Wire from '../components/Wire.astro';
 import { flavorStylesheet, defaultFlavor, theme, flavor, org } from '../data/palette';
 
 interface Props {
@@ -209,6 +210,8 @@ const jsonLd = {
 
     <p id="copy-status" class="visually-hidden" role="status" aria-live="polite"></p>
 
+    {/* The footer hangs from a wire instead of sitting under a rule. */}
+    <Wire seed={3} edge />
     <footer class="site-footer">
       <div class="wrap site-footer__cols">
         <div class="site-footer__about">
