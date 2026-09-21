@@ -1,4 +1,9 @@
 ---
+/* Self-hosted, so the site has the same face on every machine. Bricolage
+   carries the display and the body; JetBrains Mono carries everything that
+   is code or a label. Subset by unicode-range, so a page only fetches latin. */
+import '@fontsource-variable/bricolage-grotesque';
+import '@fontsource-variable/jetbrains-mono';
 import '../styles/global.css';
 import FlavorSwitcher from '../components/FlavorSwitcher.astro';
 import Logo from '../components/Logo.astro';

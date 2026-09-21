@@ -8,7 +8,12 @@ import GithubIcon from '../components/GithubIcon.astro';
 import Contributors from '../components/Contributors.astro';
 import { flavors, GROUPS, GROUP_IDS, COLOUR_COUNT, org } from '../data/palette';
 import { ports } from '../data/ports';
-import { HOME_PREVIEW } from '../data/content';
+import { HOME_PREVIEW, heroLines } from '../data/content';
+import type { FlavorId } from '../data/content';
+
+/* Each line of the headline is rendered once per flavour and shown by the
+   same data-f rule that switches the hex values elsewhere. */
+const line = (i: 0 | 1 | 2) => flavors.map((f) => ({ id: f.id, text: heroLines[f.id as FlavorId]![i] }));
 
 /**
  * Derived, never asserted: the counts below come from the data this page
@@ -37,9 +42,9 @@ const facts = [
     <div class="wrap hero__inner">
       <p class="eyebrow rise" style="--d: 0ms">a dark theme with São Paulo as its reference</p>
       <h1 class="hero__title">
-        <span class="rise" style="--d: 90ms">The sodium lamp</span>
-        <span class="rise hero__accent lamp" style="--d: 180ms">turns the whole city</span>
-        <span class="rise" style="--d: 270ms">this colour.</span>
+        <span class="rise" style="--d: 90ms">{line(0).map((l) => <span data-f={l.id}>{l.text}</span>)}</span>
+        <span class="rise hero__accent lamp" style="--d: 180ms">{line(1).map((l) => <span data-f={l.id}>{l.text}</span>)}</span>
+        <span class="rise" style="--d: 270ms">{line(2).map((l) => <span data-f={l.id}>{l.text}</span>)}</span>
       </h1>
       <p class="lede hero__lede rise" style="--d: 380ms">
         Exposed concrete, the free span of the MASP, the drizzle before the rain. Three dark
@@ -88,7 +93,7 @@ const facts = [
       <dl class="flavor-list">
         {
           flavors.map((f) => (
-            <div>
+            <div data-flavor-item={f.id}>
               <dt class="mono">{f.label}</dt>
               <dd>{f.description}</dd>
             </div>
@@ -110,14 +115,14 @@ const facts = [
 
     <div class="strip">
       {
-        GROUP_IDS.map((g) => (
+        GROUP_IDS.map((g, gi) => (
           <div class="strip__group">
             <span class="strip__label mono muted">{GROUPS[g]!.label}</span>
             <div class="strip__row">
-              {GROUPS[g]!.keys.map((k) => (
+              {GROUPS[g]!.keys.map((k, ki) => (
                 <span
-                  class="strip__chip"
-                  style={`background: var(--sp-${k.replace(/_/g, '-')})`}
+                  class="strip__chip retint-wave"
+                  style={`--i: ${GROUP_IDS.slice(0, gi).reduce((n, id) => n + GROUPS[id]!.keys.length, 0) + ki}; background: var(--sp-${k.replace(/_/g, '-')})`}
                   title={k}
                 />
               ))}
@@ -163,11 +168,17 @@ const facts = [
 </Base>
 
 <style>
+  /* The hero is a view: the text sits in the sky, and the city fills the
+     bottom of the first screen. On a tall viewport the sky grows; on a short
+     one the skyline rises up behind the buttons. */
   .hero {
     padding-top: clamp(2.5rem, 1.5rem + 4vw, 5rem);
     position: relative;
     overflow: hidden;
     isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100svh - 4rem);
   }
 
   /* the sodium wash: a lamp somewhere off-frame, warming the top of the page */
@@ -183,11 +194,16 @@ const facts = [
     background:
       radial-gradient(
         circle at 50% 50%,
-        color-mix(in oklab, var(--sp-sodio) 26%, transparent) 0%,
-        color-mix(in oklab, var(--sp-sodio) 9%, transparent) 34%,
+        color-mix(in oklab, var(--sp-glow) 26%, transparent) 0%,
+        color-mix(in oklab, var(--sp-glow) 9%, transparent) 34%,
         transparent 62%
       );
     animation: lamp-wash 13s ease-in-out infinite;
+  }
+
+  /* The drizzle does not glow — it diffuses. The peak is lit from below. */
+  :global(html[data-flavor='garoa']) .hero__glow {
+    filter: saturate(0.5) brightness(0.8);
   }
 
   @keyframes lamp-wash {
@@ -203,22 +219,29 @@ const facts = [
   }
 
   .hero__inner {
-    padding-bottom: clamp(2rem, 1rem + 4vw, 4rem);
+    position: relative;
+    z-index: 1;
+    padding-bottom: 0;
+    /* Pull the sky up behind the actions: the top of the skyline's viewBox is
+       transparent, so only stars and weather sit behind the text. */
+    margin-bottom: clamp(-8rem, -11vw, -3rem);
   }
 
   .hero__title {
     /* Wide enough that each line of the headline stays on its own line —
-       "turns the whole city" is 20 characters. */
-    max-width: 23ch;
-    text-wrap: balance;
+       "is a field of lights." is 21 characters. */
+    max-width: 24ch;
+    font-size: clamp(2.6rem, 1.6rem + 4vw, 5rem);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
   }
 
-  .hero__title span {
+  .hero__title > span {
     display: block;
   }
 
   .hero__accent {
-    color: var(--sp-sodio);
+    color: var(--sp-glow);
   }
 
   /* a sodium lamp does not switch on cleanly — it stutters, then holds. */
@@ -234,8 +257,8 @@ const facts = [
     }
     15%,
     19% {
-      color: var(--sp-sodio);
-      text-shadow: 0 0 26px color-mix(in oklab, var(--sp-sodio) 55%, transparent);
+      color: var(--sp-glow);
+      text-shadow: 0 0 26px color-mix(in oklab, var(--sp-glow) 55%, transparent);
     }
     20%,
     27% {
@@ -244,8 +267,8 @@ const facts = [
     }
     28%,
     31% {
-      color: var(--sp-sodio);
-      text-shadow: 0 0 26px color-mix(in oklab, var(--sp-sodio) 55%, transparent);
+      color: var(--sp-glow);
+      text-shadow: 0 0 26px color-mix(in oklab, var(--sp-glow) 55%, transparent);
     }
     32%,
     36% {
@@ -254,8 +277,8 @@ const facts = [
     }
     37%,
     100% {
-      color: var(--sp-sodio);
-      text-shadow: 0 0 34px color-mix(in oklab, var(--sp-sodio) 40%, transparent);
+      color: var(--sp-glow);
+      text-shadow: 0 0 34px color-mix(in oklab, var(--sp-glow) 40%, transparent);
     }
   }
 
@@ -273,6 +296,7 @@ const facts = [
 
   /* the skyline drifts a little slower than the page scrolls */
   .hero__skyline {
+    margin-top: auto;
     will-change: transform;
     transform: translate3d(0, calc(var(--sp-scroll, 0) * 0.06px), 0);
   }
@@ -283,7 +307,7 @@ const facts = [
       animation: none;
     }
     .lamp {
-      color: var(--sp-sodio);
+      color: var(--sp-glow);
     }
     .hero__skyline {
       transform: none;
@@ -308,6 +332,14 @@ const facts = [
     background: var(--sp-laje);
     border: var(--border);
     border-radius: var(--radius);
+    transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease,
+      transform 0.3s var(--sp-ease), box-shadow 0.3s ease;
+  }
+
+  .fact:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--sp-sodio) 45%, var(--sp-fiacao));
+    box-shadow: 0 14px 30px -20px var(--sp-sodio);
   }
 
   .fact__n {
@@ -344,7 +376,28 @@ const facts = [
   .flavor-list {
     margin: 0;
     display: grid;
-    gap: 0.9rem;
+    gap: 0.5rem;
+  }
+
+  /* The entry for the flavour on screen steps forward; the others wait. */
+  .flavor-list > div {
+    padding: 0.5rem 0.8rem;
+    border-left: 2px solid transparent;
+    border-radius: 0 6px 6px 0;
+    opacity: 0.6;
+  }
+
+  .flavor-list > div:hover {
+    opacity: 0.85;
+  }
+
+  :global(html[data-flavor='noite']) .flavor-list > [data-flavor-item='noite'],
+  :global(html[data-flavor='garoa']) .flavor-list > [data-flavor-item='garoa'],
+  :global(html[data-flavor='jaragua']) .flavor-list > [data-flavor-item='jaragua'] {
+    opacity: 1;
+    border-left-color: var(--sp-sodio);
+    background: color-mix(in oklab, var(--sp-sodio) 7%, transparent);
+    transform: translateX(4px);
   }
 
   .flavor-list dt {
@@ -382,8 +435,8 @@ const facts = [
     flex: 1 1 3rem;
     border-radius: 6px;
     box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--sp-vao) 40%, transparent);
-    transition: background-color 0.45s ease, transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1),
-      box-shadow 0.25s ease;
+    transition: background-color var(--sp-retint) ease calc(var(--i, 0) * 20ms),
+      transform 0.25s var(--sp-ease), box-shadow 0.25s ease, opacity 0.25s ease;
   }
 
   .strip__row:hover .strip__chip {

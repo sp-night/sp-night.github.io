@@ -21,7 +21,7 @@ const groupOrder = GROUP_IDS;
   <section class="flavor-notes" aria-label="Flavours">
     {
       flavors.map((f) => (
-        <article class="card flavor-note">
+        <article class="card flavor-note" data-flavor-item={f.id}>
           <header>
             <span class="flavor-note__dots" aria-hidden="true">
               {['vao', 'concreto', 'sodio', 'marginal', 'ibira'].map((k) => (
@@ -38,15 +38,18 @@ const groupOrder = GROUP_IDS;
   </section>
 
   {
-    groupOrder.map((g) => (
+    groupOrder.map((g, gi) => (
       <section class="group" aria-labelledby={`group-${g}`}>
         <div class="group__head">
           <h2 id={`group-${g}`}>{GROUPS[g]!.label}</h2>
           <p class="muted">{GROUPS[g]!.blurb}</p>
         </div>
         <div class="group__grid">
-          {GROUPS[g]!.keys.map((key) => (
-            <ColorCard colorKey={key} />
+          {GROUPS[g]!.keys.map((key, ki) => (
+            <ColorCard
+              colorKey={key}
+              index={groupOrder.slice(0, gi).reduce((n, id) => n + GROUPS[id]!.keys.length, 0) + ki}
+            />
           ))}
         </div>
       </section>
@@ -66,7 +69,7 @@ const groupOrder = GROUP_IDS;
       {
         Object.keys(flavors[0]!.roles.ansi!).map((role) => (
           <div class="ansi">
-            <span class="ansi__chip" style={`background: var(--sp-${flavors[0]!.roles.ansi![role]!.key.replace(/_/g, '-')})`} aria-hidden="true" />
+            <span class="ansi__chip retint-wave" style={`--i: ${Object.keys(flavors[0]!.roles.ansi!).indexOf(role)}; background: var(--sp-${flavors[0]!.roles.ansi![role]!.key.replace(/_/g, '-')})`} aria-hidden="true" />
             <span class="mono ansi__role">{role}</span>
             <span class="mono muted ansi__key">{flavors[0]!.roles.ansi![role]!.key}</span>
           </div>
@@ -97,6 +100,25 @@ const groupOrder = GROUP_IDS;
     margin: 0;
   }
 
+  /* The note for the flavour on screen is lit; the other two wait their turn. */
+  .flavor-note {
+    opacity: 0.72;
+  }
+
+  .flavor-note:hover {
+    opacity: 1;
+  }
+
+  :global(html[data-flavor='noite']) .flavor-note[data-flavor-item='noite'],
+  :global(html[data-flavor='garoa']) .flavor-note[data-flavor-item='garoa'],
+  :global(html[data-flavor='jaragua']) .flavor-note[data-flavor-item='jaragua'] {
+    opacity: 1;
+    border-color: color-mix(in oklab, var(--sp-sodio) 55%, var(--sp-fiacao));
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--sp-sodio) 25%, transparent),
+      0 18px 40px -26px var(--sp-sodio);
+    transform: translateY(-3px);
+  }
+
   .flavor-note p {
     margin: 0;
     font-size: var(--step--1);
@@ -113,6 +135,11 @@ const groupOrder = GROUP_IDS;
     width: 1.4rem;
     height: 0.4rem;
     border-radius: 2px;
+    transition: transform 0.35s var(--sp-ease);
+  }
+
+  .flavor-note:hover .flavor-note__dots span {
+    transform: scaleX(1.25);
   }
 
   .group {
@@ -156,6 +183,13 @@ const groupOrder = GROUP_IDS;
     border: var(--border);
     border-radius: 8px;
     font-size: var(--step--1);
+    transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease,
+      transform 0.25s var(--sp-ease);
+  }
+
+  .ansi:hover {
+    border-color: var(--sp-fg-muted);
+    transform: translateY(-1px);
   }
 
   .ansi__chip {

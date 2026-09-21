@@ -4,20 +4,47 @@
  */
 
 :root {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Inter, sans-serif;
-  --font-mono: ui-monospace, 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+  --font-sans: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'JetBrains Mono', 'Fira Code', 'SF Mono',
+    Menlo, monospace;
 
   --step--1: clamp(0.78rem, 0.75rem + 0.15vw, 0.86rem);
   --step-0: clamp(0.95rem, 0.92rem + 0.2vw, 1.05rem);
   --step-1: clamp(1.2rem, 1.1rem + 0.5vw, 1.45rem);
-  --step-2: clamp(1.6rem, 1.4rem + 1vw, 2.1rem);
-  --step-3: clamp(2.2rem, 1.8rem + 2.2vw, 3.6rem);
+  --step-2: clamp(1.7rem, 1.4rem + 1.2vw, 2.3rem);
+  --step-3: clamp(2.4rem, 1.8rem + 2.6vw, 4rem);
 
   --gutter: clamp(1rem, 0.6rem + 2vw, 2.5rem);
   --measure: 68ch;
   --wide: 1180px;
   --radius: 10px;
   --border: 1px solid var(--sp-fiacao);
+
+  /* Motion tokens. `--sp-retint` is how long a colour takes to follow the
+     flavour switcher; it collapses to 0 while a view-transition wipe is
+     running, so the wipe reveals the finished page instead of one still
+     fading. `--sp-scene` does the same for the skyline scene crossfade. */
+  --sp-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --sp-retint: 0.5s;
+  --sp-scene: 0.55s;
+
+  /* The lamp somewhere off-frame that warms the top of the home page. Sodium
+     by default; the drizzle cools it, and the peak turns it to the forest. */
+  --sp-glow: var(--sp-sodio);
+}
+
+:root[data-flavor='garoa'] {
+  --sp-glow: var(--sp-sereno);
+}
+
+:root[data-flavor='jaragua'] {
+  --sp-glow: var(--sp-ibira);
+}
+
+html.is-swapping {
+  --sp-retint: 0s;
+  --sp-scene: 0s;
 }
 
 *,
@@ -39,17 +66,18 @@ body {
   font-size: var(--step-0);
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.35s ease, color 0.35s ease;
+  transition: background-color var(--sp-retint) ease, color var(--sp-retint) ease;
 }
 
 h1,
 h2,
 h3,
 h4 {
-  line-height: 1.15;
-  letter-spacing: -0.02em;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
   margin: 0 0 0.5em;
-  font-weight: 620;
+  font-weight: 700;
+  text-wrap: balance;
 }
 
 h1 {
@@ -72,8 +100,13 @@ a {
   text-underline-offset: 0.2em;
 }
 
+a {
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
 a:hover {
   color: var(--sp-marginal-vivo);
+  text-decoration-color: currentColor;
 }
 
 code,
@@ -81,7 +114,7 @@ kbd,
 pre,
 samp {
   font-family: var(--font-mono);
-  font-size: 0.92em;
+  font-size: 0.9em;
 }
 
 :where(p, li, td) > code {
@@ -166,6 +199,7 @@ hr {
   background: color-mix(in oklab, var(--sp-vao) 88%, transparent);
   backdrop-filter: blur(10px);
   border-bottom: var(--border);
+  transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease;
 }
 
 .site-header__inner {
@@ -201,10 +235,28 @@ hr {
 }
 
 .nav a {
+  position: relative;
   color: var(--sp-fg-dim);
   text-decoration: none;
   font-size: var(--step--1);
   font-family: var(--font-mono);
+  transition: color 0.2s ease;
+}
+
+/* The underline grows out from the left on hover, and stays for the current
+   page — one element, two states, no layout shift. */
+.nav a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--sp-sodio);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.28s var(--sp-ease), background-color var(--sp-retint) ease;
 }
 
 .nav a:hover,
@@ -212,19 +264,50 @@ hr {
   color: var(--sp-fg);
 }
 
-.nav a[aria-current='page'] {
-  border-bottom: 2px solid var(--sp-sodio);
+.nav a:hover::after {
+  transform: scaleX(0.6);
+}
+
+.nav a[aria-current='page']::after {
+  transform: scaleX(1);
 }
 
 /* -------------------------------------------------------- flavor switcher */
 
 .flavors {
+  position: relative;
+  isolation: isolate;
   display: inline-flex;
   gap: 2px;
   padding: 2px;
   background: var(--sp-concreto);
   border: var(--border);
   border-radius: 999px;
+  transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease;
+}
+
+/* The selection is one pill that slides between the options, measured by the
+   switcher script. Until it has been measured, the checked button paints its
+   own background so nothing is ever unmarked. */
+.flavors__thumb {
+  position: absolute;
+  z-index: -1;
+  top: 2px;
+  bottom: 2px;
+  left: 0;
+  width: var(--w, 0px);
+  transform: translateX(var(--x, 0px));
+  background: var(--sp-vidro);
+  border-radius: 999px;
+  box-shadow: 0 1px 0 color-mix(in oklab, var(--sp-fg) 6%, transparent) inset,
+    0 4px 14px -8px var(--sp-vao);
+  opacity: 0;
+  transition: transform 0.4s var(--sp-ease), width 0.4s var(--sp-ease),
+    background-color var(--sp-retint) ease, opacity 0.2s ease;
+}
+
+.flavors.is-ready .flavors__thumb {
+  opacity: 1;
 }
 
 .flavors button {
@@ -241,11 +324,15 @@ hr {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  transition: color 0.2s, background-color 0.2s;
+  transition: color 0.25s ease, background-color 0.25s ease, transform 0.18s var(--sp-ease);
 }
 
 .flavors button:hover {
   color: var(--sp-fg);
+}
+
+.flavors button:active {
+  transform: scale(0.96);
 }
 
 .flavors button[aria-checked='true'] {
@@ -253,20 +340,53 @@ hr {
   color: var(--sp-fg);
 }
 
-.flavors button[aria-checked='true'] .swatch {
-  box-shadow: 0 0 0 3px color-mix(in oklab, currentColor 18%, transparent);
+.flavors.is-ready button[aria-checked='true'] {
+  background: transparent;
 }
 
 .flavors .flavor-id {
   display: none;
 }
 
+/* Each dot is that flavour's own sky: its dark surface with its signature
+   accent — so the three are told apart at a glance, not only by their name. */
 .flavors .swatch {
-  width: 0.66em;
-  height: 0.66em;
+  --dot: var(--sp-sodio);
+  width: 0.72em;
+  height: 0.72em;
   border-radius: 50%;
   display: inline-block;
-  transition: box-shadow 0.25s ease, background-color 0.45s ease;
+  flex: none;
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--sp-fg) 12%, transparent);
+  transition: box-shadow 0.3s ease, transform 0.3s var(--sp-ease);
+}
+
+.flavors button:hover .swatch {
+  transform: scale(1.15);
+}
+
+.flavors button[aria-checked='true'] .swatch {
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--sp-fg) 12%, transparent),
+    0 0 0 3px color-mix(in oklab, var(--dot) 28%, transparent),
+    0 0 12px color-mix(in oklab, var(--dot) 55%, transparent);
+  animation: dot-pulse 0.6s var(--sp-ease);
+}
+
+/* The lamp comes on: a ring that spreads and fades the moment a flavour is picked. */
+@keyframes dot-pulse {
+  0% {
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--sp-fg) 12%, transparent),
+      0 0 0 0 color-mix(in oklab, var(--dot) 70%, transparent),
+      0 0 0 color-mix(in oklab, var(--dot) 0%, transparent);
+  }
+  100% {
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--sp-fg) 12%, transparent),
+      0 0 0 3px color-mix(in oklab, var(--dot) 28%, transparent),
+      0 0 12px color-mix(in oklab, var(--dot) 55%, transparent);
+  }
 }
 
 /* ------------------------------------------------------- header GitHub */
@@ -289,10 +409,12 @@ hr {
   border-radius: 999px;
   text-decoration: none;
   white-space: nowrap;
-  transition: color 0.25s ease, border-color 0.25s ease;
+  transition: color 0.25s ease, border-color 0.25s ease, background-color var(--sp-retint) ease,
+    transform 0.2s var(--sp-ease);
 }
 
 .gh:hover {
+  transform: translateY(-1px);
   color: var(--sp-fg);
   border-color: var(--sp-sodio);
 }
@@ -363,8 +485,8 @@ hr {
   }
 
   .flavors .swatch {
-    width: 0.85em;
-    height: 0.85em;
+    width: 0.9em;
+    height: 0.9em;
   }
 }
 
@@ -372,6 +494,7 @@ hr {
 
 .site-footer {
   border-top: var(--border);
+  transition: border-color var(--sp-retint) ease, color var(--sp-retint) ease;
   /* Sections already carry generous bottom padding; 4rem on top of that left a
      dead band above the footer. */
   margin-top: 1.5rem;
@@ -445,7 +568,7 @@ hr {
   border: var(--border);
   border-radius: var(--radius);
   padding: 1.1rem 1.25rem;
-  transition: background-color 0.45s ease, border-color 0.45s ease;
+  transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease;
 }
 
 .pill {
@@ -456,6 +579,8 @@ hr {
   border: var(--border);
   border-radius: 999px;
   padding: 0.15rem 0.6rem;
+  transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease,
+    color var(--sp-retint) ease;
 }
 
 .btn {
@@ -471,8 +596,8 @@ hr {
   color: var(--sp-fg);
   text-decoration: none;
   cursor: pointer;
-  transition: border-color 0.2s, background-color 0.45s ease, transform 0.2s
-      cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.2s ease;
+  transition: border-color 0.2s, background-color var(--sp-retint) ease, color var(--sp-retint) ease,
+    transform 0.2s var(--sp-ease), box-shadow 0.2s ease;
 }
 
 .btn:hover {
@@ -496,6 +621,7 @@ hr {
 .btn--primary:hover {
   filter: brightness(1.08);
   color: var(--sp-vao);
+  box-shadow: 0 12px 28px -12px var(--sp-sodio), 0 0 0 4px color-mix(in oklab, var(--sp-sodio) 18%, transparent);
 }
 
 /* Third in a row of three: present, but not competing with the two decisions
@@ -554,6 +680,44 @@ hr {
   transform: none;
 }
 
+/* Flavour switch as a view transition: the new page opens out of the button
+   that was pressed, like a lamp coming on. The old snapshot just sits there;
+   the new one is clipped to a growing circle. `--sp-wipe-*` are set on <html>
+   by the switcher, and `::view-transition` inherits from the root. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(root) {
+  animation: sp-wipe 0.7s var(--sp-ease) both;
+}
+
+@keyframes sp-wipe {
+  from {
+    clip-path: circle(0px at var(--sp-wipe-x, 50%) var(--sp-wipe-y, 0%));
+  }
+  to {
+    clip-path: circle(var(--sp-wipe-r, 160vmax) at var(--sp-wipe-x, 50%) var(--sp-wipe-y, 0%));
+  }
+}
+
+/* Colour chips that should follow the switcher in a wave rather than all at
+   once: stagger with `style="--i: n"`. Only the colour is delayed — hovers
+   stay immediate. */
+.retint-wave {
+  transition: background-color var(--sp-retint) ease calc(var(--i, 0) * 20ms);
+}
+
+/* Things that are "the current flavour" — a note, a list entry — lift a little
+   when their flavour is on screen. Marked with data-flavor-item, which is
+   deliberately not data-f: that one hides content. */
+[data-flavor-item] {
+  transition: opacity var(--sp-retint) ease, border-color var(--sp-retint) ease,
+    background-color var(--sp-retint) ease, transform 0.4s var(--sp-ease), box-shadow 0.4s ease;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -577,6 +741,11 @@ hr {
   .js .reveal {
     opacity: 1;
     transform: none;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
   }
 }
 
@@ -602,6 +771,7 @@ td {
   padding: 0.45rem 0.7rem;
   border-bottom: var(--border);
   vertical-align: top;
+  transition: border-color var(--sp-retint) ease, color var(--sp-retint) ease;
 }
 
 @media (max-width: 34rem) {
@@ -670,6 +840,7 @@ td {
   border: var(--border);
   border-left: 3px solid var(--sp-sodio);
   border-radius: var(--radius);
+  transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease;
 }
 
 .callout > :first-child {
@@ -714,5 +885,5 @@ td {
   background: var(--sp-laje);
   box-shadow: 0 0 0 100vmax var(--sp-laje);
   clip-path: inset(0 -100vmax);
-  transition: background-color 0.45s ease, box-shadow 0.45s ease;
+  transition: background-color var(--sp-retint) ease, box-shadow var(--sp-retint) ease;
 }

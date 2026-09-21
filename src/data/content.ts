@@ -47,6 +47,17 @@ export interface FlavorCopy {
   story: { pt: string; en: string };
 }
 
+/**
+ * The headline on the home page, three lines with the middle one lit. One
+ * per flavour, because the sentence describes the scene behind it: the
+ * sodium lamp is the noite line, and it stops being true in the drizzle.
+ */
+export const heroLines: Record<FlavorId, [string, string, string]> = {
+  noite: ['The sodium lamp', 'turns the whole city', 'this colour.'],
+  garoa: ['The drizzle', 'fades the whole city', 'to this grey.'],
+  jaragua: ['From the summit,', 'the whole city', 'is a field of lights.'],
+};
+
 export const flavorCopy: Record<FlavorId, FlavorCopy> = {
   noite: {
     story: {

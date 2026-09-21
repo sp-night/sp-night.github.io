@@ -64,7 +64,7 @@ const classes = ['term', compact && 'term--compact', lines && 'term--thumb']
         ? flavors.map((f) => <span data-f={f.id}>{previewText(s.t, f)}</span>)
         : s.t
     }</span>
-  ))}</>))}</pre>
+  ))}</>))}<span class="term__cursor" aria-hidden="true"></span></pre>
 
   <div class="term__strip">
     <span class="term__strip-label mono">{preview.swatches.label}</span>
@@ -81,6 +81,7 @@ const classes = ['term', compact && 'term--compact', lines && 'term--thumb']
     border-radius: var(--radius);
     overflow: hidden;
     box-shadow: 0 22px 60px -28px color-mix(in oklab, var(--sp-vao) 90%, transparent);
+    transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease;
   }
 
   .term__bar {
@@ -90,6 +91,35 @@ const classes = ['term', compact && 'term--compact', lines && 'term--thumb']
     padding: 0.5rem 0.8rem;
     background: var(--sp-concreto);
     border-bottom: var(--border);
+    transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease;
+  }
+
+  /* The session is live: a block cursor, blinking at the end of the last line. */
+  .term__cursor {
+    display: inline-block;
+    width: 0.6em;
+    height: 1.1em;
+    vertical-align: -0.2em;
+    margin-left: 0.1em;
+    background: var(--sp-fg);
+    opacity: 0.85;
+    animation: cursor-blink 1.1s steps(1, end) infinite;
+  }
+
+  @keyframes cursor-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  .term--thumb .term__cursor {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .term__cursor {
+      animation: none;
+    }
   }
 
   .term__dots {
@@ -163,6 +193,11 @@ const classes = ['term', compact && 'term--compact', lines && 'term--thumb']
     flex: 1;
     height: 12px;
     border-radius: 3px;
+    transition: background-color var(--sp-retint) ease, transform 0.25s var(--sp-ease);
+  }
+
+  .term__swatches span:hover {
+    transform: scaleY(1.5);
   }
 
   /* --------------------------------------------------------- thumbnail */
