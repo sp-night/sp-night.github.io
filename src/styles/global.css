@@ -16,9 +16,30 @@
   --step-3: clamp(2.4rem, 1.8rem + 2.6vw, 4rem);
 
   --gutter: clamp(1rem, 0.6rem + 2vw, 2.5rem);
-  --measure: 68ch;
+  /* 52ch, not 68: Bricolage's zero — the glyph `ch` measures — is wide for the
+     face, so 68ch let the home lede run to 84 characters a line. 52ch lands
+     around 70, which is where reading stops being work. */
+  --measure: 52ch;
   --wide: 1180px;
-  --radius: 10px;
+  /* Four radii, not nine: a hairline for chips and bars, small for controls,
+     medium for anything that holds content, and the pill. */
+  --r-xs: 3px;
+  --r-s: 6px;
+  --r-m: 10px;
+  --r-pill: 999px;
+  --radius: var(--r-m);
+
+  /* Spacing on one scale. Cards take --pad-card; the compact lists (ports,
+     ansi) take --pad-tight, so a long list stays a list. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2.5rem;
+  --pad-card: var(--space-4) 1.1rem;
+  --pad-tight: 0.8rem var(--space-4);
+
   --border: 1px solid var(--sp-fiacao);
 
   /* Motion tokens. `--sp-retint` is how long a colour takes to follow the
@@ -29,8 +50,14 @@
   --sp-retint: 0.5s;
   --sp-scene: 0.55s;
 
-  /* The lamp somewhere off-frame that warms the top of the home page. Sodium
-     by default; the drizzle cools it, and the peak turns it to the forest. */
+  /* Two jobs, two colours, on every page:
+     - sodio is ACTION — the primary button, the focus ring. Nothing else.
+     - --sp-glow is STATE — "you are here": the current nav item, the checked
+       filter, the section being read, the flavour on screen. It is the
+       scene's own colour: sodium in noite, the drizzle's blue-grey in garoa,
+       the forest green on the peak. The hero's lit line is the same idea.
+     Labels, numbers and ornaments are text colours. When everything was
+     orange, nothing was. */
   --sp-glow: var(--sp-sodio);
 }
 
@@ -56,6 +83,15 @@ html.is-swapping {
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  /* Scrollbars in the palette, on the page and on every scroller in it. On
+     Linux the default horizontal bar under a long install path was a white
+     stripe across a dark page. Inherited, and retints with the flavour. */
+  scrollbar-color: var(--sp-fiacao) transparent;
+}
+
+pre,
+.table-scroll {
+  scrollbar-width: thin;
 }
 
 body {
@@ -64,6 +100,9 @@ body {
   color: var(--sp-fg);
   font-family: var(--font-sans);
   font-size: var(--step-0);
+  /* Bricolage at 400 is thin on a dark ground; a touch more weight reads as
+     the regular it is meant to be. */
+  font-weight: 430;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   transition: background-color var(--sp-retint) ease, color var(--sp-retint) ease;
@@ -78,6 +117,14 @@ h4 {
   margin: 0 0 0.5em;
   font-weight: 700;
   text-wrap: balance;
+}
+
+/* The tight setting is for display sizes. At h3 and below the same -0.025em
+   and 1.1 crowded two-line headings in the steps and the spec. */
+h3,
+h4 {
+  line-height: 1.25;
+  letter-spacing: -0.012em;
 }
 
 h1 {
@@ -120,7 +167,7 @@ samp {
 :where(p, li, td) > code {
   background: var(--sp-concreto);
   border: var(--border);
-  border-radius: 5px;
+  border-radius: var(--r-s);
   padding: 0.1em 0.36em;
 }
 
@@ -133,7 +180,7 @@ hr {
 :focus-visible {
   outline: 2px solid var(--sp-sodio);
   outline-offset: 2px;
-  border-radius: 3px;
+  border-radius: var(--r-xs);
 }
 
 ::selection {
@@ -161,7 +208,8 @@ hr {
   scroll-margin-top: 5rem;
 }
 
-@media (max-width: 34rem) {
+/* The header grows to two rows at the same width the switcher moves down. */
+@media (max-width: 50rem) {
   [id] {
     scroll-margin-top: 7rem;
   }
@@ -172,8 +220,8 @@ hr {
   font-size: var(--step--1);
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--sp-sodio);
-  margin-bottom: 0.75rem;
+  color: var(--sp-fg-dim);
+  margin-bottom: var(--space-3);
 }
 
 .lede {
@@ -222,8 +270,35 @@ hr {
 }
 
 .brand svg {
-  border-radius: 6px;
+  border-radius: var(--r-s);
   box-shadow: 0 0 0 1px color-mix(in oklab, var(--sp-fiacao) 70%, transparent);
+}
+
+/* The mark's aviation light keeps the tower's rhythm from the hero: a double
+   pulse, then a pause. Selected by fill so it holds for any drawing of the
+   mark that keeps the beacon in brasa with its halo gradient. */
+.brand svg circle[fill='var(--sp-brasa)'],
+.brand svg circle[fill$='-beacon)'] {
+  animation: mark-beacon 2s ease-out infinite;
+}
+
+@keyframes mark-beacon {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  8% {
+    opacity: 1;
+  }
+  22% {
+    opacity: 0.35;
+  }
+  30% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
 }
 
 .nav {
@@ -253,7 +328,7 @@ hr {
   bottom: -3px;
   height: 2px;
   border-radius: 1px;
-  background: var(--sp-sodio);
+  background: var(--sp-glow);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.28s var(--sp-ease), background-color var(--sp-retint) ease;
@@ -282,7 +357,7 @@ hr {
   padding: 2px;
   background: var(--sp-concreto);
   border: var(--border);
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease;
 }
 
@@ -298,7 +373,7 @@ hr {
   width: var(--w, 0px);
   transform: translateX(var(--x, 0px));
   background: var(--sp-vidro);
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   box-shadow: 0 1px 0 color-mix(in oklab, var(--sp-fg) 6%, transparent) inset,
     0 4px 14px -8px var(--sp-vao);
   opacity: 0;
@@ -319,7 +394,7 @@ hr {
   font-family: var(--font-mono);
   font-size: var(--step--1);
   padding: 0.3rem 0.75rem;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -406,7 +481,7 @@ hr {
   color: var(--sp-fg-dim);
   background: var(--sp-concreto);
   border: var(--border);
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   text-decoration: none;
   white-space: nowrap;
   transition: color 0.25s ease, border-color 0.25s ease, background-color var(--sp-retint) ease,
@@ -414,19 +489,41 @@ hr {
 }
 
 .gh:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
   color: var(--sp-fg);
-  border-color: var(--sp-sodio);
+  border-color: var(--sp-fg-muted);
 }
 
 .gh svg {
   flex: none;
 }
 
-/* Below ~44rem one header row cannot hold brand + nav + switcher, so the
-   switcher moves to a second row: two rows of chrome instead of three. The
-   pill is capped so it reads as a control, not a banner. */
-@media (max-width: 44rem) {
+/* Between ~50rem and ~66rem one row holds brand + nav + switcher only if the
+   switcher gives up the full names. Without this the nav wrapped under itself
+   at tablet widths and "contribute" sat alone on a second line. The short ids
+   are the same ones the phone layout already uses. */
+@media (max-width: 66rem) {
+  .flavors button .flavor-name {
+    display: none;
+  }
+
+  .flavors button .flavor-id {
+    display: inline;
+  }
+
+  .gh span {
+    display: none;
+  }
+
+  .gh {
+    padding: 0.35rem 0.55rem;
+  }
+}
+
+/* Below ~50rem even that does not fit, so the switcher moves to a second row:
+   two rows of chrome instead of three. The pill is capped so it reads as a
+   control, not a banner. */
+@media (max-width: 50rem) {
   .site-header__inner {
     gap: 1rem;
     row-gap: 0.4rem;
@@ -453,11 +550,6 @@ hr {
     flex: 1;
   }
 
-  /* The word goes; the mark still reads. */
-  .gh span {
-    display: none;
-  }
-
   .gh {
     padding: 0.45rem 0.6rem;
   }
@@ -469,17 +561,8 @@ hr {
   }
 }
 
-/* Narrow phones: the full names no longer fit three abreast — swap each for
-   its short id. (Three identical dots would not do: sodio is shared.) */
+/* Narrow phones: bigger touch targets for the three short ids. */
 @media (max-width: 34rem) {
-  .flavors button .flavor-name {
-    display: none;
-  }
-
-  .flavors button .flavor-id {
-    display: inline;
-  }
-
   .flavors button {
     padding: 0.5rem 0.6rem;
   }
@@ -493,11 +576,7 @@ hr {
 /* ---------------------------------------------------------------- footer */
 
 .site-footer {
-  border-top: var(--border);
   transition: border-color var(--sp-retint) ease, color var(--sp-retint) ease;
-  /* Sections already carry generous bottom padding; 4rem on top of that left a
-     dead band above the footer. */
-  margin-top: 1.5rem;
   padding-block: 2.5rem;
   color: var(--sp-fg-muted);
   font-size: var(--step--1);
@@ -567,7 +646,7 @@ hr {
   background: var(--sp-laje);
   border: var(--border);
   border-radius: var(--radius);
-  padding: 1.1rem 1.25rem;
+  padding: var(--pad-card);
   transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease;
 }
 
@@ -577,7 +656,7 @@ hr {
   color: var(--sp-fg-dim);
   background: var(--sp-concreto);
   border: var(--border);
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   padding: 0.15rem 0.6rem;
   transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease,
     color var(--sp-retint) ease;
@@ -590,7 +669,7 @@ hr {
   font-family: var(--font-mono);
   font-size: var(--step--1);
   padding: 0.55rem 1.1rem;
-  border-radius: 8px;
+  border-radius: var(--r-s);
   border: var(--border);
   background: var(--sp-concreto);
   color: var(--sp-fg);
@@ -600,11 +679,12 @@ hr {
     transform 0.2s var(--sp-ease), box-shadow 0.2s ease;
 }
 
+/* One hover language for everything that lifts: two pixels up, and the
+   border steps from fiacao to fg-muted. Only the primary button casts light. */
 .btn:hover {
-  border-color: var(--sp-sodio);
+  border-color: var(--sp-fg-muted);
   color: var(--sp-fg);
   transform: translateY(-2px);
-  box-shadow: 0 10px 24px -14px var(--sp-sodio);
 }
 
 .btn:active {
@@ -680,6 +760,14 @@ hr {
   transform: none;
 }
 
+/* The hero scene, paused while it is off screen (src/scripts/motion.ts). */
+.is-scene-off [data-scene],
+.is-scene-off [data-scene] *,
+.is-scene-off [data-scene] *::before,
+.is-scene-off [data-scene] *::after {
+  animation-play-state: paused !important;
+}
+
 /* Flavour switch as a view transition: the new page opens out of the button
    that was pressed, like a lamp coming on. The old snapshot just sits there;
    the new one is clipped to a growing circle. `--sp-wipe-*` are set on <html>
@@ -747,6 +835,143 @@ hr {
   ::view-transition-new(root) {
     animation: none;
   }
+}
+
+/* ------------------------------------------------------- document pages */
+
+/* The long reference pages (/spec, /contribute) used half the screen: a
+   measure-wide column with nothing beside it. Above 62rem they become two
+   columns, the text and a sticky index of the page. The aside comes first in
+   the markup, so on a phone the index still sits above the text. */
+.doc {
+  display: grid;
+  gap: 2rem 3.5rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 62rem) {
+  /* The text column stops at 40rem — paragraphs keep the measure inside it,
+     tables and card grids get the rest — and the index sits at the far edge. */
+  .doc {
+    grid-template-columns: minmax(0, 40rem) 15.5rem;
+    justify-content: space-between;
+  }
+
+  .doc__aside {
+    grid-column: 2;
+    grid-row: 1;
+    position: sticky;
+    top: 5.5rem;
+    align-self: start;
+    max-height: calc(100svh - 7rem);
+    overflow-y: auto;
+  }
+}
+
+.doc__main {
+  min-width: 0;
+}
+
+/* Inside the column, blocks may use its full width; running text still
+   wraps at the measure. :where() keeps this at zero specificity, so a page's
+   own rule for a list or a table wins. */
+.doc__main :where(p, ul, ol, dl) {
+  max-width: var(--measure);
+}
+
+.doc__main > section:first-child {
+  margin-top: 0;
+}
+
+.doc__aside {
+  display: grid;
+  gap: 1rem;
+  font-size: var(--step--1);
+}
+
+.doc__box {
+  padding: var(--pad-card);
+  background: var(--sp-laje);
+  border: var(--border);
+  border-radius: var(--radius);
+  transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease;
+}
+
+.doc__box h2 {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sp-fg-muted);
+  margin: 0 0 0.6rem;
+}
+
+.doc__box p {
+  margin: 0 0 0.6rem;
+  color: var(--sp-fg-dim);
+  line-height: 1.5;
+}
+
+.doc__box p:last-child {
+  margin-bottom: 0;
+}
+
+.doc__toc {
+  display: grid;
+  gap: 0.1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Wide screens: a vertical list with a rail. Phones keep the chips the spec
+   used to have, which wrap instead of making the index a screen tall. */
+.doc__toc a {
+  display: block;
+  padding: 0.28rem 0 0.28rem 0.75rem;
+  border-left: 2px solid var(--sp-fiacao);
+  color: var(--sp-fg-dim);
+  text-decoration: none;
+  transition: color 0.2s ease, border-color 0.2s ease, padding 0.25s var(--sp-ease);
+}
+
+.doc__toc a:hover {
+  color: var(--sp-fg);
+  border-left-color: var(--sp-fg-muted);
+}
+
+.doc__toc a[aria-current='location'] {
+  color: var(--sp-fg);
+  border-left-color: var(--sp-glow);
+  padding-left: 1rem;
+}
+
+@media (max-width: 62rem) {
+  .doc__toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .doc__toc a,
+  .doc__toc a[aria-current='location'] {
+    padding: 0.15rem 0.6rem;
+    border: var(--border);
+    border-radius: var(--r-pill);
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+  }
+}
+
+.doc__links {
+  display: grid;
+  gap: 0.3rem;
+  list-style: none;
+  margin: 0 0 0.7rem;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
 }
 
 /* ---------------------------------------------------------------- tables */
@@ -835,10 +1060,10 @@ td {
 /* GitHub's alert syntax, turned into an aside by remarkAlerts. */
 .callout {
   margin: 1.2rem 0;
-  padding: 0.8rem 1rem;
+  padding: var(--pad-card);
   background: var(--sp-concreto);
   border: var(--border);
-  border-left: 3px solid var(--sp-sodio);
+  border-left: 3px solid var(--sp-marginal);
   border-radius: var(--radius);
   transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease;
 }
@@ -858,7 +1083,7 @@ td {
   font-size: 0.68rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--sp-sodio);
+  color: var(--sp-marginal);
   margin-bottom: 0.35rem;
 }
 
@@ -882,7 +1107,12 @@ td {
    the shadow paints outward and the clip keeps it from adding scroll of its
    own. The vertical inset is 0, so nothing inside can bleed past the band. */
 .band {
-  background: var(--sp-laje);
+  background-color: var(--sp-laje);
+  /* The grain of poured concrete: fractal noise, white at a few percent alpha,
+     so it lightens whatever laje the flavour sets without tinting it. One
+     200px tile, rasterised once. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
   box-shadow: 0 0 0 100vmax var(--sp-laje);
   clip-path: inset(0 -100vmax);
   transition: background-color var(--sp-retint) ease, box-shadow var(--sp-retint) ease;

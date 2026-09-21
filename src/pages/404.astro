@@ -3,27 +3,125 @@ import Base from '../layouts/Base.astro';
 ---
 
 <Base title="404" description="This page does not exist." noindex>
-  <p class="eyebrow">404</p>
-  <h1>Nothing under this lamp post</h1>
-  <p class="lede">
-    The page you were looking for does not exist. The palette, the spec and the ports are all one
-    block away.
-  </p>
-  <p class="links mono">
-    <a href="/">home</a>
-    <a href="/palette">palette</a>
-    <a href="/spec">spec</a>
-    <a href="/ports">ports</a>
-    <a href="/contribute">contribute</a>
-  </p>
+  <div class="lost">
+    <div>
+      <p class="eyebrow">404</p>
+      <h1>Nothing under this lamp post</h1>
+      <p class="lede">
+        The page you were looking for does not exist. The palette, the spec and the ports are all
+        one block away.
+      </p>
+      <p class="links mono">
+        <a href="/">home</a>
+        <a href="/palette">palette</a>
+        <a href="/spec">spec</a>
+        <a href="/ports">ports</a>
+        <a href="/contribute">contribute</a>
+      </p>
+    </div>
+
+    {/* The joke of the page, drawn: one sodium lamp on an empty pavement, and
+        the pool of light under it with nothing in it. The lamp stutters now
+        and then, the way a sodium lamp at the end of its life does. */}
+    <svg class="poste" viewBox="0 0 220 300" aria-hidden="true">
+      <defs>
+        <radialGradient id="poste-luz" cx="0.5" cy="0" r="1">
+          <stop offset="0" style="stop-color: var(--sp-sodio); stop-opacity: 0.34"></stop>
+          <stop offset="0.6" style="stop-color: var(--sp-sodio); stop-opacity: 0.08"></stop>
+          <stop offset="1" style="stop-color: var(--sp-sodio); stop-opacity: 0"></stop>
+        </radialGradient>
+        <radialGradient id="poste-chao">
+          <stop offset="0" style="stop-color: var(--sp-sodio); stop-opacity: 0.28"></stop>
+          <stop offset="1" style="stop-color: var(--sp-sodio); stop-opacity: 0"></stop>
+        </radialGradient>
+      </defs>
+
+      <g class="poste__luz">
+        <path d="M150 58 L86 280 L214 280 Z" fill="url(#poste-luz)"></path>
+        <ellipse cx="150" cy="280" rx="70" ry="10" fill="url(#poste-chao)"></ellipse>
+      </g>
+
+      <line x1="0" y1="280.5" x2="220" y2="280.5" stroke="var(--sp-fiacao)" stroke-width="1"></line>
+      <rect x="54" y="60" width="5" height="220" rx="1.5" fill="var(--sp-concreto)"></rect>
+      <path d="M56.5 64 C 56.5 44, 80 40, 140 50" fill="none" stroke="var(--sp-concreto)" stroke-width="4" stroke-linecap="round"></path>
+      <path d="M132 48 L 166 52 L 162 60 L 136 57 Z" fill="var(--sp-concreto)"></path>
+      <rect class="poste__lampada" x="138" y="56" width="22" height="4" rx="2" fill="var(--sp-sodio)"></rect>
+      <rect x="50" y="276" width="13" height="5" rx="1" fill="var(--sp-concreto)"></rect>
+    </svg>
+  </div>
 </Base>
 
 <style>
+  .lost {
+    display: grid;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  @media (min-width: 52rem) {
+    .lost {
+      grid-template-columns: 1fr minmax(12rem, 18rem);
+    }
+  }
+
   .links {
     display: flex;
     flex-wrap: wrap;
     gap: 1.25rem;
     margin-top: 2rem;
     font-size: var(--step--1);
+  }
+
+  .poste {
+    width: min(100%, 18rem);
+    justify-self: center;
+    overflow: visible;
+  }
+
+  @media (max-width: 52rem) {
+    .poste {
+      width: 11rem;
+      order: -1;
+      justify-self: start;
+    }
+  }
+
+  .poste__lampada {
+    filter: drop-shadow(0 0 6px var(--sp-sodio));
+  }
+
+  .poste__luz,
+  .poste__lampada {
+    animation: poste 9s steps(1, end) infinite;
+  }
+
+  @keyframes poste {
+    0%,
+    82% {
+      opacity: 1;
+    }
+    83%,
+    85% {
+      opacity: 0.25;
+    }
+    86%,
+    89% {
+      opacity: 1;
+    }
+    90%,
+    91% {
+      opacity: 0.35;
+    }
+    92%,
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .poste__luz,
+    .poste__lampada {
+      animation: none;
+    }
   }
 </style>

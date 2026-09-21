@@ -6,6 +6,7 @@ import TerminalMock from '../components/TerminalMock.astro';
 import FlavorSwitcher from '../components/FlavorSwitcher.astro';
 import GithubIcon from '../components/GithubIcon.astro';
 import Contributors from '../components/Contributors.astro';
+import Wire from '../components/Wire.astro';
 import { flavors, GROUPS, GROUP_IDS, COLOUR_COUNT, org } from '../data/palette';
 import { ports } from '../data/ports';
 import { HOME_PREVIEW, heroLines } from '../data/content';
@@ -36,7 +37,7 @@ const facts = [
 ---
 
 <Base bare>
-  <section class="hero">
+  <section class="hero" data-scene>
     <div class="hero__glow" aria-hidden="true"></div>
 
     <div class="wrap hero__inner">
@@ -72,7 +73,7 @@ const facts = [
       {
         facts.map((f, i) => (
           <li class="fact reveal" style={`--d: ${i * 80}ms`}>
-            <span class="fact__n mono">{f.n}</span>
+            <span class="fact__n mono" data-count={f.n}>{f.n}</span>
             <span class="fact__label">{f.label}</span>
             <span class="fact__sub muted">{f.sub}</span>
           </li>
@@ -81,6 +82,7 @@ const facts = [
     </ul>
   </section>
 
+  <Wire seed={1} />
   <section class="band"><div class="wrap section split reveal">
     <div>
       <p class="eyebrow">one palette, three cities</p>
@@ -135,6 +137,7 @@ const facts = [
     <p><a href="/palette">Every colour, with its meaning and contrast →</a></p>
   </section>
 
+  <Wire seed={2} />
   <section class="band"><div class="wrap section reveal">
     <p class="eyebrow">ports</p>
     <h2>Themes you can install today</h2>
@@ -178,7 +181,8 @@ const facts = [
     isolation: isolate;
     display: flex;
     flex-direction: column;
-    min-height: calc(100svh - 4rem);
+    /* Capped: on a portrait monitor a full-height hero was two screens of sky. */
+    min-height: min(calc(100svh - 4rem), 58rem);
   }
 
   /* the sodium wash: a lamp somewhere off-frame, warming the top of the page */
@@ -231,7 +235,9 @@ const facts = [
     /* Wide enough that each line of the headline stays on its own line —
        "is a field of lights." is 21 characters. */
     max-width: 24ch;
-    font-size: clamp(2.6rem, 1.6rem + 4vw, 5rem);
+    /* The floor is set by the longest lit line on a 390px phone: "turns the
+       whole city" has to stay one line, or the lamp lights half a sentence. */
+    font-size: clamp(2.05rem, 0.95rem + 4.5vw, 5rem);
     line-height: 1.02;
     letter-spacing: -0.03em;
   }
@@ -328,23 +334,22 @@ const facts = [
     display: flex;
     flex-direction: column;
     gap: 0.1rem;
-    padding: 1rem 1.1rem;
+    padding: var(--pad-card);
     background: var(--sp-laje);
     border: var(--border);
     border-radius: var(--radius);
-    transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease,
-      transform 0.3s var(--sp-ease), box-shadow 0.3s ease;
+    transition: background-color var(--sp-retint) ease, border-color 0.2s ease,
+      transform 0.3s var(--sp-ease);
   }
 
   .fact:hover {
     transform: translateY(-2px);
-    border-color: color-mix(in oklab, var(--sp-sodio) 45%, var(--sp-fiacao));
-    box-shadow: 0 14px 30px -20px var(--sp-sodio);
+    border-color: var(--sp-fg-muted);
   }
 
   .fact__n {
     font-size: var(--step-2);
-    color: var(--sp-sodio);
+    color: var(--sp-fg);
     line-height: 1;
   }
 
@@ -383,7 +388,7 @@ const facts = [
   .flavor-list > div {
     padding: 0.5rem 0.8rem;
     border-left: 2px solid transparent;
-    border-radius: 0 6px 6px 0;
+    border-radius: 0 var(--r-s) var(--r-s) 0;
     opacity: 0.6;
   }
 
@@ -395,13 +400,13 @@ const facts = [
   :global(html[data-flavor='garoa']) .flavor-list > [data-flavor-item='garoa'],
   :global(html[data-flavor='jaragua']) .flavor-list > [data-flavor-item='jaragua'] {
     opacity: 1;
-    border-left-color: var(--sp-sodio);
-    background: color-mix(in oklab, var(--sp-sodio) 7%, transparent);
+    border-left-color: var(--sp-glow);
+    background: color-mix(in oklab, var(--sp-glow) 7%, transparent);
     transform: translateX(4px);
   }
 
   .flavor-list dt {
-    color: var(--sp-sodio);
+    color: var(--sp-fg);
     font-size: var(--step--1);
   }
 
@@ -433,7 +438,7 @@ const facts = [
   .strip__chip {
     height: 2.4rem;
     flex: 1 1 3rem;
-    border-radius: 6px;
+    border-radius: var(--r-s);
     box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--sp-vao) 40%, transparent);
     transition: background-color var(--sp-retint) ease calc(var(--i, 0) * 20ms),
       transform 0.25s var(--sp-ease), box-shadow 0.25s ease, opacity 0.25s ease;

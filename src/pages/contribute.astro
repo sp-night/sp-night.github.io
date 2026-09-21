@@ -55,22 +55,38 @@ const example = [
     the <a href="/spec">spec</a>.
   </p>
 
-  <aside class="status">
-    <strong class="mono">the palette, as data</strong>
-    <p>
-      The colours and the role layer are published as plain JSON, versioned with this site. They are
-      the contract: anything that reads them produces a theme that agrees with every other port.
-    </p>
-    <p class="mono links">
-      <a href="/palette.json">/palette.json</a>
-      <a href="/roles.json">/roles.json</a>
-    </p>
-    <p class="muted">
-      No tool is required to use them, and none is blessed. A port is judged by the files it ships,
-      not by how they were written.
-    </p>
+  <div class="doc">
+  <aside class="doc__aside">
+    <nav class="doc__box" aria-label="On this page">
+      <h2>on this page</h2>
+      <ul class="doc__toc" role="list" data-toc>
+        <li><a href="#how">Adding a port</a></li>
+        <li><a href="#example">What a mapping looks like</a></li>
+        <li><a href="#reporting">Reporting a colour problem</a></li>
+        <li><a href="#contributors">Who has built it</a></li>
+        <li><a href="#where">Where the pieces live</a></li>
+      </ul>
+    </nav>
+
+    <div class="doc__box doc__box--lit">
+      <h2>the palette, as data</h2>
+      <p>
+        The colours and the role layer are published as plain JSON, versioned with this site. They
+        are the contract: anything that reads them produces a theme that agrees with every other
+        port.
+      </p>
+      <ul class="doc__links" role="list">
+        <li><a href="/palette.json">/palette.json</a></li>
+        <li><a href="/roles.json">/roles.json</a></li>
+      </ul>
+      <p class="muted">
+        No tool is required to use them, and none is blessed. A port is judged by the files it
+        ships, not by how they were written.
+      </p>
+    </div>
   </aside>
 
+  <div class="doc__main">
   <section aria-labelledby="how">
     <h2 id="how">Adding a port, step by step</h2>
     <ol class="steps">
@@ -187,50 +203,22 @@ const example = [
       }
     </ul>
   </section>
+  </div>
+  </div>
 </Base>
 
 <style>
   section {
     margin-block: 3.25rem;
-    max-width: var(--measure);
   }
 
   section h2 {
     font-size: var(--step-1);
   }
 
-  .status {
-    padding: 1.1rem 1.25rem;
-    background: var(--sp-laje);
-    border: var(--border);
-    border-left: 3px solid var(--sp-sodio);
-    border-radius: var(--radius);
-    margin-block: 2rem;
-    max-width: var(--measure);
-  }
-
-  .status strong {
-    display: block;
-    color: var(--sp-sodio);
-    font-size: 0.72rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
-  }
-
-  .status p {
-    font-size: var(--step--1);
-    color: var(--sp-fg-dim);
-  }
-
-  .status p:last-child {
-    margin-bottom: 0;
-  }
-
-  .links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.1rem;
+  /* The contract box in the aside: the one thing on the page a port reads. */
+  .doc__box--lit {
+    border-left: 3px solid var(--sp-marginal);
   }
 
   .steps {
@@ -254,8 +242,8 @@ const example = [
     display: grid;
     place-items: center;
     border-radius: 50%;
-    border: 1px solid var(--sp-sodio);
-    color: var(--sp-sodio);
+    border: 1px solid var(--sp-fg-muted);
+    color: var(--sp-fg);
     font-size: var(--step--1);
   }
 
@@ -290,7 +278,7 @@ const example = [
     padding: 0.85rem 1rem;
     background: var(--sp-vao);
     border: var(--border);
-    border-radius: 8px;
+    border-radius: var(--r-s);
     font-size: var(--step--1);
     line-height: 1.7;
     overflow-x: auto;
@@ -323,7 +311,7 @@ const example = [
   }
 
   .repos li {
-    padding: 1rem 1.1rem;
+    padding: var(--pad-card);
     background: var(--sp-laje);
     border: var(--border);
     border-radius: var(--radius);

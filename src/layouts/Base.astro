@@ -4,10 +4,16 @@
    is code or a label. Subset by unicode-range, so a page only fetches latin. */
 import '@fontsource-variable/bricolage-grotesque';
 import '@fontsource-variable/jetbrains-mono';
+// The same files the stylesheets point at, so Vite emits one asset each and
+// the preload and the @font-face request share it. Latin only: that is every
+// page's text, and the other subsets stay on demand.
+import displayFont from '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2?url';
+import monoFont from '@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url';
 import '../styles/global.css';
 import FlavorSwitcher from '../components/FlavorSwitcher.astro';
 import Logo from '../components/Logo.astro';
 import GithubIcon from '../components/GithubIcon.astro';
+import Wire from '../components/Wire.astro';
 import { flavorStylesheet, defaultFlavor, theme, flavor, org } from '../data/palette';
 
 interface Props {
@@ -144,6 +150,8 @@ const jsonLd = {
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
     {/* Swapped client-side so the tab icon matches the flavour on screen. */}
+    <link rel="preload" href={displayFont} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={monoFont} as="font" type="font/woff2" crossorigin />
     <link id="favicon" rel="icon" href={`/favicon-${defaultFlavor}.svg`} type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
@@ -202,6 +210,8 @@ const jsonLd = {
 
     <p id="copy-status" class="visually-hidden" role="status" aria-live="polite"></p>
 
+    {/* The footer hangs from a wire instead of sitting under a rule. */}
+    <Wire seed={3} edge />
     <footer class="site-footer">
       <div class="wrap site-footer__cols">
         <div class="site-footer__about">

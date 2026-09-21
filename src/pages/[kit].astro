@@ -1,0 +1,183 @@
+---
+/**
+ * The component inventory: every primitive the site uses, once each, on one
+ * page — so an inconsistency shows up side by side instead of three pages
+ * apart. Local only: in a production build getStaticPaths returns nothing,
+ * so /kit is never emitted and never reaches the sitemap.
+ */
+import Base from '../layouts/Base.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+import ColorCard from '../components/ColorCard.astro';
+import FlavorSwitcher from '../components/FlavorSwitcher.astro';
+import TerminalMock from '../components/TerminalMock.astro';
+import Wire from '../components/Wire.astro';
+import { HOME_PREVIEW } from '../data/content';
+
+export function getStaticPaths() {
+  return import.meta.env.DEV ? [{ params: { kit: 'kit' } }] : [];
+}
+
+const radii = ['--r-xs', '--r-s', '--r-m', '--r-pill'];
+const spaces = ['--space-1', '--space-2', '--space-3', '--space-4', '--space-5', '--space-6'];
+const inks = ['fg-vivo', 'fg', 'fg-dim', 'fg-muted'];
+---
+
+<Base title="Kit" description="Component inventory (local only)." noindex>
+  <p class="eyebrow">kit · local only</p>
+  <h1>Every primitive, once</h1>
+  <p class="lede">
+    The site's building blocks side by side. Switch the flavour in the header and every one of them
+    should follow; anything that stays put is a colour that escaped the palette.
+  </p>
+
+  <section class="kit">
+    <h2>Type</h2>
+    <div class="kit__row kit__stack">
+      <h1>Heading one</h1>
+      <h2>Heading two, the section title</h2>
+      <h3>Heading three, which can run long enough to wrap onto a second line</h3>
+      <p class="lede">A lede sits between a heading and the body, a step up and a shade down.</p>
+      <p>
+        Body text in Bricolage, with <a href="#">a link</a>, some <code>inline_code</code> and a
+        run long enough to show the measure doing its work across more than one line of text.
+      </p>
+      <p class="muted">Muted text, for asides.</p>
+      <p class="eyebrow">an eyebrow</p>
+      <p>
+        {inks.map((k) => <span class="kit__ink" style={`color: var(--sp-${k})`}>{k}</span>)}
+      </p>
+    </div>
+  </section>
+
+  <section class="kit">
+    <h2>Actions</h2>
+    <div class="kit__row">
+      <a class="btn btn--primary" href="#">Primary</a>
+      <a class="btn" href="#">Default</a>
+      <a class="btn btn--ghost" href="#">Ghost</a>
+      <span class="pill">pill</span>
+      <a class="gh" href="#"><span>GitHub</span></a>
+    </div>
+    <div class="kit__row">
+      <FlavorSwitcher />
+    </div>
+  </section>
+
+  <section class="kit">
+    <h2>Containers</h2>
+    <div class="kit__grid">
+      <div class="card">
+        <strong>.card</strong>
+        <p class="muted">The default container, padded with --pad-card.</p>
+      </div>
+      <div class="doc__box">
+        <h2>doc box</h2>
+        <p>The aside container on the reference pages.</p>
+      </div>
+      <aside class="callout" data-kind="note"><p>A note callout, from <code>&gt; [!NOTE]</code>.</p></aside>
+      <aside class="callout" data-kind="warning"><p>A warning callout.</p></aside>
+    </div>
+  </section>
+
+  <section class="kit">
+    <h2>Code and data</h2>
+    <CodeBlock label="a snippet" code={'theme = sp_night_noite\nfont-size = 13'} />
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>role</th><th>key</th><th>note</th></tr></thead>
+        <tbody>
+          <tr><th>ui.bg</th><td>laje</td><td>the default surface</td></tr>
+          <tr><th>ansi.blue</th><td>marginal</td><td>the expressway sign</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="kit">
+    <h2>Colour</h2>
+    <div class="kit__grid">
+      <ColorCard colorKey="sodio" />
+      <ColorCard colorKey="fg_dim" />
+      <ColorCard colorKey="laje" />
+    </div>
+    <TerminalMock preview={HOME_PREVIEW} />
+  </section>
+
+  <section class="kit">
+    <h2>Tokens</h2>
+    <div class="kit__row">
+      {radii.map((r) => (
+        <span class="kit__radius" style={`border-radius: var(${r})`}><code>{r}</code></span>
+      ))}
+    </div>
+    <div class="kit__stack">
+      {spaces.map((s) => (
+        <span class="kit__space"><i style={`width: var(${s})`} /><code>{s}</code></span>
+      ))}
+    </div>
+  </section>
+
+  <Wire seed={0} />
+</Base>
+
+<style>
+  .kit {
+    margin-block: 3rem;
+    padding-top: 1.5rem;
+    border-top: var(--border);
+  }
+
+  .kit > h2 {
+    font-size: var(--step-1);
+  }
+
+  .kit__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    margin-block: var(--space-4);
+  }
+
+  .kit__stack {
+    display: grid;
+    gap: var(--space-2);
+    align-items: start;
+  }
+
+  .kit__grid {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+    align-items: start;
+    margin-block: var(--space-4);
+  }
+
+  .kit__ink {
+    margin-right: var(--space-4);
+    font-family: var(--font-mono);
+  }
+
+  .kit__radius {
+    display: grid;
+    place-items: center;
+    width: 7rem;
+    height: 4rem;
+    background: var(--sp-concreto);
+    border: var(--border);
+    font-size: 0.72rem;
+  }
+
+  .kit__space {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: 0.72rem;
+  }
+
+  .kit__space i {
+    height: 0.8rem;
+    background: var(--sp-glow);
+    border-radius: var(--r-xs);
+  }
+</style>

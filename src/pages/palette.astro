@@ -4,6 +4,10 @@ import ColorCard from '../components/ColorCard.astro';
 import { COLOUR_COUNT, GROUPS, GROUP_IDS, flavors } from '../data/palette';
 
 const groupOrder = GROUP_IDS;
+
+/* The surfaces are planes stacked on each other, so they are shown the way
+   they are used: one continuous slab, darkest recess to the wiring. */
+const slab = GROUPS.surfaces?.keys ?? [];
 ---
 
 <Base
@@ -44,6 +48,15 @@ const groupOrder = GROUP_IDS;
           <h2 id={`group-${g}`}>{GROUPS[g]!.label}</h2>
           <p class="muted">{GROUPS[g]!.blurb}</p>
         </div>
+        {g === 'surfaces' && (
+          <div class="slab" aria-hidden="true">
+            {slab.map((k, i) => (
+              <span class="slab__plane retint-wave" style={`--i: ${i}; background: var(--sp-${k.replace(/_/g, '-')})`}>
+                <span class="mono">{k}</span>
+              </span>
+            ))}
+          </div>
+        )}
         <div class="group__grid">
           {GROUPS[g]!.keys.map((key, ki) => (
             <ColorCard
@@ -113,9 +126,8 @@ const groupOrder = GROUP_IDS;
   :global(html[data-flavor='garoa']) .flavor-note[data-flavor-item='garoa'],
   :global(html[data-flavor='jaragua']) .flavor-note[data-flavor-item='jaragua'] {
     opacity: 1;
-    border-color: color-mix(in oklab, var(--sp-sodio) 55%, var(--sp-fiacao));
-    box-shadow: 0 0 0 1px color-mix(in oklab, var(--sp-sodio) 25%, transparent),
-      0 18px 40px -26px var(--sp-sodio);
+    border-color: color-mix(in oklab, var(--sp-glow) 55%, var(--sp-fiacao));
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--sp-glow) 25%, transparent);
     transform: translateY(-3px);
   }
 
@@ -134,7 +146,7 @@ const groupOrder = GROUP_IDS;
   .flavor-note__dots span {
     width: 1.4rem;
     height: 0.4rem;
-    border-radius: 2px;
+    border-radius: var(--r-xs);
     transition: transform 0.35s var(--sp-ease);
   }
 
@@ -164,7 +176,48 @@ const groupOrder = GROUP_IDS;
   .group__grid {
     display: grid;
     gap: 0.75rem;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 15.5rem), 1fr));
+    align-items: start;
+  }
+
+  /* ---------------------------------------------------------------- slab */
+
+  .slab {
+    display: flex;
+    height: 6.5rem;
+    margin-bottom: 0.9rem;
+    border: var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .slab__plane {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    padding: 0.6rem 0.75rem;
+    transition: flex-grow 0.4s var(--sp-ease), background-color var(--sp-retint) ease
+        calc(var(--i, 0) * 20ms);
+  }
+
+  .slab__plane:hover {
+    flex-grow: 1.6;
+  }
+
+  .slab__plane span {
+    font-size: 0.72rem;
+    color: var(--sp-fg-dim);
+  }
+
+  @media (max-width: 34rem) {
+    .slab {
+      flex-direction: column;
+      height: auto;
+    }
+
+    .slab__plane {
+      min-height: 2.6rem;
+    }
   }
 
   .ansi-grid {
@@ -181,7 +234,7 @@ const groupOrder = GROUP_IDS;
     padding: 0.45rem 0.7rem;
     background: var(--sp-laje);
     border: var(--border);
-    border-radius: 8px;
+    border-radius: var(--r-s);
     font-size: var(--step--1);
     transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease,
       transform 0.25s var(--sp-ease);
@@ -189,13 +242,13 @@ const groupOrder = GROUP_IDS;
 
   .ansi:hover {
     border-color: var(--sp-fg-muted);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
   }
 
   .ansi__chip {
     width: 0.9rem;
     height: 0.9rem;
-    border-radius: 3px;
+    border-radius: var(--r-xs);
     flex: 0 0 auto;
   }
 
