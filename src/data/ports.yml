@@ -12,7 +12,8 @@
 #
 # Fields:
 #   slug           unique id, and the repository name under the org
-#   name           display name
+#   name           display name, capitalised — Kitty, Eza — so a list of ports
+#                  reads as one list, whatever case the project uses for itself
 #   group          a key of `groups` below
 #   blurb          one line on what the port covers
 #   homepage       the themed app's own site
@@ -23,11 +24,18 @@
 #   template       the mapping file in the port repository
 #   install_guide  the app-specific prose of the README's Install section
 #   mapping        the "What gets themed" table: app key | role | gloss
-#   preview        the synthetic screenshot: title, fake session, colour strip
+#   preview        the synthetic screenshot: title, frame, fake session, colour strip
 #
 # In `install`, `activate` and preview text, {flavor} and {label} are
 # substituted. In a preview span, `r` is a role (group.role), `c` is a raw
 # palette key — a strip that exists to show colours may name colours.
+#
+# `preview.frame` is the chrome the session is drawn in, and it should be the
+# kind of window the app lives in: `terminal` (the default: titlebar, dots),
+# `editor` (a tab from the title, numbered lines, a `bar` statusline and a
+# `cursor_line`), `app` (the title as a header, a `bar` of key hints) or `pane`
+# (a CLI in someone else's terminal: no chrome at all). The body is only the
+# session; the frame draws the rest, so nobody fakes a gutter span by span.
 
 groups:
   terminal: Terminals
@@ -159,7 +167,7 @@ ports:
           - {t: "separation ΔE ≥ 0.10 or ΔL ≥ 0.04", r: ui.fg_dim}
 
   - slug: kitty
-    name: kitty
+    name: Kitty
     group: terminal
     blurb: The 16-colour ANSI mapping, plus cursor, selection, splits, the tab bar and the three mark slots.
     homepage: https://sw.kovidgoyal.net/kitty/
@@ -426,14 +434,6 @@ ports:
           - {t: " = ", r: syntax.operator}
           - {t: "\"{r:ui.fg_dim}\"", r: syntax.string}
         - []
-        - - {t: "[colors.cursor]", r: syntax.type}
-        - - {t: "cursor", r: syntax.attribute}
-          - {t: " = ", r: syntax.operator}
-          - {t: "\"{r:ui.cursor}\"", r: syntax.string}
-        - - {t: "text", r: syntax.attribute}
-          - {t: "   = ", r: syntax.operator}
-          - {t: "\"{r:ui.on_accent}\"", r: syntax.string}
-        - []
         - - {t: "~/sp-night ", r: ui.accent}
           - {t: "❯ ", r: ui.accent_alt}
           - {t: "grep -n import ~/.config/alacritty/alacritty.toml", r: ui.fg}
@@ -449,12 +449,9 @@ ports:
         - - {t: "✓ ", r: diagnostic.ok}
           - {t: "contrast   ", r: ui.fg}
           - {t: "70 pairs per flavour, AA on every surface", r: ui.fg_dim}
-        - - {t: "✓ ", r: diagnostic.ok}
-          - {t: "accents    ", r: ui.fg}
-          - {t: "separation ΔE ≥ 0.10 or ΔL ≥ 0.04", r: ui.fg_dim}
 
   - slug: eza
-    name: eza
+    name: Eza
     group: shell
     blurb: A native eza theme.yml — file kinds, permissions, sizes, git status and per-language accents.
     homepage: https://eza.rocks/
@@ -530,6 +527,7 @@ ports:
 
     preview:
       title: eza — sp_night_{flavor}
+      frame: pane
       swatches:
         label: the roles behind theme.yml
         keys: [vao, brasa, sodio, taxi, ibira, estaiada, sereno, marginal, temporal, fg_dim, fg]
@@ -721,7 +719,16 @@ ports:
         meaning: Markdown headings in *sódio*, links in *marginal* — the expressway sign
 
     preview:
-      title: helix — sp_night_{flavor}
+      title: sp_night.rs
+      frame: editor
+      cursor_line: 6
+      bar:
+        left:
+          - {t: " NOR ", r: ui.accent, b: true}
+          - {t: "  sp_night.rs", r: ui.fg}
+        right:
+          - {t: "6:2  ", r: ui.fg_dim}
+          - {t: "rust", r: ui.fg_muted}
       swatches:
         label: the roles behind the scopes
         roles:
@@ -742,23 +749,16 @@ ports:
           - diagnostic.warn
           - git.added
       body:
-        - - {t: "  1 ", r: ui.fg_muted}
-          - {t: "│ ", r: ui.border}
-          - {t: "use ", r: syntax.keyword}
+        - - {t: "use ", r: syntax.keyword}
           - {t: "std", r: syntax.namespace}
           - {t: "::", r: syntax.punctuation}
           - {t: "collections", r: syntax.namespace}
           - {t: "::", r: syntax.punctuation}
           - {t: "HashMap", r: syntax.type}
           - {t: ";", r: syntax.punctuation}
-        - - {t: "  2 ", r: ui.fg_muted}
-          - {t: "│", r: ui.border}
-        - - {t: "  3 ", r: ui.fg_muted}
-          - {t: "│ ", r: ui.border}
-          - {t: "/// the sodium lamp that turns the whole city this colour", r: syntax.comment}
-        - - {t: "  4 ", r: ui.fg_muted}
-          - {t: "│ ", r: ui.border}
-          - {t: "pub fn ", r: syntax.keyword}
+        - []
+        - - {t: "/// the sodium lamp that turns the whole city this colour", r: syntax.comment}
+        - - {t: "pub fn ", r: syntax.keyword}
           - {t: "flavours", r: syntax.function}
           - {t: "() ", r: syntax.punctuation}
           - {t: "-> ", r: syntax.operator}
@@ -767,8 +767,7 @@ ports:
           - {t: "'static ", r: syntax.keyword}
           - {t: "str", r: syntax.type}
           - {t: "> {", r: syntax.punctuation}
-        - - {t: "  5 ", r: ui.fg_muted}
-          - {t: "│     ", r: ui.border}
+        - - {t: "    ", r: ui.fg}
           - {t: "vec!", r: syntax.macro}
           - {t: "[", r: syntax.punctuation}
           - {t: "\"noite\"", r: syntax.string}
@@ -777,21 +776,13 @@ ports:
           - {t: ", ", r: syntax.punctuation}
           - {t: "\"jaragua\"", r: syntax.string}
           - {t: "]", r: syntax.punctuation}
-        - - {t: "  6 ", r: ui.fg_muted}
-          - {t: "│ ", r: ui.border}
-          - {t: "}", r: syntax.punctuation}
-        - []
-        - - {t: "    ", r: ui.fg_muted}
+        - - {t: "}", r: syntax.punctuation}
+          - {t: "      ", r: ui.fg}
           - {t: "● ", r: diagnostic.error}
           - {t: "expected `;`, found `}`", r: ui.fg_dim}
-        - []
-        - - {t: " NOR ", r: ui.accent, b: true}
-          - {t: "  sp_night.rs ", r: ui.fg}
-          - {t: "  6:2 ", r: ui.fg_dim}
-          - {t: "  rust", r: ui.fg_muted}
 
   - slug: herdr
-    name: herdr
+    name: Herdr
     group: multiplexer
     blurb: The agent sidebar, panes, tabs and toasts — including the four colours that say what each agent is doing.
     homepage: https://herdr.dev/
@@ -877,7 +868,18 @@ ports:
           accepts an override, but nothing in the interface paints with it today
 
     preview:
-      title: herdr — sp_night_{flavor}
+      title: herdr
+      frame: app
+      bar:
+        left:
+          - {t: " ~/sp-night ", r: ui.fg}
+          - {t: " main", r: syntax.type}
+        right:
+          - {t: "4 agents  ", r: ui.fg_muted}
+          - {t: "j/k", r: ui.accent}
+          - {t: " move  ", r: ui.fg_dim}
+          - {t: "q", r: ui.accent}
+          - {t: " quit", r: ui.fg_dim}
       swatches:
         label: the roles behind the tokens
         roles:
@@ -898,11 +900,6 @@ ports:
           - syntax.type
           - ui.accent_alt
       body:
-        - - {t: " herdr ", r: ui.accent, b: true}
-          - {t: " ~/sp-night ", r: ui.fg}
-          - {t: "  main", r: syntax.type}
-          - {t: "                          4 agents", r: ui.fg_muted}
-        - - {t: " ─────────────────────────────────────────────────────", r: ui.border}
         - - {t: " ● ", r: diagnostic.warn}
           - {t: "claude    ", r: ui.fg}
           - {t: "working   ", r: diagnostic.warn}
@@ -926,3 +923,141 @@ ports:
           - {t: "run finished", r: ui.fg}
           - {t: "  ·  ", r: ui.fg_muted}
           - {t: "spn check: 70 pairs per flavour, AA on every surface", r: ui.fg_dim}
+
+  - slug: foot
+    name: Foot
+    group: terminal
+    blurb: The 16-colour ANSI mapping, plus cursor, selection, URL mode, the scrollback search box and indicator, and the bell flash.
+    homepage: https://codeberg.org/dnkl/foot
+    repo: https://github.com/sp-night/foot
+    install: ~/.config/foot/sp_night_{flavor}.ini
+    activate: include=~/.config/foot/sp_night_{flavor}.ini
+    note: >-
+      The theme files write `[colors-dark]`, the section that replaced
+      `[colors]` in foot 1.26. On an older foot, upgrade — the colours
+      are ignored otherwise.
+    template: foot.ini.tmpl
+    mapping_closer: what the search box turning red means
+
+    install_guide: |-
+      foot reads a theme through an `include` in its own `foot.ini`, so the file
+      goes next to it and nothing overwrites it.
+
+      Grab the flavour you want (or all three):
+
+      ```sh
+      mkdir -p ~/.config/foot
+      curl -Lo ~/.config/foot/sp_night_noite.ini \
+        https://raw.githubusercontent.com/sp-night/foot/main/themes/sp_night_noite.ini
+      ```
+
+      Then add the include to `~/.config/foot/foot.ini`:
+
+      ```ini
+      include=~/.config/foot/sp_night_noite.ini
+      ```
+
+      foot does not reload its configuration, so open a new window — or, with a
+      server running, restart `foot --server`.
+
+      > [!NOTE]
+      > The theme sets `[colors-dark]`, which replaced `[colors]` in foot 1.26.
+      > The included file keeps its own section scope, so the `include` line can
+      > sit anywhere in `foot.ini`. A `[colors-dark]` of your own that comes
+      > after it still wins, key by key.
+
+      Prefer a checkout? Clone and copy — the files are plain text, there is no build:
+
+      ```sh
+      git clone https://github.com/sp-night/foot.git
+      cp foot/themes/*.ini ~/.config/foot/
+      ```
+
+      Some keys the theme deliberately leaves alone, for one reason: this project
+      does not ship a colour nobody measured.
+
+      `dim0`…`dim7` are absent. The palette has no measured dim set, and foot
+      derives faint text by blending on its own.
+
+      The 256-colour palette above 15 and the sixel palette are absent too: they
+      are xterm's standard cube, not a place for a colour scheme.
+
+      `alpha`, `flash-alpha` and the `[csd]` title bar are behaviour and window
+      decoration rather than terminal colour. Set them in your own config.
+
+    mapping:
+      - key: "`regular0…7` / `bright0…7`"
+        role: "`ansi.*`"
+        meaning: the full 16-colour ANSI mapping
+      - key: "`background` / `foreground`"
+        role: "`ui.bg` / `ui.fg`"
+        meaning: "*laje* under the main text"
+      - key: "`cursor`"
+        role: "`ui.on_accent` / `ui.cursor`"
+        meaning: the *sódio* cursor, dark text inside it
+      - key: "`selection-background` / `-foreground`"
+        role: "`ui.selection` / `ui.fg`"
+        meaning: "*vidro*, glass reflecting the street"
+      - key: "`urls`"
+        role: "`ui.link`"
+        meaning: the URL-mode underline in *marginal*, the expressway sign
+      - key: "`jump-labels`"
+        role: "`ui.on_accent` / `ui.accent`"
+        meaning: the key to press next is loud, dark text on the signature colour
+      - key: "`search-box-match`"
+        role: "`ui.on_accent` / `ui.match`"
+        meaning: a search that finds something sits in *táxi*, the colour this theme uses for a match
+      - key: "`search-box-no-match`"
+        role: "`ui.on_accent` / `diagnostic.error`"
+        meaning: a search that finds nothing turns to *brasa* — an error, not an accent
+      - key: "`scrollback-indicator`"
+        role: "`ui.fg_dim` / `ui.bg_deep`"
+        meaning: the position readout recedes into the *vão*
+      - key: "`flash`"
+        role: "`diagnostic.warn`"
+        meaning: a bell is a warning, not an accent
+
+    preview:
+      title: foot — sp_night_{flavor}
+      swatches:
+        label: regular0–7 / bright0–7
+        roles:
+          - ansi.black
+          - ansi.red
+          - ansi.green
+          - ansi.yellow
+          - ansi.blue
+          - ansi.magenta
+          - ansi.cyan
+          - ansi.white
+          - ansi.bright_black
+          - ansi.bright_red
+          - ansi.bright_green
+          - ansi.bright_yellow
+          - ansi.bright_blue
+          - ansi.bright_magenta
+          - ansi.bright_cyan
+          - ansi.bright_white
+      body:
+        - - {t: "~/sp-night ", r: ui.accent}
+          - {t: "(main) ", r: ui.match}
+          - {t: "❯ ", r: ui.accent_alt}
+          - {t: "grep include ~/.config/foot/foot.ini", r: ui.fg}
+        - - {t: "include", r: syntax.attribute}
+          - {t: "=", r: syntax.operator}
+          - {t: "~/.config/foot/sp_night_{flavor}.ini", r: syntax.string}
+        - []
+        - - {t: "~/sp-night ", r: ui.accent}
+          - {t: "❯ ", r: ui.accent_alt}
+          - {t: "grep -cE '^(regular|bright)[0-7]=' ~/.config/foot/sp_night_{flavor}.ini", r: ui.fg}
+        - - {t: "16", r: syntax.number}
+        - []
+        - - {t: "~/sp-night ", r: ui.accent}
+          - {t: "❯ ", r: ui.accent_alt}
+          - {t: "spn check", r: ui.fg}
+        - - {t: "✓ ", r: diagnostic.ok}
+          - {t: "contrast   ", r: ui.fg}
+          - {t: "70 pairs per flavour, AA on every surface", r: ui.fg_dim}
+        - - {t: "✓ ", r: diagnostic.ok}
+          - {t: "accents    ", r: ui.fg}
+          - {t: "separation ΔE ≥ 0.10 or ΔL ≥ 0.04", r: ui.fg_dim}

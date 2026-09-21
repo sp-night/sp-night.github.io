@@ -141,17 +141,17 @@ function ogSvg(id, flavor) {
 }
 
 /**
- * The social card for one port page.
+ * The social card for one port group's page.
  *
- * Same scene as the site card, so a shared port link is recognisably the same
- * project — the headline is the only thing that changes. One card per port in
+ * Same scene as the site card, so a shared link is recognisably the same
+ * project — the headline is the only thing that changes. One card per group in
  * the default flavour, because a page emits exactly one og:image and three
- * would be two dead files each.
+ * would be two dead files each. The line under the headline names the ports
+ * the page holds, which is what someone deciding whether to click wants.
  */
-function portOgSvg(flavorId, flavor, port) {
+function groupOgSvg(flavorId, flavor, label, names) {
   const c = flavor.colors;
   const lit = litFor(flavorId, c);
-  const install = port.install.replaceAll('{flavor}', flavorId);
   const swatches = ACCENTS.map(
     (k, i) => `<rect x="${72 + i * 52}" y="470" width="40" height="40" rx="8" fill="${c[k]}"/>`,
   ).join('');
@@ -179,9 +179,9 @@ function portOgSvg(flavorId, flavor, port) {
   <text x="132" y="114" font-family="${MONO}" font-size="30" font-weight="700" fill="${c.fg}">SP Night</text>
 
   <text x="72" y="268" font-family="${DISPLAY}" font-size="76" font-weight="700" letter-spacing="-2" fill="${c.fg}">SP Night for</text>
-  <text x="72" y="352" font-family="${DISPLAY}" font-size="76" font-weight="700" letter-spacing="-2" fill="${lit}">${esc(port.name)}</text>
+  <text x="72" y="352" font-family="${DISPLAY}" font-size="76" font-weight="700" letter-spacing="-2" fill="${lit}">${esc(label)}</text>
 
-  <text x="72" y="414" font-family="${MONO}" font-size="26" fill="${c.fg_dim}">${esc(install)}</text>
+  <text x="72" y="414" font-family="${MONO}" font-size="26" fill="${c.fg_dim}">${esc(names.join(' · '))}</text>
 
   ${swatches}
 </svg>`;
@@ -331,13 +331,17 @@ function portsTable() {
 
 replaceReadmeBlock('ports-table', portsTable());
 
-/* One social card per port page. The default flavour only — a page emits one
-   og:image, so three would be two dead files each. */
+/* One social card per group page, in the order a port first calls for the
+   group — the rule src/data/ports.ts uses for the pages themselves. The
+   default flavour only: a page emits one og:image, so three would be two dead
+   files each. */
 const DEFAULT_FLAVOR = 'noite';
-for (const p of registry.ports) {
-  const svg = portOgSvg(DEFAULT_FLAVOR, palette.flavors[DEFAULT_FLAVOR], p);
-  await sharp(Buffer.from(svg)).png().toFile(join(root, `public/og-port-${p.slug}.png`));
+const groups = [...new Set(registry.ports.map((p) => p.group))];
+for (const g of groups) {
+  const names = registry.ports.filter((p) => p.group === g).map((p) => p.name);
+  const svg = groupOgSvg(DEFAULT_FLAVOR, palette.flavors[DEFAULT_FLAVOR], registry.groups[g], names);
+  await sharp(Buffer.from(svg)).png().toFile(join(root, `public/og-ports-${g}.png`));
 }
-console.log(`og-port-*.png (${registry.ports.length})`);
+console.log(`og-ports-*.png (${groups.length})`);
 
 console.log(`\n${SURFACES.length} surfaces · ${ACCENTS.length} accents · ${Object.keys(palette.flavors).length} flavours`);

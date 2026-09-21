@@ -123,11 +123,12 @@ by `npm run assets`, and `npm test` fails if it falls behind.
 | Port | Group | Installs to |
 | --- | --- | --- |
 | [Ghostty](https://github.com/sp-night/ghostty) | Terminals | `~/.config/ghostty/themes/sp_night_{flavor}` |
-| [kitty](https://github.com/sp-night/kitty) | Terminals | `~/.config/kitty/sp_night_{flavor}.conf` |
+| [Kitty](https://github.com/sp-night/kitty) | Terminals | `~/.config/kitty/sp_night_{flavor}.conf` |
 | [Alacritty](https://github.com/sp-night/alacritty) | Terminals | `~/.config/alacritty/themes/sp_night_{flavor}.toml` |
-| [eza](https://github.com/sp-night/eza) | Shell & CLI | `~/.config/eza/theme.yml` |
+| [Eza](https://github.com/sp-night/eza) | Shell & CLI | `~/.config/eza/theme.yml` |
 | [Helix](https://github.com/sp-night/helix) | Editors | `~/.config/helix/themes/sp_night_{flavor}.toml` |
-| [herdr](https://github.com/sp-night/herdr) | Multiplexers | `~/.config/herdr/config.toml` |
+| [Herdr](https://github.com/sp-night/herdr) | Multiplexers | `~/.config/herdr/config.toml` |
+| [Foot](https://github.com/sp-night/foot) | Terminals | `~/.config/foot/sp_night_{flavor}.ini` |
 <!-- ports-table:end -->
 
 Theming another app? See [CONTRIBUTING.md](CONTRIBUTING.md). The palette and the
@@ -174,8 +175,8 @@ those copies here is a change that disappears at the next sync.
   [`public/previews/`](public/previews) and opens a pull request here, gated on
   this repository's own `npm run check && npm test && npm run build`.
 - **A new port** → list it in the engine's `registry/ports.yml`. Merging the
-  sync pull request publishes `/ports/<slug>` — the page is generated from the
-  entry, so there is nothing to write here.
+  sync pull request publishes it as a tab on `/ports/<group>` — the page is
+  generated from the catalogue, so there is nothing to write here.
 - **Contributor list** → `npm run contributors`, or leave it to the weekly
   workflow.
 

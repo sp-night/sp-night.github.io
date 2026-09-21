@@ -1,0 +1,233 @@
+---
+/**
+ * One page per group of the catalogue, one tab per port inside it.
+ *
+ * The page used to be per port, and the four terminal pages were the same page:
+ * the same sixteen ANSI colours, cursor and selection, written in four file
+ * formats. What differs between ports is where the file goes and how it is
+ * switched on, so that is what a tab holds. Which key gets which role is in
+ * each port's README, generated from the same catalogue entry — the site does
+ * not print it a second time.
+ *
+ * The tabs are links to `#<slug>`, and `:target` picks the panel. No script:
+ * the rules are generated per port, the same way the filter on /ports is. The
+ * anchor sits on the tab rather than on the panel, so following a link lands on
+ * the tab strip instead of scrolling the tabs out of view. Without `:has()`
+ * every panel shows, stacked — the page degrades to a longer page.
+ */
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import Base from '../../layouts/Base.astro';
+import CodeBlock from '../../components/CodeBlock.astro';
+import Guide from '../../components/Guide.astro';
+import { expand, portsByGroup } from '../../data/ports';
+import { inlineMd } from '../../data/guide';
+import { flavors } from '../../data/palette';
+import { groupLede, previewCaption } from '../../data/content';
+
+export const getStaticPaths = (() =>
+  portsByGroup.map((g, i) => ({
+    params: { group: g.group },
+    props: { group: g, prev: portsByGroup[i - 1], next: portsByGroup[i + 1] },
+  }))) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+const { group, prev, next } = Astro.props as Props;
+const { label, items } = group;
+
+const tabbed = items.length > 1;
+const first = items[0]!.slug;
+
+const panels = await Promise.all(
+  items.map(async (p) => ({
+    port: p,
+    blurb: await inlineMd(p.blurb),
+    note: p.note ? await inlineMd(p.note) : undefined,
+  })),
+);
+
+// Slugs are validated against the repository name, so they are safe in a
+// selector: lowercase, no quotes.
+const tabsCss = tabbed
+  ? [
+      `[data-tabs]:not(:has(.tabs__tab:target)) .port:not([data-port="${first}"]){display:none}`,
+      ...items.map(
+        (p) => `[data-tabs]:has(#${p.slug}:target) .port:not([data-port="${p.slug}"]){display:none}`,
+      ),
+    ].join('')
+  : '';
+
+const names = items.map((p) => p.name);
+const list =
+  names.length === 1 ? names[0]! : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`;
+---
+
+<Base
+  title={label}
+  description={`SP Night for ${list} — where each file goes and how to switch it on.`}
+  ogImage={`/og-ports-${group.group}.png`}
+  ogImageAlt={`SP Night for ${label}: ${list}`}
+>
+  <p class="eyebrow">
+    <a href="/ports">ports</a> · {items.length} {items.length === 1 ? 'port' : 'ports'}
+  </p>
+  <h1>{label}</h1>
+  <p class="lede">{groupLede[group.group]}</p>
+
+  <div class="group" data-tabs={tabbed ? '' : undefined}>
+    {tabbed && <style is:inline set:html={tabsCss} />}
+
+    {
+      tabbed && (
+        <nav class="tabs" aria-label={`${label}: choose a port`}>
+          {items.map((p) => (
+            <a class="tabs__tab" id={p.slug} href={`#${p.slug}`}>
+              {p.name}
+            </a>
+          ))}
+        </nav>
+      )
+    }
+
+    {
+      panels.map(({ port: p, blurb, note }) => (
+        <section class="port" data-port={p.slug} aria-labelledby={`${p.slug}-name`}>
+          <header class="port__head">
+            <h2 id={`${p.slug}-name`}>{p.name}</h2>
+            <p class="port__blurb" set:html={blurb} />
+            <p class="port__links mono">
+              <a href={p.repo}>the repository ↗</a>
+              <a href={p.homepage}>{p.name} ↗</a>
+              <a href={`${p.repo}/blob/main/${p.template}`}>{p.template} ↗</a>
+            </p>
+          </header>
+
+          <figure class="port__shot">
+            {flavors.map((f) => (
+              <img
+                data-f={f.id}
+                src={`/previews/${p.slug}-${f.id}.svg`}
+                width="840"
+                height="462"
+                alt={`${p.name} themed with SP Night ${f.label}`}
+                loading={p.slug === first && f.id === flavors[0]!.id ? 'eager' : 'lazy'}
+              />
+            ))}
+            <figcaption class="muted">{previewCaption}</figcaption>
+          </figure>
+
+          <h3>Install</h3>
+          {flavors.map((f) => (
+            <CodeBlock flavor={f.id} label="the file goes here" code={expand(p.install, f.id, f.label)} />
+          ))}
+          {p.activate &&
+            flavors.map((f) => (
+              <CodeBlock flavor={f.id} label="then add this" code={expand(p.activate!, f.id, f.label)} />
+            ))}
+          <p class="muted port__follow">
+            Those are the paths for the flavour selected in the header — switch it and they follow.
+          </p>
+
+          {note && <aside class="callout" data-kind="note" set:html={note} />}
+
+          <Guide markdown={p.install_guide} />
+
+          <p class="port__more">
+            <a href={`${p.repo}#what-gets-themed`}>Which {p.name} key gets which role ↗</a>
+          </p>
+        </section>
+      ))
+    }
+  </div>
+
+  <nav class="group-nav mono" aria-label="Other groups">
+    {prev ? <a href={`/ports/${prev.group}`}>← {prev.label}</a> : <span />}
+    <a href="/ports">all ports</a>
+    {next ? <a href={`/ports/${next.group}`}>{next.label} →</a> : <span />}
+  </nav>
+</Base>
+
+<style>
+  .group {
+    margin-top: 2.5rem;
+  }
+
+  /* The strip itself is the .tabs primitive in global.css. */
+  .tabs {
+    padding-bottom: 1.25rem;
+    border-bottom: var(--border);
+  }
+
+  /* ----------------------------------------------------------------- panel */
+
+  .port {
+    padding-top: 1.75rem;
+  }
+
+  .port + .port {
+    margin-top: 3rem;
+  }
+
+  .port__head h2 {
+    margin: 0;
+    font-size: var(--step-2);
+  }
+
+  .port__blurb {
+    margin: 0.4rem 0 0;
+    max-width: var(--measure);
+    color: var(--sp-fg-dim);
+  }
+
+  .port__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.2rem;
+    font-size: var(--step--1);
+    margin: 0.9rem 0 0;
+  }
+
+  .port__shot {
+    margin: 1.75rem 0 2.5rem;
+  }
+
+  .port__shot img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: var(--border);
+    border-radius: var(--radius);
+    background: var(--sp-vao);
+  }
+
+  .port__shot figcaption {
+    font-size: var(--step--1);
+    margin-top: 0.7rem;
+  }
+
+  .port h3 {
+    font-size: var(--step-1);
+    padding-top: 0.6rem;
+    border-top: var(--border);
+  }
+
+  .port__follow {
+    font-size: var(--step--1);
+  }
+
+  .port__more {
+    margin-top: 2rem;
+    font-size: var(--step--1);
+  }
+
+  /* -------------------------------------------------------------- group nav */
+
+  .group-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: var(--step--1);
+    margin-top: 3.5rem;
+    padding-top: 1.5rem;
+    border-top: var(--border);
+  }
+</style>

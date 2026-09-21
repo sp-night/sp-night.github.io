@@ -27,7 +27,7 @@ src/data/        o contrato vendorizado e os módulos que o leem
   content.ts     texto editorial: glosas, manchetes do hero, sceneAccent, preview da home
   ports.ts, preview.ts, guide.ts   catálogo de ports, previews sintéticos, guias de instalação
 src/components/  Skyline (as três cenas), FlavorSwitcher, ColorCard, TerminalMock, Wire, Logo…
-src/pages/       home, palette, spec, ports (+ uma página por port), contribute, 404, [kit]
+src/pages/       home, palette, spec, ports (+ uma página por grupo, abas por port), contribute, 404, [kit]
 src/scripts/     copy.ts (copiar hex/snippet), motion.ts (parallax, reveal, pausa da cena, índice)
 src/lib/mark.mjs a marca — usada pelo Logo e pelo gerador de assets
 scripts/         gen-assets.mjs, fonts.mjs, gen-contributors.mjs
@@ -41,7 +41,13 @@ tests/           guardas do contrato, dos ports, do README e do próprio site
 - **Zero hex fora de `src/data`.** Toda cor é `var(--sp-*)`, gerada por `flavorStylesheet()`
   (`tests/no-raw-hex.test.ts` cobra).
 - Nada é afirmado se pode ser derivado: contagens, pisos de contraste e tabelas saem dos dados.
-- O site lista só ports publicados; cada página de port é gerada do catálogo.
+- O site lista só ports publicados. A página é por **grupo** do catálogo (`/ports/<group>`),
+  com uma aba por port: preview, onde o arquivo vai, como ativar, o guia. Qual chave vira
+  qual role fica no README do port, gerado do mesmo catálogo — o site não repete.
+  `/ports/<slug>` redireciona para a aba (`astro.config.mjs`, gerado do catálogo).
+- O preview de cada port é o SVG que o motor desenha (`public/previews/`), numa moldura por
+  tipo de app (`preview.frame`: terminal, editor, app, pane). O `TerminalMock` do site só
+  desenha a moldura `terminal`, que é a única que a home usa.
 
 **Flavors**
 - `data-flavor` no `<html>` escolhe o bloco de variáveis. Texto que muda por flavor é
@@ -84,6 +90,8 @@ tests/           guardas do contrato, dos ports, do README e do próprio site
 | 8 | 2026-09-21 | tipografia própria; o hero vira uma vista, com manchete por flavor |
 | 9 | 2026-09-21 | paleta como galeria, duas colunas, fiação, consistência de cor/hover/raio, testes |
 | 10 | 2026-09-21 | cards OG com as fontes e manchetes do site; reveal por scroll só com CSS |
+| 11 | 2026-09-21 | previews com moldura por tipo de app: editor, app e pane além do terminal |
+| 12 | 2026-09-21 | uma página por grupo com abas por port; tabela de roles e procedência só no README |
 
 ## Pendências
 
