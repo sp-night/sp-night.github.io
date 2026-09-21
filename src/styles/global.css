@@ -16,7 +16,10 @@
   --step-3: clamp(2.4rem, 1.8rem + 2.6vw, 4rem);
 
   --gutter: clamp(1rem, 0.6rem + 2vw, 2.5rem);
-  --measure: 68ch;
+  /* 52ch, not 68: Bricolage's zero — the glyph `ch` measures — is wide for the
+     face, so 68ch let the home lede run to 84 characters a line. 52ch lands
+     around 70, which is where reading stops being work. */
+  --measure: 52ch;
   --wide: 1180px;
   --radius: 10px;
   --border: 1px solid var(--sp-fiacao);
@@ -161,7 +164,8 @@ hr {
   scroll-margin-top: 5rem;
 }
 
-@media (max-width: 34rem) {
+/* The header grows to two rows at the same width the switcher moves down. */
+@media (max-width: 50rem) {
   [id] {
     scroll-margin-top: 7rem;
   }
@@ -423,10 +427,32 @@ hr {
   flex: none;
 }
 
-/* Below ~44rem one header row cannot hold brand + nav + switcher, so the
-   switcher moves to a second row: two rows of chrome instead of three. The
-   pill is capped so it reads as a control, not a banner. */
-@media (max-width: 44rem) {
+/* Between ~50rem and ~66rem one row holds brand + nav + switcher only if the
+   switcher gives up the full names. Without this the nav wrapped under itself
+   at tablet widths and "contribute" sat alone on a second line. The short ids
+   are the same ones the phone layout already uses. */
+@media (max-width: 66rem) {
+  .flavors button .flavor-name {
+    display: none;
+  }
+
+  .flavors button .flavor-id {
+    display: inline;
+  }
+
+  .gh span {
+    display: none;
+  }
+
+  .gh {
+    padding: 0.35rem 0.55rem;
+  }
+}
+
+/* Below ~50rem even that does not fit, so the switcher moves to a second row:
+   two rows of chrome instead of three. The pill is capped so it reads as a
+   control, not a banner. */
+@media (max-width: 50rem) {
   .site-header__inner {
     gap: 1rem;
     row-gap: 0.4rem;
@@ -453,11 +479,6 @@ hr {
     flex: 1;
   }
 
-  /* The word goes; the mark still reads. */
-  .gh span {
-    display: none;
-  }
-
   .gh {
     padding: 0.45rem 0.6rem;
   }
@@ -469,17 +490,8 @@ hr {
   }
 }
 
-/* Narrow phones: the full names no longer fit three abreast — swap each for
-   its short id. (Three identical dots would not do: sodio is shared.) */
+/* Narrow phones: bigger touch targets for the three short ids. */
 @media (max-width: 34rem) {
-  .flavors button .flavor-name {
-    display: none;
-  }
-
-  .flavors button .flavor-id {
-    display: inline;
-  }
-
   .flavors button {
     padding: 0.5rem 0.6rem;
   }

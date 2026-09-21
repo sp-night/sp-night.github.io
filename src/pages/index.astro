@@ -231,7 +231,9 @@ const facts = [
     /* Wide enough that each line of the headline stays on its own line —
        "is a field of lights." is 21 characters. */
     max-width: 24ch;
-    font-size: clamp(2.6rem, 1.6rem + 4vw, 5rem);
+    /* The floor is set by the longest lit line on a 390px phone: "turns the
+       whole city" has to stay one line, or the lamp lights half a sentence. */
+    font-size: clamp(2.05rem, 0.95rem + 4.5vw, 5rem);
     line-height: 1.02;
     letter-spacing: -0.03em;
   }
