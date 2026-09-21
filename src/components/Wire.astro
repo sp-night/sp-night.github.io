@@ -1,105 +1,204 @@
 ---
 /**
- * Overhead wiring as a divider — `fiacao` is the palette's name for borders
- * because the wires cutting across São Paulo's sky are what divide it.
+ * Overhead wiring above the footer — `fiacao` is the palette's name for
+ * borders because the wires cutting across São Paulo's sky are what divide it.
  *
- * Two or three cables hung between poles off either edge of the page, each
- * with its own sag, the lower one a little heavier. The SVG stretches to the
- * full width (preserveAspectRatio none), and non-scaling strokes keep the
- * cables one pixel wide however wide the screen is.
+ * A span between two poles standing at the edges of the content: two power
+ * lines on stacked crossarms and, lower and heavier, the telecom bundle every
+ * street in the city has, with the spare cable coiled near a pole. A pigeon
+ * sits on the top line.
  *
- * `seed` varies the sag, so two wires on the same page are not identical.
+ * The first version stretched three bare curves across the whole window and
+ * hung them on the seam between two sections. Without poles nothing said
+ * "wire", and on a wide screen the sag flattened into what looked like a
+ * rendering fault. Here the span ends at poles, and the sag is in pixels: the
+ * svg stretches only sideways (preserveAspectRatio none, fixed height), so a
+ * wider screen gives a longer span, never a shallower one.
  */
-interface Props {
-  seed?: number;
-  /** Above the footer: takes its own room instead of straddling a boundary. */
-  edge?: boolean;
-  class?: string;
-}
-const { seed = 0, edge = false, class: className } = Astro.props;
 
-const sag = [34, 40, 30, 44][seed % 4]!;
-const drop = [5, 3, 7, 4][seed % 4]!;
+/* Each cable: where it leaves the crossarm (y0) and how far it sags (S), in
+   px. A quadratic from (0, y0) through (500, y0 + 2S) to (1000, y0) sags by
+   exactly S at the middle, and x is linear in t — so anything sitting on a
+   cable can be placed with y(t) = y0 + 4·S·t·(1 − t). */
 const cables = [
-  { y: 6, sag, w: 1.1, o: 0.95 },
-  { y: 6 + drop, sag: sag + 6, w: 1.6, o: 0.8 },
-  { y: 3, sag: sag - 9, w: 0.8, o: 0.55 },
+  { y0: 10, S: 26, w: 1.1, kind: 'power' },
+  { y0: 22, S: 24, w: 1.1, kind: 'power' },
+  { y0: 34, S: 30, w: 2.6, kind: 'telecom' },
 ];
-// Asymmetric control points: the lowest point is off-centre, the way a real
-// span sags when the poles are not the same height.
-const path = (c: (typeof cables)[number]) =>
-  `M-20 ${c.y} C ${300 + seed * 40} ${c.y + c.sag}, ${820 + seed * 30} ${c.y + c.sag}, 1220 ${c.y + 2}`;
+const onCable = (c: (typeof cables)[number], t: number) => c.y0 + 4 * c.S * t * (1 - t);
+
+const pigeon = { t: 0.34, y: onCable(cables[0]!, 0.34) };
+const coil = { t: 0.9, y: onCable(cables[2]!, 0.9) };
 ---
 
-<div class:list={['wire', edge && 'wire--edge', className]} aria-hidden="true">
-  <svg viewBox="0 0 1200 64" preserveAspectRatio="none">
+<div class="wrap wire" aria-hidden="true">
+  <svg class="wire__cables" viewBox="0 0 1000 72" preserveAspectRatio="none">
     {
       cables.map((c) => (
         <path
-          d={path(c)}
-          fill="none"
-          stroke="var(--sp-fiacao)"
+          class={`wire__cable wire__cable--${c.kind}`}
+          d={`M0 ${c.y0} Q 500 ${c.y0 + 2 * c.S} 1000 ${c.y0}`}
           stroke-width={c.w}
-          stroke-opacity={c.o}
           vector-effect="non-scaling-stroke"
         />
       ))
     }
+  </svg>
+
+  {
+    ['l', 'r'].map((side) => (
+      <svg class={`wire__pole wire__pole--${side}`} viewBox="0 0 40 120">
+        {/* the concrete pole, fading out below */}
+        <rect class="wire__post" x="17.5" y="0" width="5" height="120" rx="1.5" />
+        {/* two crossarms, the upper one wider, each with its insulators */}
+        <rect class="wire__arm" x="4" y="9" width="32" height="2.4" rx="1" />
+        <rect class="wire__arm" x="8" y="21" width="24" height="2.4" rx="1" />
+        <g class="wire__insulator">
+          <rect x="5" y="5.5" width="3" height="4" rx="1" />
+          <rect x="32" y="5.5" width="3" height="4" rx="1" />
+          <rect x="9" y="17.5" width="3" height="4" rx="1" />
+          <rect x="28" y="17.5" width="3" height="4" rx="1" />
+        </g>
+        {/* the clamp the telecom bundle hangs from */}
+        <rect class="wire__arm" x="15" y="33" width="10" height="3" rx="1" />
+      </svg>
+    ))
+  }
+
+  {/* the spare telecom cable, coiled and hung near the pole */}
+  <svg class="wire__coil" viewBox="0 0 20 24" style={`left: ${coil.t * 100}%; top: ${coil.y}px`}>
+    <ellipse cx="10" cy="12" rx="7" ry="9" />
+    <ellipse cx="10" cy="13" rx="5.5" ry="7.5" />
+  </svg>
+
+  {/* a pigeon on the top line */}
+  <svg class="wire__pigeon" viewBox="0 0 18 13" style={`left: ${pigeon.t * 100}%; top: ${pigeon.y}px`}>
+    <path d="M2 9 C 3 5, 7 3.5, 11 4.5 C 13 5, 14 6.5, 13.5 8.5 C 12 10.5, 6 11, 2 9 Z" />
+    <path d="M1 8.5 L -1.5 9.5 L 1.5 10 Z" />
+    <g class="wire__head">
+      <circle cx="13.6" cy="3.4" r="2.1" />
+      <path d="M15.4 3.2 L 17 3.8 L 15.4 4.2 Z" />
+    </g>
   </svg>
 </div>
 
 <style>
   .wire {
     position: relative;
-    z-index: 1;
-    height: 4rem;
-    /* Hung across the boundary between two sections, half on each. */
-    margin-block: -2rem;
+    /* In px, like the cables: the svg maps its 72 units onto exactly this. */
+    height: 72px;
+    margin-top: 3rem;
     pointer-events: none;
   }
 
-  .wire--edge {
-    margin-block: 1rem -2rem;
-  }
-
-  /* The cables start off either edge, so the svg clips them: left visible,
-     the overflow widened the document and painted a strip past the page. */
-  .wire svg {
+  .wire__cables {
     display: block;
     width: 100%;
     height: 100%;
-    overflow: hidden;
+    overflow: visible;
   }
 
-  /* A wire in the wind: the sag breathes, very slowly. */
-  .wire path {
-    transform-origin: 50% 0;
-    transform-box: view-box;
-    animation: wire-sway 9s ease-in-out infinite alternate;
+  /* Wiring is fiacao, lifted a little toward the muted text so it reads as a
+     line against vao without becoming an accent. */
+  .wire__cable {
+    fill: none;
+    stroke: color-mix(in oklab, var(--sp-fiacao) 70%, var(--sp-fg-muted));
     transition: stroke var(--sp-retint) ease;
   }
 
-  .wire path:nth-child(2) {
-    animation-duration: 11s;
-    animation-delay: -3s;
+  .wire__cable--telecom {
+    stroke: var(--sp-fiacao);
   }
 
-  .wire path:nth-child(3) {
-    animation-duration: 7.5s;
-    animation-delay: -5s;
+  /* Poles stand centred on the edges of the content, so the span is exactly
+     the page's measure of width. They fade into the footer below. */
+  /* 1 unit of the pole's viewBox is 1px, and it starts at the top of the
+     span, so the crossarms (y 10 and 22) and the clamp (y 34) sit exactly
+     where the cables leave them. */
+  .wire__pole {
+    position: absolute;
+    top: 0;
+    width: 40px;
+    height: 120px;
+    overflow: visible;
+    -webkit-mask-image: linear-gradient(to bottom, black 45%, transparent);
+    mask-image: linear-gradient(to bottom, black 45%, transparent);
   }
 
-  @keyframes wire-sway {
-    from {
-      transform: scaleY(0.94);
+  .wire__pole--l {
+    left: 0;
+    transform: translateX(-50%);
+  }
+
+  .wire__pole--r {
+    right: 0;
+    transform: translateX(50%);
+  }
+
+  .wire__post,
+  .wire__arm {
+    fill: var(--sp-concreto);
+    stroke: color-mix(in oklab, var(--sp-fiacao) 80%, transparent);
+    stroke-width: 0.6;
+  }
+
+  .wire__insulator {
+    fill: var(--sp-fg-muted);
+    opacity: 0.55;
+  }
+
+  .wire__coil {
+    position: absolute;
+    width: 1rem;
+    height: 1.2rem;
+    transform: translate(-50%, -2px);
+    fill: none;
+    stroke: var(--sp-fiacao);
+    stroke-width: 1.6;
+  }
+
+  .wire__pigeon {
+    position: absolute;
+    width: 1.15rem;
+    height: 0.85rem;
+    /* Feet on the line: the body's lowest point sits on the cable. */
+    transform: translate(-50%, calc(-100% + 2px));
+    fill: color-mix(in oklab, var(--sp-fg-muted) 75%, var(--sp-fiacao));
+    overflow: visible;
+  }
+
+  /* Now and then it looks around. */
+  .wire__head {
+    transform-box: fill-box;
+    transform-origin: 30% 80%;
+    animation: pigeon 7s ease-in-out infinite;
+  }
+
+  @keyframes pigeon {
+    0%,
+    78%,
+    100% {
+      transform: none;
     }
-    to {
-      transform: scaleY(1.06);
+    82%,
+    88% {
+      transform: rotate(-14deg) translateY(-0.4px);
+    }
+    92% {
+      transform: rotate(8deg);
+    }
+  }
+
+  /* A short span on a phone: the wiring stays, the details go. */
+  @media (max-width: 34rem) {
+    .wire__coil,
+    .wire__pigeon {
+      display: none;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .wire path {
+    .wire__head {
       animation: none;
     }
   }
