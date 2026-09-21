@@ -83,6 +83,15 @@ html.is-swapping {
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  /* Scrollbars in the palette, on the page and on every scroller in it. On
+     Linux the default horizontal bar under a long install path was a white
+     stripe across a dark page. Inherited, and retints with the flavour. */
+  scrollbar-color: var(--sp-fiacao) transparent;
+}
+
+pre,
+.table-scroll {
+  scrollbar-width: thin;
 }
 
 body {
