@@ -13,16 +13,15 @@ const sample = perFlavor[0]!.color;
 const cssVar = `--sp-${colorKey.replace(/_/g, '-')}`;
 
 /* The name is set on the swatch itself, in whichever of the flavour's darkest
-   surface or its text colour reads better on it — decided per flavour at
-   build time, exposed as --on-<flavour>, picked by a rule palette.astro emits. */
-const onVars = perFlavor
-  .map(({ flavor, color }) => {
-    const f = flavors.find((x) => x.id === flavor)!;
-    const dark = contrast(color.hex, f.colors.vao!.hex);
-    const light = contrast(color.hex, f.colors.fg_vivo!.hex);
-    return `--on-${flavor}: var(${dark >= light ? '--sp-vao' : '--sp-fg-vivo'})`;
-  })
-  .join('; ');
+   surface or its brightest text reads better on it — decided per flavour at
+   build time, and rendered once per flavour behind data-f, so the card needs
+   no rule from the page it sits on. */
+const inkFor = (flavor: string, hex: string) => {
+  const f = flavors.find((x) => x.id === flavor)!;
+  const dark = contrast(hex, f.colors.vao!.hex);
+  const light = contrast(hex, f.colors.fg_vivo!.hex);
+  return dark >= light ? 'var(--sp-vao)' : 'var(--sp-fg-vivo)';
+};
 
 /* Surfaces measured against surfaces say nothing, so the contrast bars are
    for the colours that are read: text, accents and their bright pairs. */
@@ -38,10 +37,16 @@ const pct = (n: number) => `${Math.min(100, (n / SCALE) * 100).toFixed(1)}%`;
   type="button"
   data-copy-var={cssVar}
   aria-label={`Copy ${colorKey} hex value`}
-  style={`--i: ${index}; ${onVars}`}
+  style={`--i: ${index}`}
 >
   <span class="color__swatch" style={`background: var(${cssVar})`}>
-    <span class="color__name mono">{colorKey}</span>
+    {
+      perFlavor.map(({ flavor, color }) => (
+        <span class="color__name mono" data-f={flavor} style={`color: ${inkFor(flavor, color.hex)}`}>
+          {colorKey}
+        </span>
+      ))
+    }
     <span class="color__copied mono" aria-hidden="true">copied</span>
   </span>
 
@@ -52,7 +57,7 @@ const pct = (n: number) => `${Math.min(100, (n / SCALE) * 100).toFixed(1)}%`;
     <span class="color__hexes mono">
       {
         perFlavor.map(({ flavor, color }) => (
-          <span class="color__hex" data-hex={flavor}>
+          <span class="color__hex" data-lit={flavor}>
             <i style={`background: ${color.hex}`} />
             {color.hex}
           </span>
@@ -116,7 +121,6 @@ const pct = (n: number) => `${Math.min(100, (n / SCALE) * 100).toFixed(1)}%`;
   .color:hover {
     border-color: var(--sp-fg-muted);
     transform: translateY(-2px);
-    box-shadow: 0 16px 34px -24px var(--sp-vao);
   }
 
   .color:active {
@@ -133,12 +137,11 @@ const pct = (n: number) => `${Math.min(100, (n / SCALE) * 100).toFixed(1)}%`;
     gap: 0.5rem;
     height: 5.5rem;
     padding: 0.6rem 0.8rem;
-    color: var(--on, var(--sp-fg));
     box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--sp-vao) 35%, transparent);
     /* The colour follows the switcher in a wave down the page, one card after
        the next; the hover stays immediate. */
     transition: background-color var(--sp-retint) ease calc(var(--i, 0) * 22ms),
-      color var(--sp-retint) ease calc(var(--i, 0) * 22ms), height 0.3s var(--sp-ease);
+      height 0.3s var(--sp-ease);
   }
 
   .color:hover .color__swatch {
@@ -222,7 +225,7 @@ const pct = (n: number) => `${Math.min(100, (n / SCALE) * 100).toFixed(1)}%`;
   .color__hex i {
     width: 0.6rem;
     height: 0.6rem;
-    border-radius: 2px;
+    border-radius: var(--r-xs);
     box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--sp-fg) 14%, transparent);
   }
 
@@ -255,14 +258,14 @@ const pct = (n: number) => `${Math.min(100, (n / SCALE) * 100).toFixed(1)}%`;
   .bar__track {
     position: relative;
     height: 5px;
-    border-radius: 3px;
+    border-radius: var(--r-xs);
     background: var(--sp-concreto);
   }
 
   .bar__fill {
     position: absolute;
     inset: 0 auto 0 0;
-    border-radius: 3px;
+    border-radius: var(--r-xs);
     transition: width 0.5s var(--sp-ease), background-color var(--sp-retint) ease;
   }
 

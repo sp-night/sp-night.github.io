@@ -395,5 +395,11 @@ export function flavorStylesheet(): string {
     .map((f) => `:root[data-flavor="${f.id}"] [data-f]:not([data-f="${f.id}"]) { display: none; }`)
     .join('\n  ');
 
-  return `${vars}\n  ${visibility}`;
+  // The companion to data-f for text that stays visible in every flavour but
+  // should be lit in its own — the three hex values on a colour card.
+  const lit = flavors
+    .map((f) => `:root[data-flavor="${f.id}"] [data-lit="${f.id}"] { color: var(--sp-fg); }`)
+    .join('\n  ');
+
+  return `${vars}\n  ${visibility}\n  ${lit}`;
 }

@@ -218,7 +218,7 @@ const example = [
 
   /* The contract box in the aside: the one thing on the page a port reads. */
   .doc__box--lit {
-    border-left: 3px solid var(--sp-sodio);
+    border-left: 3px solid var(--sp-marginal);
   }
 
   .steps {
@@ -242,8 +242,8 @@ const example = [
     display: grid;
     place-items: center;
     border-radius: 50%;
-    border: 1px solid var(--sp-sodio);
-    color: var(--sp-sodio);
+    border: 1px solid var(--sp-fg-muted);
+    color: var(--sp-fg);
     font-size: var(--step--1);
   }
 
@@ -278,7 +278,7 @@ const example = [
     padding: 0.85rem 1rem;
     background: var(--sp-vao);
     border: var(--border);
-    border-radius: 8px;
+    border-radius: var(--r-s);
     font-size: var(--step--1);
     line-height: 1.7;
     overflow-x: auto;
@@ -311,7 +311,7 @@ const example = [
   }
 
   .repos li {
-    padding: 1rem 1.1rem;
+    padding: var(--pad-card);
     background: var(--sp-laje);
     border: var(--border);
     border-radius: var(--radius);

@@ -21,7 +21,25 @@
      around 70, which is where reading stops being work. */
   --measure: 52ch;
   --wide: 1180px;
-  --radius: 10px;
+  /* Four radii, not nine: a hairline for chips and bars, small for controls,
+     medium for anything that holds content, and the pill. */
+  --r-xs: 3px;
+  --r-s: 6px;
+  --r-m: 10px;
+  --r-pill: 999px;
+  --radius: var(--r-m);
+
+  /* Spacing on one scale. Cards take --pad-card; the compact lists (ports,
+     ansi) take --pad-tight, so a long list stays a list. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2.5rem;
+  --pad-card: var(--space-4) 1.1rem;
+  --pad-tight: 0.8rem var(--space-4);
+
   --border: 1px solid var(--sp-fiacao);
 
   /* Motion tokens. `--sp-retint` is how long a colour takes to follow the
@@ -32,8 +50,14 @@
   --sp-retint: 0.5s;
   --sp-scene: 0.55s;
 
-  /* The lamp somewhere off-frame that warms the top of the home page. Sodium
-     by default; the drizzle cools it, and the peak turns it to the forest. */
+  /* Two jobs, two colours, on every page:
+     - sodio is ACTION — the primary button, the focus ring. Nothing else.
+     - --sp-glow is STATE — "you are here": the current nav item, the checked
+       filter, the section being read, the flavour on screen. It is the
+       scene's own colour: sodium in noite, the drizzle's blue-grey in garoa,
+       the forest green on the peak. The hero's lit line is the same idea.
+     Labels, numbers and ornaments are text colours. When everything was
+     orange, nothing was. */
   --sp-glow: var(--sp-sodio);
 }
 
@@ -67,6 +91,9 @@ body {
   color: var(--sp-fg);
   font-family: var(--font-sans);
   font-size: var(--step-0);
+  /* Bricolage at 400 is thin on a dark ground; a touch more weight reads as
+     the regular it is meant to be. */
+  font-weight: 430;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   transition: background-color var(--sp-retint) ease, color var(--sp-retint) ease;
@@ -81,6 +108,14 @@ h4 {
   margin: 0 0 0.5em;
   font-weight: 700;
   text-wrap: balance;
+}
+
+/* The tight setting is for display sizes. At h3 and below the same -0.025em
+   and 1.1 crowded two-line headings in the steps and the spec. */
+h3,
+h4 {
+  line-height: 1.25;
+  letter-spacing: -0.012em;
 }
 
 h1 {
@@ -123,7 +158,7 @@ samp {
 :where(p, li, td) > code {
   background: var(--sp-concreto);
   border: var(--border);
-  border-radius: 5px;
+  border-radius: var(--r-s);
   padding: 0.1em 0.36em;
 }
 
@@ -136,7 +171,7 @@ hr {
 :focus-visible {
   outline: 2px solid var(--sp-sodio);
   outline-offset: 2px;
-  border-radius: 3px;
+  border-radius: var(--r-xs);
 }
 
 ::selection {
@@ -176,8 +211,8 @@ hr {
   font-size: var(--step--1);
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--sp-sodio);
-  margin-bottom: 0.75rem;
+  color: var(--sp-fg-dim);
+  margin-bottom: var(--space-3);
 }
 
 .lede {
@@ -226,7 +261,7 @@ hr {
 }
 
 .brand svg {
-  border-radius: 6px;
+  border-radius: var(--r-s);
   box-shadow: 0 0 0 1px color-mix(in oklab, var(--sp-fiacao) 70%, transparent);
 }
 
@@ -284,7 +319,7 @@ hr {
   bottom: -3px;
   height: 2px;
   border-radius: 1px;
-  background: var(--sp-sodio);
+  background: var(--sp-glow);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.28s var(--sp-ease), background-color var(--sp-retint) ease;
@@ -313,7 +348,7 @@ hr {
   padding: 2px;
   background: var(--sp-concreto);
   border: var(--border);
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease;
 }
 
@@ -329,7 +364,7 @@ hr {
   width: var(--w, 0px);
   transform: translateX(var(--x, 0px));
   background: var(--sp-vidro);
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   box-shadow: 0 1px 0 color-mix(in oklab, var(--sp-fg) 6%, transparent) inset,
     0 4px 14px -8px var(--sp-vao);
   opacity: 0;
@@ -350,7 +385,7 @@ hr {
   font-family: var(--font-mono);
   font-size: var(--step--1);
   padding: 0.3rem 0.75rem;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -437,7 +472,7 @@ hr {
   color: var(--sp-fg-dim);
   background: var(--sp-concreto);
   border: var(--border);
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   text-decoration: none;
   white-space: nowrap;
   transition: color 0.25s ease, border-color 0.25s ease, background-color var(--sp-retint) ease,
@@ -445,9 +480,9 @@ hr {
 }
 
 .gh:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
   color: var(--sp-fg);
-  border-color: var(--sp-sodio);
+  border-color: var(--sp-fg-muted);
 }
 
 .gh svg {
@@ -602,7 +637,7 @@ hr {
   background: var(--sp-laje);
   border: var(--border);
   border-radius: var(--radius);
-  padding: 1.1rem 1.25rem;
+  padding: var(--pad-card);
   transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease;
 }
 
@@ -612,7 +647,7 @@ hr {
   color: var(--sp-fg-dim);
   background: var(--sp-concreto);
   border: var(--border);
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   padding: 0.15rem 0.6rem;
   transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease,
     color var(--sp-retint) ease;
@@ -625,7 +660,7 @@ hr {
   font-family: var(--font-mono);
   font-size: var(--step--1);
   padding: 0.55rem 1.1rem;
-  border-radius: 8px;
+  border-radius: var(--r-s);
   border: var(--border);
   background: var(--sp-concreto);
   color: var(--sp-fg);
@@ -635,11 +670,12 @@ hr {
     transform 0.2s var(--sp-ease), box-shadow 0.2s ease;
 }
 
+/* One hover language for everything that lifts: two pixels up, and the
+   border steps from fiacao to fg-muted. Only the primary button casts light. */
 .btn:hover {
-  border-color: var(--sp-sodio);
+  border-color: var(--sp-fg-muted);
   color: var(--sp-fg);
   transform: translateY(-2px);
-  box-shadow: 0 10px 24px -14px var(--sp-sodio);
 }
 
 .btn:active {
@@ -845,7 +881,7 @@ hr {
 }
 
 .doc__box {
-  padding: 0.9rem 1rem;
+  padding: var(--pad-card);
   background: var(--sp-laje);
   border: var(--border);
   border-radius: var(--radius);
@@ -898,7 +934,7 @@ hr {
 
 .doc__toc a[aria-current='location'] {
   color: var(--sp-fg);
-  border-left-color: var(--sp-sodio);
+  border-left-color: var(--sp-glow);
   padding-left: 1rem;
 }
 
@@ -913,7 +949,7 @@ hr {
   .doc__toc a[aria-current='location'] {
     padding: 0.15rem 0.6rem;
     border: var(--border);
-    border-radius: 999px;
+    border-radius: var(--r-pill);
     font-family: var(--font-mono);
     font-size: 0.74rem;
   }
@@ -1015,10 +1051,10 @@ td {
 /* GitHub's alert syntax, turned into an aside by remarkAlerts. */
 .callout {
   margin: 1.2rem 0;
-  padding: 0.8rem 1rem;
+  padding: var(--pad-card);
   background: var(--sp-concreto);
   border: var(--border);
-  border-left: 3px solid var(--sp-sodio);
+  border-left: 3px solid var(--sp-marginal);
   border-radius: var(--radius);
   transition: background-color var(--sp-retint) ease, border-color var(--sp-retint) ease;
 }
@@ -1038,7 +1074,7 @@ td {
   font-size: 0.68rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--sp-sodio);
+  color: var(--sp-marginal);
   margin-bottom: 0.35rem;
 }
 

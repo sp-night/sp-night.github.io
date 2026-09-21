@@ -143,7 +143,7 @@ const filterCss = portsByGroup
     color: var(--sp-fg-dim);
     background: var(--sp-concreto);
     border: var(--border);
-    border-radius: 999px;
+    border-radius: var(--r-pill);
     padding: 0.3rem 0.75rem;
     cursor: pointer;
     transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
@@ -151,13 +151,13 @@ const filterCss = portsByGroup
 
   .filter label:hover {
     color: var(--sp-fg);
-    border-color: color-mix(in oklab, var(--sp-sodio) 40%, var(--sp-fiacao));
+    border-color: var(--sp-fg-muted);
   }
 
   .filter input:checked + label {
-    color: var(--sp-sodio);
-    border-color: color-mix(in oklab, var(--sp-sodio) 55%, var(--sp-fiacao));
-    background: color-mix(in oklab, var(--sp-sodio) 10%, var(--sp-concreto));
+    color: var(--sp-fg);
+    border-color: color-mix(in oklab, var(--sp-glow) 60%, var(--sp-fiacao));
+    background: color-mix(in oklab, var(--sp-glow) 12%, var(--sp-concreto));
   }
 
   .filter input:focus-visible + label {
@@ -192,7 +192,7 @@ const filterCss = portsByGroup
   }
 
   .group__count {
-    color: var(--sp-sodio);
+    color: var(--sp-fg-dim);
     font-weight: 400;
   }
 
@@ -218,24 +218,17 @@ const filterCss = portsByGroup
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
-    padding: 0.85rem 1rem;
+    padding: var(--pad-tight);
     border: var(--border);
-    border-color: color-mix(in oklab, var(--sp-sodio) 40%, var(--sp-fiacao));
     border-radius: var(--radius);
-    background: linear-gradient(
-        160deg,
-        color-mix(in oklab, var(--sp-sodio) 6%, transparent),
-        transparent 45%
-      ),
-      var(--sp-laje);
-    transition: border-color 0.25s ease, transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1),
-      box-shadow 0.25s ease, background-color 0.45s ease;
+    background: var(--sp-laje);
+    transition: border-color 0.2s ease, transform 0.25s var(--sp-ease),
+      background-color var(--sp-retint) ease;
   }
 
   .port:hover {
-    border-color: color-mix(in oklab, var(--sp-sodio) 45%, var(--sp-fiacao));
-    transform: translateY(-3px);
-    box-shadow: 0 14px 30px -18px color-mix(in oklab, var(--sp-sodio) 55%, transparent);
+    border-color: var(--sp-fg-muted);
+    transform: translateY(-2px);
   }
 
   .port:focus-within {
@@ -281,7 +274,7 @@ const filterCss = portsByGroup
     color: var(--sp-fg-muted);
     background: var(--sp-concreto);
     border: var(--border);
-    border-radius: 999px;
+    border-radius: var(--r-pill);
     padding: 0.14rem 0.6rem;
     white-space: nowrap;
   }
@@ -290,14 +283,21 @@ const filterCss = portsByGroup
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    color: var(--sp-sodio);
-    border-color: color-mix(in oklab, var(--sp-sodio) 45%, var(--sp-fiacao));
+    color: var(--sp-marginal);
+    border-color: color-mix(in oklab, var(--sp-marginal) 40%, var(--sp-fiacao));
     text-decoration: none;
   }
 
   .port__status--live:hover {
-    color: var(--sp-taxi);
-    border-color: var(--sp-sodio);
+    color: var(--sp-marginal-vivo);
+    border-color: var(--sp-marginal);
+  }
+
+  /* Live means installable: the lamp is the green of a go light, whatever
+     colour the link around it is. */
+  .port__status--live .port__lamp {
+    background: var(--sp-ibira);
+    box-shadow: 0 0 7px var(--sp-ibira);
   }
 
   .port__lamp {
@@ -317,7 +317,7 @@ const filterCss = portsByGroup
 
   .port__strip span {
     flex: 1;
-    border-radius: 2px;
+    border-radius: var(--r-xs);
     transform-origin: bottom;
     transition: background-color var(--sp-retint) ease calc(var(--i, 0) * 20ms),
       transform 0.3s var(--sp-ease);
@@ -339,7 +339,7 @@ const filterCss = portsByGroup
     font-size: 0.76rem;
     line-height: 1.5;
     color: var(--sp-fg-muted);
-    border-left: 2px solid color-mix(in oklab, var(--sp-sodio) 40%, transparent);
+    border-left: 2px solid var(--sp-fiacao);
     padding-left: 0.6rem;
   }
 

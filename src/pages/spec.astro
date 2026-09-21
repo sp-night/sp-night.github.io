@@ -443,16 +443,16 @@ const glossary = [
   }
 
   .layers li {
-    padding: 0.8rem 1rem;
+    padding: var(--pad-card);
     background: var(--sp-laje);
     border: var(--border);
-    border-left: 3px solid var(--sp-sodio);
-    border-radius: 8px;
+    border-left: 3px solid var(--sp-marginal);
+    border-radius: var(--r-s);
   }
 
   .layers strong {
     display: block;
-    color: var(--sp-sodio);
+    color: var(--sp-fg);
     font-size: var(--step--1);
     margin-bottom: 0.2rem;
   }
@@ -467,7 +467,7 @@ const glossary = [
     padding: 0.75rem 1rem;
     background: var(--sp-vao);
     border: var(--border);
-    border-radius: 8px;
+    border-radius: var(--r-s);
     font-size: var(--step--1);
     overflow-x: auto;
   }
@@ -481,7 +481,7 @@ const glossary = [
     padding: 0.7rem 1rem;
     background: var(--sp-laje);
     border: var(--border);
-    border-radius: 8px;
+    border-radius: var(--r-s);
   }
 
   .chain span:not(.chain__hex) {
@@ -499,7 +499,7 @@ const glossary = [
     flex-wrap: wrap;
     padding: 0.6rem 0.9rem;
     border: var(--border);
-    border-radius: 8px;
+    border-radius: var(--r-s);
     margin-top: 0.5rem;
     font-size: var(--step--1);
     background: var(--sp-laje);
@@ -552,7 +552,7 @@ const glossary = [
     letter-spacing: 0.06em;
     text-transform: uppercase;
     padding: 0.1rem 0.45rem;
-    border-radius: 999px;
+    border-radius: var(--r-pill);
     border: 1px solid currentColor;
     white-space: nowrap;
   }
@@ -582,7 +582,7 @@ const glossary = [
   }
 
   .glossary dt {
-    color: var(--sp-sodio);
+    color: var(--sp-fg);
     font-size: var(--step--1);
   }
 
