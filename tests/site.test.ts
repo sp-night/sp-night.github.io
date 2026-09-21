@@ -7,7 +7,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { CONTRAST_POLICY, flavors, floorFor } from '../src/data/palette';
-import { heroLines } from '../src/data/content';
+import { groupLede, heroLines } from '../src/data/content';
+import { portsByGroup } from '../src/data/ports';
 
 describe('hero headline', () => {
   // The home page renders one headline per flavour of the contract. A flavour
@@ -24,6 +25,21 @@ describe('hero headline', () => {
   it('names no flavour the contract does not have', () => {
     const ids = flavors.map((f) => f.id);
     expect(Object.keys(heroLines).filter((id) => !ids.includes(id))).toEqual([]);
+  });
+});
+
+describe('port group pages', () => {
+  // One page per group of the catalogue. A group the engine adds with no lede
+  // here would render a page that opens on nothing.
+  it('has a lede for every group the catalogue fills', () => {
+    for (const { group } of portsByGroup) {
+      expect(groupLede[group]?.trim(), `no lede for "${group}"`).toBeTruthy();
+    }
+  });
+
+  it('names no group the catalogue does not fill', () => {
+    const groups = portsByGroup.map((g) => g.group);
+    expect(Object.keys(groupLede).filter((g) => !groups.includes(g))).toEqual([]);
   });
 });
 

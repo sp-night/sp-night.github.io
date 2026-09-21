@@ -95,6 +95,29 @@ export const flavorCopy: Record<FlavorId, FlavorCopy> = {
 };
 
 /**
+ * The lede on each port group's page, keyed by the catalogue's group ids.
+ *
+ * Editorial, so it lives here rather than in the catalogue: the engine's
+ * `groups` names a group, this says why its ports read the way they do. A
+ * group the catalogue grows without a line here fails tests/site.test.ts
+ * rather than rendering a page with no lede.
+ */
+export const groupLede: Record<string, string> = {
+  terminal:
+    'Four terminals, one theme. Each port is the same sixteen ANSI colours, cursor and selection, written in the file format its terminal reads — pick yours and the rest of the page follows.',
+  editor:
+    'The whole syntax tree, the editing modes, diagnostics and diffs — every scope the editor exposes, mapped onto the role layer rather than onto colours.',
+  multiplexer:
+    'Panes, tabs and the status line around them. The colours that say what each pane is doing come from the diagnostic roles, so they mean what they mean everywhere else.',
+  shell:
+    'Command-line tools that paint inside whatever terminal you run them in. They take the same accents the editor port gives the same things — a Go file is the same colour in both.',
+};
+
+/** One line under every port preview: what the picture is, and why it can be trusted. */
+export const previewCaption =
+  'Synthetic: drawn from the palette itself, so it cannot drift from what you install. Switch the flavour in the header to redraw it.';
+
+/**
  * The home page's terminal mock, in the same shape the catalogue declares a
  * port's preview in.
  *

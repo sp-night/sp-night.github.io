@@ -71,6 +71,14 @@ describe('port catalogue', () => {
     }
   });
 
+  it('gives no port the name of a group', () => {
+    // Both live under /ports/: a group is a page, a port's old address is a
+    // redirect to its tab. A slug equal to a group key would claim the page.
+    for (const p of ports) {
+      expect(Object.keys(GROUP_LABELS), `${p.slug} shadows a group page`).not.toContain(p.slug);
+    }
+  });
+
   it('leaves no port out of the grouped view, and shows no empty group', () => {
     const grouped = portsByGroup.flatMap((g) => g.items);
     expect(grouped).toHaveLength(ports.length);

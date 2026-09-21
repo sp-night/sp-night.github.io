@@ -209,6 +209,16 @@ hr {
   }
 }
 
+/* On a narrow phone the brand and the nav stop sharing a row, and the header
+   is three rows, about 8.6rem: 7rem left the first line of every anchor under
+   it. The width is where the nav wraps (~26rem) with room for a longer nav; a
+   little extra air between 26 and 30rem costs nothing. */
+@media (max-width: 30rem) {
+  [id] {
+    scroll-margin-top: 9.5rem;
+  }
+}
+
 .eyebrow {
   font-family: var(--font-mono);
   font-size: var(--step--1);
@@ -707,6 +717,49 @@ hr {
 
 .btn--ghost:hover {
   color: var(--sp-fg);
+}
+
+/* A tab strip that needs no script: each tab is a link to its own id, and
+   `:target` marks the chosen one. The container carries data-tabs; until a tab
+   is chosen the first reads as current. The page that uses it generates the
+   rules that show one panel per tab. Pills like the filter on /ports, and the
+   "you are here" colour is glow, never sodium. */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.tabs__tab {
+  display: inline-flex;
+  align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  color: var(--sp-fg-dim);
+  text-decoration: none;
+  background: var(--sp-concreto);
+  border: var(--border);
+  border-radius: var(--r-pill);
+  padding: 0.35rem 0.9rem;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.tabs__tab:hover {
+  color: var(--sp-fg);
+  border-color: var(--sp-fg-muted);
+}
+
+.tabs__tab:focus-visible {
+  outline: 2px solid var(--sp-sodio);
+  outline-offset: 2px;
+}
+
+.tabs__tab:target,
+[data-tabs]:not(:has(.tabs__tab:target)) .tabs__tab:first-child {
+  color: var(--sp-fg);
+  border-color: color-mix(in oklab, var(--sp-glow) 60%, var(--sp-fiacao));
+  background: color-mix(in oklab, var(--sp-glow) 12%, var(--sp-concreto));
 }
 
 .visually-hidden {

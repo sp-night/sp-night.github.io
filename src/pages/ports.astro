@@ -64,7 +64,7 @@ const filterCss = portsByGroup
       portsByGroup.map(({ group, label, items }) => (
         <section class="group" data-group={group}>
           <h2 class="group__label mono">
-            {label}
+            <a href={`/ports/${group}`}>{label}</a>
             <span class="group__count">{items.length}</span>
           </h2>
           <ul role="list" class="ports">
@@ -73,7 +73,7 @@ const filterCss = portsByGroup
                 <div class="port__head">
                   {/* Stretched: the whole card is the hit target, without nesting
                       anchors or reaching for JavaScript. */}
-                  <a class="port__name" href={`/ports/${p.slug}`}>{p.name}</a>
+                  <a class="port__name" href={`/ports/${p.group}#${p.slug}`}>{p.name}</a>
                   <a class="port__status port__status--live" href={p.repo}>
                     <span class="port__lamp" aria-hidden="true" /> repo ↗
                   </a>
@@ -189,6 +189,15 @@ const filterCss = portsByGroup
     color: var(--sp-fg-muted);
     border-bottom: var(--border);
     padding-bottom: 0.55rem;
+  }
+
+  .group__label a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .group__label a:hover {
+    color: var(--sp-fg);
   }
 
   .group__count {

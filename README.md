@@ -175,8 +175,8 @@ those copies here is a change that disappears at the next sync.
   [`public/previews/`](public/previews) and opens a pull request here, gated on
   this repository's own `npm run check && npm test && npm run build`.
 - **A new port** → list it in the engine's `registry/ports.yml`. Merging the
-  sync pull request publishes `/ports/<slug>` — the page is generated from the
-  entry, so there is nothing to write here.
+  sync pull request publishes it as a tab on `/ports/<group>` — the page is
+  generated from the catalogue, so there is nothing to write here.
 - **Contributor list** → `npm run contributors`, or leave it to the weekly
   workflow.
 
